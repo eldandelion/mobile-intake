@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AuthPage } from './pages/AuthPage';
 import { AssessmentsPage } from './pages/AssessmentsPage';
 import { ProfilePage } from './pages/ProfilePage';
+import './utils/navigationTabStyles';
 
 function AppContent() {
   const { student, loading } = useAuth();

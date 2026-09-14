@@ -22,6 +22,7 @@ import '@material/web/icon/icon.js';
 import '@material/web/iconbutton/icon-button.js';
 import '@material/web/labs/navigationbar/navigation-bar.js';
 import '@material/web/labs/navigationtab/navigation-tab.js';
+import './utils/navigationTabStyles';
 import '@material/web/progress/linear-progress.js';
 import '@material/web/progress/circular-progress.js';
 import '@material/web/dialog/dialog.js';
