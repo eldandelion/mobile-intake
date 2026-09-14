@@ -220,23 +220,8 @@ export const AuthPage: React.FC = () => {
     </div>
   );
 
-  // Shared Google-style Footer with original theme colors
-  const renderFooter = () => (
-    <footer className="w-full max-w-[440px] mt-auto pt-10 pb-4 flex items-center justify-between text-[12px] text-[var(--md-sys-color-on-surface-variant)] select-none">
-      <div className="inline-flex items-center gap-1 cursor-pointer hover:text-[var(--md-sys-color-on-surface)] transition-colors">
-        <span>中文（简体）</span>
-        <span className="material-symbols-outlined text-[16px] leading-none">arrow_drop_down</span>
-      </div>
-      <div className="flex items-center gap-6">
-        <a href="#help" onClick={(e) => e.preventDefault()} className="hover:text-[var(--md-sys-color-on-surface)] transition-colors">帮助</a>
-        <a href="#privacy" onClick={(e) => e.preventDefault()} className="hover:text-[var(--md-sys-color-on-surface)] transition-colors">隐私权</a>
-        <a href="#terms" onClick={(e) => e.preventDefault()} className="hover:text-[var(--md-sys-color-on-surface)] transition-colors">条款</a>
-      </div>
-    </footer>
-  );
-
   return (
-    <div className="w-full min-h-[100dvh] bg-[var(--md-sys-color-surface)] text-[var(--md-sys-color-on-surface)] flex flex-col justify-between items-center px-6 py-8 sm:py-12">
+    <div className="w-full min-h-[100dvh] bg-[var(--md-sys-color-surface)] text-[var(--md-sys-color-on-surface)] flex flex-col items-center px-6 py-8 sm:py-12">
       {/* Top indeterminate progress bar during network requests */}
       <div className="h-1 w-full fixed top-0 left-0 z-50">
         {loading && (
@@ -247,7 +232,7 @@ export const AuthPage: React.FC = () => {
         )}
       </div>
 
-      <div className="w-full max-w-[440px] flex-1 flex flex-col justify-between">
+      <div className="w-full max-w-[440px] flex-1 flex flex-col">
         {/* Main Body */}
         <div className="flex flex-col">
           {renderLogo()}
@@ -597,8 +582,6 @@ export const AuthPage: React.FC = () => {
             </div>
           )}
         </div>
-
-        {renderFooter()}
       </div>
     </div>
   );

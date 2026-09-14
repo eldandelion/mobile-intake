@@ -42,11 +42,9 @@ describe('AuthPage', () => {
     expect(screen.getByText('创建账号')).toBeDefined();
     expect(screen.getByText('下一步')).toBeDefined();
 
-    // Footer
-    expect(screen.getByText('中文（简体）')).toBeDefined();
-    expect(screen.getByText('帮助')).toBeDefined();
-    expect(screen.getByText('隐私权')).toBeDefined();
-    expect(screen.getByText('条款')).toBeDefined();
+    // No bottom language / policy footer
+    expect(screen.queryByText('中文（简体）')).toBeNull();
+    expect(screen.queryByText('隐私权')).toBeNull();
   });
 
   it('validates empty login inputs on submit', async () => {
