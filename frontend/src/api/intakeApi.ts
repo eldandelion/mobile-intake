@@ -120,6 +120,18 @@ export const intakeApi = {
       body: JSON.stringify(data),
     }),
 
+  sendCode: (phone: string) =>
+    request<{ phone: string; devCode: string; expiresInSeconds: number }>('/api/auth/send-code', {
+      method: 'POST',
+      body: JSON.stringify({ phone }),
+    }),
+
+  verifyCode: (phone: string, code: string) =>
+    request<{ valid: boolean }>('/api/auth/verify-code', {
+      method: 'POST',
+      body: JSON.stringify({ phone, code }),
+    }),
+
   getMe: () => request<StudentDto>('/api/auth/me'),
 
   // Scales
