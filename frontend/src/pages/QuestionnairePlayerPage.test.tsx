@@ -170,4 +170,37 @@ describe('QuestionnairePlayerPage', () => {
     unmount();
     expect(document.body.style.overflow).toBe('visible');
   });
+
+  it('opens question grid bottom sheet when clicking counter pill and jumps to selected question', async () => {
+    const handleClose = vi.fn();
+    render(
+      <QuestionnairePlayerPage
+        scaleCode="phq_9"
+        studentNumber="2026001"
+        onClose={handleClose}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('1. 做事提不起劲或没有兴趣')).toBeDefined();
+    });
+
+    // Find and click the counter pill button
+    const counterBtn = screen.getByLabelText('查看题目列表并快速跳转');
+    expect(counterBtn).toBeDefined();
+    fireEvent.click(counterBtn);
+
+    // Sheet should be open
+    expect(screen.getByText('题目列表')).toBeDefined();
+
+    // Click on question 2 button
+    const q2Btn = screen.getByLabelText(/跳转至第 2 题/);
+    fireEvent.click(q2Btn);
+
+    // Sheet should auto-close and player should now be on question 2
+    await waitFor(() => {
+      expect(screen.getByText('2. 感到心情低落、沮丧或绝望')).toBeDefined();
+    });
+    expect(screen.getByText('第 2 / 2 题')).toBeDefined();
+  });
 });

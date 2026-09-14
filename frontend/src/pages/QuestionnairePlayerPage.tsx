@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { intakeApi, ScaleDetail, ScaleQuestion } from '../api/intakeApi';
 import { PrimaryButton, OutlinedButton, TertiaryButton } from '../components/common/Buttons';
+import { QuestionGridSheet } from '../components/assessments/QuestionGridSheet';
 import { setCenteredDialogAnimation } from '../utils/dialogAnimation';
 import type { MdDialog } from '@material/web/dialog/dialog';
 
@@ -31,6 +32,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
+  const [isQuestionSheetOpen, setIsQuestionSheetOpen] = useState<boolean>(false);
 
   const autoAdvanceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const dialogRef = useRef<MdDialog>(null);
@@ -272,7 +274,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
   const playerContent = (
     <div className="fixed inset-0 z-50 bg-[var(--md-sys-color-surface)] flex flex-col justify-between overflow-hidden overscroll-contain">
       {/* Pinned Top Navigation Header - spans full width on wider screens */}
-      <header className="shrink-0 w-full bg-[var(--md-sys-color-surface-container-low)] border-b border-[var(--md-sys-color-outline-variant)] border-opacity-40">
+      <header className="shrink-0 w-full bg-[var(--md-sys-color-surface-container-low)]">
         <div className="w-full px-4 sm:px-8 py-2.5 flex items-center justify-between">
           <div className="flex items-center gap-1 sm:gap-2 min-w-0">
             <md-icon-button
@@ -288,10 +290,16 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
             </div>
           </div>
 
-          {/* Question Counter Pill */}
-          <div className="px-3 py-1 rounded-full bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-primary)] text-xs sm:text-sm font-semibold flex items-center gap-1 shrink-0">
+          {/* Question Counter Pill (Interactive Sheet Trigger) */}
+          <button
+            type="button"
+            onClick={() => setIsQuestionSheetOpen(true)}
+            aria-label="查看题目列表并快速跳转"
+            title="点击查看所有题目并快速跳转"
+            className="px-3 py-1 rounded-full bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-primary)] text-xs sm:text-sm font-semibold shrink-0 cursor-pointer active:scale-95 transition-all hover:bg-[var(--md-sys-color-surface-container-highest)] select-none focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)]"
+          >
             <span>第 {currentIndex + 1} / {totalQuestions} 题</span>
-          </div>
+          </button>
         </div>
 
         {/* Linear Progress Bar */}
@@ -450,6 +458,20 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
           />
         </div>
       </md-dialog>
+
+      {/* Question Navigation Grid Bottom Sheet */}
+      <QuestionGridSheet
+        isOpen={isQuestionSheetOpen}
+        totalQuestions={totalQuestions}
+        currentIndex={currentIndex}
+        answers={answers}
+        questions={scale.questions}
+        onSelectQuestion={(index) => {
+          setCurrentIndex(index);
+          setIsQuestionSheetOpen(false);
+        }}
+        onClose={() => setIsQuestionSheetOpen(false)}
+      />
     </div>
   );
 
