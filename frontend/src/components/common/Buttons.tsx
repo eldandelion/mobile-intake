@@ -131,3 +131,5 @@ export function TertiaryButton({
     </md-text-button>
   );
 }
+
+export const TextButton = TertiaryButton;

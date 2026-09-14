@@ -65,13 +65,28 @@ declare global {
         badge?: string;
         'active-index'?: number;
       }, HTMLElement>;
+      'md-radio': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+        checked?: boolean;
+        name?: string;
+        value?: string;
+        disabled?: boolean;
+      }, HTMLElement>;
+      'md-checkbox': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+        checked?: boolean;
+        indeterminate?: boolean;
+        name?: string;
+        value?: string;
+        disabled?: boolean;
+      }, HTMLElement>;
       'md-linear-progress': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
         value?: number;
+        max?: number;
         indeterminate?: boolean;
         fourColor?: boolean;
       }, HTMLElement>;
       'md-circular-progress': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
         value?: number;
+        max?: number;
         indeterminate?: boolean;
         fourColor?: boolean;
       }, HTMLElement>;
