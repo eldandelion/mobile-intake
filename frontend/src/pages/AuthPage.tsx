@@ -92,8 +92,10 @@ export const AuthPage: React.FC = () => {
         <div className="flex flex-col">
           {/* Brand Header */}
           <div className="flex flex-col items-center text-center mb-6">
-            <div className="w-14 h-14 rounded-2xl bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] flex items-center justify-center mb-3 shadow-xs">
-              <md-icon style={{ fontSize: '32px' }}>psychology</md-icon>
+            <div className="mb-2 flex items-center justify-center">
+              <span className="text-[36px] font-extrabold text-[var(--md-sys-color-primary)] tracking-tight">
+                CSU
+              </span>
             </div>
             <span className="text-xs font-semibold uppercase tracking-wider text-[var(--md-sys-color-primary)]">
               中南大学 · 心理健康教育与咨询中心
@@ -101,11 +103,6 @@ export const AuthPage: React.FC = () => {
             <h1 className="text-xl font-bold text-[var(--md-sys-color-on-surface)] mt-1">
               新生心理普查与档案采集
             </h1>
-            <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] mt-1.5">
-              {isRegisterMode
-                ? '仅需 30 秒快速登记即可开始测评'
-                : '输入学号与密码登录系统'}
-            </p>
           </div>
 
           {/* Tab switch */}

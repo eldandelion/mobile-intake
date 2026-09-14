@@ -11,6 +11,7 @@ describe('AuthPage', () => {
       </AuthProvider>
     );
 
+    expect(screen.getByText('CSU')).toBeDefined();
     expect(screen.getByText('新生心理普查与档案采集')).toBeDefined();
     expect(screen.getByText('新同学登记')).toBeDefined();
     expect(screen.getByText('已有学号登录')).toBeDefined();
