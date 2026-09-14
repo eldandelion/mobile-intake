@@ -239,9 +239,9 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-[var(--md-sys-color-surface)] flex justify-center overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-[var(--md-sys-color-surface)] flex justify-center">
       {/* Mobile Frame Container */}
-      <div className="w-full max-w-md h-full bg-[var(--md-sys-color-surface)] flex flex-col relative border-x border-[var(--md-sys-color-outline-variant)] border-opacity-30 isolate">
+      <div className="w-full max-w-md min-h-[100dvh] bg-[var(--md-sys-color-surface)] flex flex-col relative border-x border-[var(--md-sys-color-outline-variant)] border-opacity-30">
         
         {/* Pinned Top Navigation Header */}
         <header className="shrink-0 bg-[var(--md-sys-color-surface-container-low)] border-b border-[var(--md-sys-color-outline-variant)] border-opacity-40">
@@ -279,7 +279,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
         </header>
 
         {/* Question Viewport Area */}
-        <main className="flex-1 p-5 pb-6 overflow-y-auto flex flex-col justify-start">
+        <main className="flex-1 p-5 pb-28 overflow-y-auto flex flex-col justify-start">
           <AnimatePresence mode="wait">
             {currentQuestion && (
               <motion.div
@@ -359,7 +359,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
         </main>
 
         {/* Pinned Bottom Action Footer */}
-        <footer className="shrink-0 bg-[var(--md-sys-color-surface-container)] border-t border-[var(--md-sys-color-outline-variant)] border-opacity-40 p-4 flex items-center justify-between gap-3">
+        <footer className="absolute bottom-0 inset-x-0 bg-[var(--md-sys-color-surface-container)] border-t border-[var(--md-sys-color-outline-variant)] border-opacity-40 p-4 flex items-center justify-between gap-3">
           <TertiaryButton
             label="上一题"
             icon="chevron_left"

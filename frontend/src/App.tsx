@@ -24,16 +24,16 @@ function AppContent() {
   }
 
   return (
-    <div className="w-full h-[100dvh] bg-[var(--md-sys-color-surface)] flex justify-center overflow-hidden">
+    <div className="w-full min-h-[100dvh] bg-[var(--md-sys-color-surface)] flex justify-center">
       {/* Mobile-constrained viewport shell */}
-      <div className="w-full max-w-md h-full bg-[var(--md-sys-color-surface)] flex flex-col relative">
+      <div className="w-full max-w-md min-h-[100dvh] bg-[var(--md-sys-color-surface)] flex flex-col relative">
         {/* Main Body Content */}
-        <main className="flex-1 p-4 sm:p-5 pt-6 sm:pt-8 pb-4 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-5 pt-6 sm:pt-8 pb-24 overflow-y-auto">
           {activeTab === 0 ? <AssessmentsPage /> : <ProfilePage />}
         </main>
 
         {/* MD3 Bottom Navigation Bar */}
-        <nav className="shrink-0 max-w-md w-full bg-[var(--md-sys-color-surface-container)] border-t border-[var(--md-sys-color-outline-variant)] border-opacity-40">
+        <nav className="fixed bottom-0 max-w-md w-full bg-[var(--md-sys-color-surface-container)] border-t border-[var(--md-sys-color-outline-variant)] border-opacity-40">
           <md-navigation-bar active-index={activeTab}>
             <md-navigation-tab
               label="问卷测评"
