@@ -1,5 +1,7 @@
 package com.medicalsystem.intake.dto
 
+import com.fasterxml.jackson.annotation.JsonAlias
+import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
@@ -24,12 +26,23 @@ data class RegisterRequest(
 )
 
 data class LoginRequest(
-    @field:NotBlank(message = "Identifier is required")
-    val identifier: String,
+    @JsonProperty("identifier")
+    val identifier: String? = null,
 
-    @field:NotBlank(message = "Password is required")
-    val password: String
-)
+    @JsonProperty("studentNumber")
+    val studentNumber: String? = null,
+
+    @JsonProperty("password")
+    val password: String? = null
+) {
+    val resolvedIdentifier: String
+        get() = identifier?.trim()?.ifEmpty { null }
+            ?: studentNumber?.trim()?.ifEmpty { null }
+            ?: ""
+
+    val resolvedPassword: String
+        get() = password?.trim().orEmpty()
+}
 
 data class StudentDto(
     val studentNumber: String,
@@ -40,7 +53,10 @@ data class StudentDto(
 
 data class AuthResponse(
     val token: String,
-    val student: StudentDto
+    val student: StudentDto,
+    val studentNumber: String = student.studentNumber,
+    val fullName: String = student.fullName,
+    val phone: String = student.phone
 )
 
 data class SendCodeRequest(

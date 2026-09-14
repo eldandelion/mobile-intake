@@ -12,9 +12,10 @@ export interface StudentDto {
 
 export interface AuthResponse {
   token: string;
-  studentNumber: string;
-  fullName: string;
-  phone: string;
+  studentNumber?: string;
+  fullName?: string;
+  phone?: string;
+  student?: StudentDto;
 }
 
 export interface RegisterRequest {
@@ -25,7 +26,8 @@ export interface RegisterRequest {
 }
 
 export interface LoginRequest {
-  studentNumber: string;
+  identifier?: string;
+  studentNumber?: string;
   password?: string;
 }
 
@@ -114,11 +116,17 @@ export const intakeApi = {
       body: JSON.stringify(data),
     }),
 
-  login: (data: LoginRequest) =>
-    request<AuthResponse>('/api/auth/login', {
+  login: (data: LoginRequest) => {
+    const id = data.identifier || data.studentNumber || '';
+    return request<AuthResponse>('/api/auth/login', {
       method: 'POST',
-      body: JSON.stringify(data),
-    }),
+      body: JSON.stringify({
+        identifier: id,
+        studentNumber: id,
+        password: data.password || '',
+      }),
+    });
+  },
 
   sendCode: (phone: string) =>
     request<{ phone: string; devCode: string; expiresInSeconds: number }>('/api/auth/send-code', {

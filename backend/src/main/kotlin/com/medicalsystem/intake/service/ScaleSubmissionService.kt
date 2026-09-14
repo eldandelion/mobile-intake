@@ -26,11 +26,19 @@ class ScaleSubmissionService(
             throw ConflictException("Scale '$scaleCode' has already been submitted and locked for student: $studentNumber")
         }
 
-        // Validate that all questions are answered
-        val requiredIds = detail.questions.map { it.id }.toSet()
-        val missing = requiredIds.filter { !request.answers.containsKey(it) || request.answers[it] == null || request.answers[it].toString().isBlank() }
-        if (missing.isNotEmpty()) {
-            throw ValidationException("Incomplete questionnaire submission. Missing questions: $missing")
+        // Validate completeness & option value invariants
+        for (q in detail.questions) {
+            val rawAnswer = request.answers[q.id]
+                ?: throw ValidationException("Missing answer for question: ${q.id}")
+            if (rawAnswer.toString().isBlank()) {
+                throw ValidationException("Answer cannot be blank for question: ${q.id}")
+            }
+            if (q.options.isNotEmpty()) {
+                val allowedValues = q.options.map { it.value.toString() }.toSet()
+                if (!allowedValues.contains(rawAnswer.toString())) {
+                    throw ValidationException("Invalid option value '$rawAnswer' for question: ${q.id}")
+                }
+            }
         }
 
         val answersJson = objectMapper.writeValueAsString(request.answers)

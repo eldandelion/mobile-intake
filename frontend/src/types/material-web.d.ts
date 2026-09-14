@@ -27,6 +27,15 @@ declare global {
         toggle?: boolean;
         selected?: boolean;
       }, HTMLElement>;
+      'md-outlined-icon-button': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+        disabled?: boolean;
+        href?: string;
+        target?: string;
+        ariaLabel?: string;
+        'aria-label'?: string;
+        toggle?: boolean;
+        selected?: boolean;
+      }, HTMLElement>;
       'md-dialog': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
         open?: boolean;
         type?: 'alert' | 'full-screen';

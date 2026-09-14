@@ -46,11 +46,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const res = await intakeApi.login(req);
     tokenStorage.set(res.token);
     setToken(res.token);
+    const s = res.student;
     setStudent({
-      studentNumber: res.studentNumber,
-      fullName: res.fullName,
-      phone: res.phone,
-      registeredAt: new Date().toISOString(),
+      studentNumber: s?.studentNumber || res.studentNumber || req.identifier || req.studentNumber || '',
+      fullName: s?.fullName || res.fullName || '',
+      phone: s?.phone || res.phone || '',
+      registeredAt: (s as any)?.createdAt || (s as any)?.registeredAt || new Date().toISOString(),
     });
   };
 
@@ -58,11 +59,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const res = await intakeApi.register(req);
     tokenStorage.set(res.token);
     setToken(res.token);
+    const s = res.student;
     setStudent({
-      studentNumber: res.studentNumber,
-      fullName: res.fullName,
-      phone: res.phone,
-      registeredAt: new Date().toISOString(),
+      studentNumber: s?.studentNumber || res.studentNumber || req.studentNumber || '',
+      fullName: s?.fullName || res.fullName || req.fullName || '',
+      phone: s?.phone || res.phone || req.phone || '',
+      registeredAt: (s as any)?.createdAt || (s as any)?.registeredAt || new Date().toISOString(),
     });
   };
 

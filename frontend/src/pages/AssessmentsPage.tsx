@@ -7,11 +7,15 @@ import { PrimaryButton, OutlinedButton } from '../components/common/Buttons';
 import { setCenteredDialogAnimation } from '../utils/dialogAnimation';
 import type { MdDialog } from '@material/web/dialog/dialog';
 
+import { useContext } from 'react';
+import { AssessmentContext } from '../contexts/AssessmentContext';
+
 export const AssessmentsPage: React.FC = () => {
   const { student } = useAuth();
-  const [scales, setScales] = useState<ScaleSummaryDto[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const context = useContext(AssessmentContext);
+  const [localScales, setLocalScales] = useState<ScaleSummaryDto[]>([]);
+  const [localLoading, setLocalLoading] = useState<boolean>(!context);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   // Active scale being taken in questionnaire player
   const [activeScaleCode, setActiveScaleCode] = useState<string | null>(null);
@@ -28,23 +32,30 @@ export const AssessmentsPage: React.FC = () => {
     }
   }, []);
 
-  const fetchScales = useCallback(async () => {
+  const fetchLocalScales = useCallback(async () => {
     try {
-      setLoading(true);
-      setError(null);
+      setLocalLoading(true);
+      setLocalError(null);
       const list = await intakeApi.getScales();
-      setScales(list);
+      setLocalScales(list);
     } catch (err: any) {
       console.error('Failed to load scales:', err);
-      setError(err.message || '获取问卷列表失败');
+      setLocalError(err.message || '获取问卷列表失败');
     } finally {
-      setLoading(false);
+      setLocalLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchScales();
-  }, [fetchScales]);
+    if (!context) {
+      fetchLocalScales();
+    }
+  }, [context, fetchLocalScales]);
+
+  const scales = context ? context.scales : localScales;
+  const loading = context ? context.loading : localLoading;
+  const error = context ? context.error : localError;
+  const fetchScales = context ? context.refreshScales : fetchLocalScales;
 
   const handleStartScale = (code: string) => {
     setActiveScaleCode(code);

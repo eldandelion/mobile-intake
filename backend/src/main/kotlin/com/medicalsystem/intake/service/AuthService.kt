@@ -46,12 +46,20 @@ class AuthService(
 
     @Transactional(readOnly = true)
     fun login(request: LoginRequest): AuthResponse {
-        val identifier = request.identifier.trim()
+        val identifier = request.resolvedIdentifier
+        val password = request.resolvedPassword
+        if (identifier.isBlank()) {
+            throw com.medicalsystem.intake.exception.ValidationException("Identifier is required")
+        }
+        if (password.isBlank()) {
+            throw com.medicalsystem.intake.exception.ValidationException("Password is required")
+        }
+
         val student = studentRepository.findByStudentNumber(identifier).orElse(null)
             ?: studentRepository.findByPhone(identifier).orElse(null)
             ?: throw UnauthorizedException("Invalid credentials")
 
-        if (!passwordEncoder.matches(request.password, student.passwordHash)) {
+        if (!passwordEncoder.matches(password, student.passwordHash)) {
             throw UnauthorizedException("Invalid credentials")
         }
 
@@ -64,8 +72,14 @@ class AuthService(
 
     private val verificationCodes = java.util.concurrent.ConcurrentHashMap<String, Pair<String, Long>>()
 
+    private fun cleanExpiredCodes() {
+        val now = System.currentTimeMillis()
+        verificationCodes.entries.removeIf { it.value.second <= now }
+    }
+
     fun sendVerificationCode(request: SendCodeRequest): SendCodeResponse {
         val phone = request.phone.trim()
+        cleanExpiredCodes()
         val code = "123456" // Default test code; in production can be random 6-digits
         val expiryTime = System.currentTimeMillis() + 5 * 60 * 1000 // 5 minutes
         verificationCodes[phone] = Pair(code, expiryTime)
@@ -75,14 +89,19 @@ class AuthService(
     fun verifyCode(request: VerifyCodeRequest): VerifyCodeResponse {
         val phone = request.phone.trim()
         val code = request.code.trim()
+        cleanExpiredCodes()
+
+        val cached = verificationCodes[phone]
+        if (cached != null && cached.first == code && cached.second > System.currentTimeMillis()) {
+            verificationCodes.remove(phone)
+            return VerifyCodeResponse(valid = true)
+        }
 
         if (code == "123456") {
             return VerifyCodeResponse(valid = true)
         }
 
-        val cached = verificationCodes[phone]
-        val isValid = cached != null && cached.first == code && cached.second > System.currentTimeMillis()
-        return VerifyCodeResponse(valid = isValid)
+        return VerifyCodeResponse(valid = false)
     }
 
     fun toDto(entity: IntakeStudentEntity): StudentDto {

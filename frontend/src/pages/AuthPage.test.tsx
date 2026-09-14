@@ -202,4 +202,38 @@ describe('AuthPage', () => {
     fireEvent.click(screen.getByText('改为登录'));
     expect(screen.getByText('使用您的中南大学学号以继续心理普查')).toBeDefined();
   });
+
+  it('translates "Invalid credentials" and displays it in a bottom snackbar instead of inline line', async () => {
+    vi.spyOn(intakeApi, 'login').mockRejectedValue(new Error('Invalid credentials'));
+
+    render(
+      <AuthProvider>
+        <AuthPage />
+      </AuthProvider>
+    );
+
+    const numField = document.querySelector('md-outlined-text-field[label="学号"]')!;
+    const pwdField = document.querySelector('md-outlined-text-field[label="登录密码"]')!;
+
+    simulateInput(numField, '2026001');
+    simulateInput(pwdField, 'wrongPassword');
+
+    const nextBtn = screen.getByText('下一步');
+    fireEvent.click(nextBtn);
+
+    // Verify snackbar is rendered with translated Chinese message
+    await waitFor(() => {
+      expect(screen.getByText('学号或密码错误，请重新输入')).toBeDefined();
+    });
+
+    // Verify there is NO inline error banner on the login screen
+    expect(screen.queryByText('Invalid credentials')).toBeNull();
+    const errorContainers = document.querySelectorAll('.bg-\\[var\\(--md-sys-color-error-container\\)\\]');
+    expect(errorContainers.length).toBe(0);
+
+    // Verify snackbar dismiss button
+    const closeBtn = screen.getByText('关闭');
+    expect(closeBtn).toBeDefined();
+    fireEvent.click(closeBtn);
+  });
 });

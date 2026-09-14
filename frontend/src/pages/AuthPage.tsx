@@ -2,8 +2,35 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { intakeApi } from '../api/intakeApi';
 import { PrimaryButton } from '../components/common/Buttons';
+import { Snackbar } from '../components/common/Snackbar';
 
 type AuthView = 'login' | 'register_step1' | 'register_step2' | 'register_step3';
+
+export function translateAuthError(msg?: string): string {
+  if (!msg) return '登录失败，请核对学号与密码';
+  const lower = msg.toLowerCase().trim();
+  if (
+    lower.includes('invalid credential') ||
+    lower.includes('invalid_credential') ||
+    lower === 'unauthorized' ||
+    lower.includes('bad credentials')
+  ) {
+    return '学号或密码错误，请重新输入';
+  }
+  if (lower.includes('not found') || lower.includes('student not found')) {
+    return '该学号尚未登记，请先创建账号';
+  }
+  if (lower.includes('phone') && (lower.includes('already') || lower.includes('registered') || lower.includes('duplicate'))) {
+    return '该手机号码已被注册';
+  }
+  if (lower.includes('already registered') || lower.includes('conflict')) {
+    return '该学号已被注册';
+  }
+  if (lower.includes('network') || lower.includes('failed to fetch')) {
+    return '网络连接异常，请稍后重试';
+  }
+  return msg;
+}
 
 export const AuthPage: React.FC = () => {
   const { login, register } = useAuth();
@@ -30,8 +57,15 @@ export const AuthPage: React.FC = () => {
 
   // UI state
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const showAuthError = (rawError?: string, defaultMsg = '操作失败，请重试') => {
+    const translated = translateAuthError(rawError || defaultMsg);
+    setSnackbarMessage(translated);
+    setSnackbarOpen(true);
+  };
 
   useEffect(() => {
     return () => {
@@ -63,13 +97,12 @@ export const AuthPage: React.FC = () => {
         return next;
       });
     }
-    if (errorMessage) setErrorMessage(null);
   };
 
   // 1. Handle Login Submit
   const handleLoginSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    setErrorMessage(null);
+    setSnackbarOpen(false);
     const errors: Record<string, string> = {};
 
     const cleanNum = loginStudentNumber.trim();
@@ -88,12 +121,13 @@ export const AuthPage: React.FC = () => {
     setLoading(true);
     try {
       await login({
+        identifier: cleanNum,
         studentNumber: cleanNum,
         password: loginPassword,
       });
     } catch (err: any) {
       console.error('Login error:', err);
-      setErrorMessage(err.message || '登录失败，请核对学号与密码');
+      showAuthError(err.message, '学号或密码错误，请重新输入');
     } finally {
       setLoading(false);
     }
@@ -101,7 +135,7 @@ export const AuthPage: React.FC = () => {
 
   // 2. Handle Register Step 1 -> Send Code & Go to Step 2
   const handleStep1Next = async () => {
-    setErrorMessage(null);
+    setSnackbarOpen(false);
     const errors: Record<string, string> = {};
 
     const cleanName = regFullName.trim();
@@ -130,7 +164,7 @@ export const AuthPage: React.FC = () => {
       setView('register_step2');
     } catch (err: any) {
       console.error('Send code error:', err);
-      setErrorMessage(err.message || '发送验证码失败，请重试');
+      showAuthError(err.message, '发送验证码失败，请重试');
     } finally {
       setLoading(false);
     }
@@ -140,13 +174,13 @@ export const AuthPage: React.FC = () => {
   const handleResendCode = async () => {
     if (countdown > 0 || loading) return;
     setLoading(true);
-    setErrorMessage(null);
+    setSnackbarOpen(false);
     try {
       await intakeApi.sendCode(regPhone.trim());
       startCountdown();
     } catch (err: any) {
       console.error('Resend code error:', err);
-      setErrorMessage(err.message || '重新获取验证码失败');
+      showAuthError(err.message, '重新获取验证码失败');
     } finally {
       setLoading(false);
     }
@@ -154,7 +188,7 @@ export const AuthPage: React.FC = () => {
 
   // 3. Handle Register Step 2 -> Verify Code & Go to Step 3
   const handleStep2Next = async () => {
-    setErrorMessage(null);
+    setSnackbarOpen(false);
     const cleanCode = verificationCode.trim();
     if (!cleanCode || cleanCode.length < 4) {
       setFieldErrors({ verificationCode: '请输入收到的验证码' });
@@ -172,7 +206,7 @@ export const AuthPage: React.FC = () => {
       setView('register_step3');
     } catch (err: any) {
       console.error('Verify code error:', err);
-      setErrorMessage(err.message || '验证码校验失败');
+      showAuthError(err.message, '验证码校验失败');
     } finally {
       setLoading(false);
     }
@@ -180,7 +214,7 @@ export const AuthPage: React.FC = () => {
 
   // 4. Handle Register Step 3 -> Final Register Submit
   const handleStep3Submit = async () => {
-    setErrorMessage(null);
+    setSnackbarOpen(false);
     const errors: Record<string, string> = {};
 
     if (!regPassword || regPassword.length < 6) {
@@ -205,7 +239,7 @@ export const AuthPage: React.FC = () => {
       });
     } catch (err: any) {
       console.error('Register error:', err);
-      setErrorMessage(err.message || '登记建档失败，请重试');
+      showAuthError(err.message, '登记建档失败，请重试');
     } finally {
       setLoading(false);
     }
@@ -236,14 +270,6 @@ export const AuthPage: React.FC = () => {
         {/* Main Body */}
         <div className="flex flex-col">
           {renderLogo()}
-
-          {/* Error Banner */}
-          {errorMessage && (
-            <div className="mb-6 p-3.5 rounded-lg bg-[var(--md-sys-color-error-container)] text-[var(--md-sys-color-on-error-container)] text-[13px] flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px] shrink-0">error</span>
-              <span className="leading-snug">{errorMessage}</span>
-            </div>
-          )}
 
           {/* ==================== VIEW 1: 登录 (Sign in) ==================== */}
           {view === 'login' && (
@@ -311,7 +337,7 @@ export const AuthPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      setErrorMessage(null);
+                      setSnackbarOpen(false);
                       setFieldErrors({});
                       setView('register_step1');
                     }}
@@ -395,7 +421,7 @@ export const AuthPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      setErrorMessage(null);
+                      setSnackbarOpen(false);
                       setFieldErrors({});
                       setView('login');
                     }}
@@ -405,7 +431,7 @@ export const AuthPage: React.FC = () => {
                   </button>
 
                   <PrimaryButton
-                    label={loading ? '发送中...' : '下一步'}
+                    label="下一步"
                     disabled={loading}
                     onClick={handleStep1Next}
                     className="h-10 min-h-[40px] px-6 text-[14px] font-medium rounded-full"
@@ -474,7 +500,7 @@ export const AuthPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      setErrorMessage(null);
+                      setSnackbarOpen(false);
                       setFieldErrors({});
                       setView('register_step1');
                     }}
@@ -562,7 +588,7 @@ export const AuthPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      setErrorMessage(null);
+                      setSnackbarOpen(false);
                       setFieldErrors({});
                       setView('register_step2');
                     }}
@@ -583,6 +609,15 @@ export const AuthPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* MD3 Bottom Error / Notification Snackbar */}
+      <Snackbar
+        open={snackbarOpen}
+        message={snackbarMessage}
+        icon="error"
+        actionLabel="关闭"
+        onClose={() => setSnackbarOpen(false)}
+      />
     </div>
   );
 };

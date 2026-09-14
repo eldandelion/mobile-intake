@@ -108,7 +108,7 @@ class IntakeApplicationTests {
         )
             .andExpect(status().isConflict)
 
-        // 3. Login with Student Number
+        // 3. Login with Student Number (both identifier and studentNumber JSON keys)
         mockMvc.perform(
             post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -116,6 +116,19 @@ class IntakeApplicationTests {
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.token").isNotEmpty)
+            .andExpect(jsonPath("$.student.studentNumber").value(studentNumber))
+            .andExpect(jsonPath("$.studentNumber").value(studentNumber))
+
+        // Also verify payload with explicit studentNumber key works identically
+        mockMvc.perform(
+            post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(mapOf("studentNumber" to studentNumber, "password" to "securePassword123")))
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.token").isNotEmpty)
+            .andExpect(jsonPath("$.student.studentNumber").value(studentNumber))
+            .andExpect(jsonPath("$.studentNumber").value(studentNumber))
 
         // 4. Fetch Scale List
         val listResult = mockMvc.perform(
@@ -141,7 +154,37 @@ class IntakeApplicationTests {
             .andExpect(jsonPath("$.questions").isArray)
             .andExpect(jsonPath("$.questions.length()").value(9))
 
-        // 6. Submit PHQ-9 Scale
+        // 5.5 Submit with out-of-bounds option value -> 400 Bad Request
+        val invalidOptionAnswers = mapOf(
+            "phq9_1" to 999,
+            "phq9_2" to 0,
+            "phq9_3" to 2,
+            "phq9_4" to 1,
+            "phq9_5" to 0,
+            "phq9_6" to 1,
+            "phq9_7" to 0,
+            "phq9_8" to 0,
+            "phq9_9" to 0
+        )
+        mockMvc.perform(
+            post("/api/scales/phq_9/submit")
+                .header("Authorization", "Bearer $token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(SubmitScaleRequest(invalidOptionAnswers)))
+        )
+            .andExpect(status().isBadRequest)
+
+        // 5.6 Submit with missing question -> 400 Bad Request
+        val missingAnswers = mapOf("phq9_1" to 1)
+        mockMvc.perform(
+            post("/api/scales/phq_9/submit")
+                .header("Authorization", "Bearer $token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(SubmitScaleRequest(missingAnswers)))
+        )
+            .andExpect(status().isBadRequest)
+
+        // 6. Submit PHQ-9 Scale (Valid)
         val phqAnswers = mapOf(
             "phq9_1" to 1,
             "phq9_2" to 0,

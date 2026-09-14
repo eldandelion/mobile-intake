@@ -135,11 +135,16 @@ class CsvExportService(
         return out.toByteArray()
     }
 
-    private fun escapeCsv(value: String): String {
-        return if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
-            "\"" + value.replace("\"", "\"\"") + "\""
+    internal fun escapeCsv(value: String): String {
+        val sanitized = if (value.isNotEmpty() && value[0] in charArrayOf('=', '+', '-', '@', '\t', '\r')) {
+            "'$value"
         } else {
             value
+        }
+        return if (sanitized.contains(",") || sanitized.contains("\"") || sanitized.contains("\n") || sanitized.contains("\r")) {
+            "\"" + sanitized.replace("\"", "\"\"") + "\""
+        } else {
+            sanitized
         }
     }
 }
