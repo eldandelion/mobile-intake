@@ -239,9 +239,9 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-[var(--md-sys-color-surface)] flex justify-center">
+    <div className="fixed inset-0 z-50 bg-[var(--md-sys-color-surface)] flex justify-center overflow-hidden">
       {/* Mobile Frame Container */}
-      <div className="w-full max-w-md min-h-[100dvh] bg-[var(--md-sys-color-surface)] flex flex-col relative border-x border-[var(--md-sys-color-outline-variant)] border-opacity-30">
+      <div className="w-full max-w-md h-full bg-[var(--md-sys-color-surface)] flex flex-col relative border-x border-[var(--md-sys-color-outline-variant)] border-opacity-30 isolate">
         
         {/* Pinned Top Navigation Header */}
         <header className="shrink-0 bg-[var(--md-sys-color-surface-container-low)] border-b border-[var(--md-sys-color-outline-variant)] border-opacity-40">
@@ -279,7 +279,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
         </header>
 
         {/* Question Viewport Area */}
-        <main className="flex-1 p-5 pb-28 overflow-y-auto flex flex-col justify-start">
+        <main className="flex-1 p-5 pb-6 overflow-y-auto flex flex-col justify-start">
           <AnimatePresence mode="wait">
             {currentQuestion && (
               <motion.div
@@ -359,7 +359,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
         </main>
 
         {/* Pinned Bottom Action Footer */}
-        <footer className="absolute bottom-0 inset-x-0 bg-[var(--md-sys-color-surface-container)] border-t border-[var(--md-sys-color-outline-variant)] border-opacity-40 p-4 flex items-center justify-between gap-3 z-30">
+        <footer className="shrink-0 bg-[var(--md-sys-color-surface-container)] border-t border-[var(--md-sys-color-outline-variant)] border-opacity-40 p-4 flex items-center justify-between gap-3">
           <TertiaryButton
             label="上一题"
             icon="chevron_left"
@@ -387,40 +387,39 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
             />
           )}
         </footer>
-
-        {/* Exit Confirmation Dialog */}
-        <md-dialog
-          ref={dialogRef}
-          style={{
-            maxWidth: 'min(420px, calc(100vw - 32px))',
-            minWidth: '300px',
-            '--md-dialog-container-shape': '28px',
-          } as React.CSSProperties}
-        >
-          <div slot="headline" className="px-6 pt-6 pb-2 text-xl font-bold text-[var(--md-sys-color-on-surface)]">
-            退出问卷作答？
-          </div>
-          <div slot="content" className="px-6 py-2 text-sm leading-relaxed text-[var(--md-sys-color-on-surface-variant)]">
-            当前已作答 <span className="font-semibold text-[var(--md-sys-color-primary)] font-mono">{answeredCount}</span> 道题目。您的作答内容已保存在本地设备中，稍后可随时进入继续完成。
-          </div>
-          <div slot="actions" className="px-6 pb-6 pt-3 flex items-center justify-end gap-3">
-            <OutlinedButton
-              label="退出"
-              className="h-10 min-h-[40px] px-5 text-sm"
-              onClick={() => {
-                dialogRef.current?.close();
-                onClose(false);
-              }}
-            />
-            <PrimaryButton
-              label="继续作答"
-              className="h-10 min-h-[40px] px-5 text-sm"
-              onClick={() => dialogRef.current?.close()}
-            />
-          </div>
-        </md-dialog>
-
       </div>
+
+      {/* Exit Confirmation Dialog */}
+      <md-dialog
+        ref={dialogRef}
+        style={{
+          maxWidth: 'min(420px, calc(100vw - 32px))',
+          minWidth: '300px',
+          '--md-dialog-container-shape': '28px',
+        } as React.CSSProperties}
+      >
+        <div slot="headline" className="px-6 pt-6 pb-2 text-xl font-bold text-[var(--md-sys-color-on-surface)]">
+          退出问卷作答？
+        </div>
+        <div slot="content" className="px-6 py-2 text-sm leading-relaxed text-[var(--md-sys-color-on-surface-variant)]">
+          当前已作答 <span className="font-semibold text-[var(--md-sys-color-primary)] font-mono">{answeredCount}</span> 道题目。您的作答内容已保存在本地设备中，稍后可随时进入继续完成。
+        </div>
+        <div slot="actions" className="px-6 pb-6 pt-3 flex items-center justify-end gap-3">
+          <OutlinedButton
+            label="退出"
+            className="h-10 min-h-[40px] px-5 text-sm"
+            onClick={() => {
+              dialogRef.current?.close();
+              onClose(false);
+            }}
+          />
+          <PrimaryButton
+            label="继续作答"
+            className="h-10 min-h-[40px] px-5 text-sm"
+            onClick={() => dialogRef.current?.close()}
+          />
+        </div>
+      </md-dialog>
     </div>
   );
 };
