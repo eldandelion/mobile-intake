@@ -68,6 +68,9 @@ describe('App Top Bar & Navigation', () => {
     // Verify separation line (border-b) is removed
     expect(header?.className).not.toContain('border-b');
 
+    // Verify leading icon at start of top bar is removed
+    expect(header?.querySelector('md-icon')?.textContent).not.toBe('psychology');
+
     // Verify md-linear-progress exists in header
     const progressBar = header?.querySelector('md-linear-progress');
     expect(progressBar).not.toBeNull();

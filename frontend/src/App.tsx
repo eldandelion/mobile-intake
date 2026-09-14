@@ -34,20 +34,17 @@ function AppContent() {
       {/* MD3 Top Navigation Bar - spans full width on wider screens */}
       <header className="sticky top-0 inset-x-0 w-full bg-[var(--md-sys-color-surface-container-low)] z-20 shrink-0">
         <div className="w-full px-4 sm:px-8 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <md-icon className="text-[var(--md-sys-color-primary)] text-2xl">psychology</md-icon>
-            <div>
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--md-sys-color-primary)] block">
-                中南大学 · 心理普查
-              </span>
-              <h1 className="text-base sm:text-lg font-bold text-[var(--md-sys-color-on-surface)] leading-none mt-0.5">
-                {scalesLoading
-                  ? '正在获取测评任务...'
-                  : isAllCompleted
-                    ? '全部测评任务已完成'
-                    : `还有 ${remainingCount} 项任务待完成`}
-              </h1>
-            </div>
+          <div>
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--md-sys-color-primary)] block">
+              中南大学 · 心理普查
+            </span>
+            <h1 className="text-base sm:text-lg font-bold text-[var(--md-sys-color-on-surface)] leading-none mt-0.5">
+              {scalesLoading
+                ? '正在获取测评任务...'
+                : isAllCompleted
+                  ? '全部测评任务已完成'
+                  : `还有 ${remainingCount} 项任务待完成`}
+            </h1>
           </div>
           {student && (
             <div className="flex items-center gap-2.5">

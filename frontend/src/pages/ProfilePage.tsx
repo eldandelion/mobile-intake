@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { intakeApi, ScaleSummaryDto } from '../api/intakeApi';
 import { OutlinedButton, PrimaryButton } from '../components/common/Buttons';
@@ -124,26 +125,42 @@ export const ProfilePage: React.FC = () => {
         />
       </div>
 
-      {/* Logout Confirmation Dialog */}
-      <md-dialog ref={setLogoutDialogRef}>
-        <div slot="headline">确认退出登录？</div>
-        <div slot="content" className="text-sm text-[var(--md-sys-color-on-surface-variant)]">
-          退出登录后，再次进入需输入学号与密码重新验证。
-        </div>
-        <div slot="actions">
-          <OutlinedButton
-            label="取消"
-            onClick={() => logoutDialogRef.current?.close()}
-          />
-          <PrimaryButton
-            label="确认退出"
-            onClick={() => {
-              logoutDialogRef.current?.close();
-              logout();
-            }}
-          />
-        </div>
-      </md-dialog>
+      {/* Logout Confirmation Dialog (Portalled to body to cover full screen including top/bottom bars) */}
+      {typeof document !== 'undefined'
+        ? createPortal(
+            <md-dialog
+              ref={setLogoutDialogRef}
+              style={{
+                maxWidth: 'min(420px, calc(100vw - 32px))',
+                minWidth: '300px',
+                '--md-dialog-container-shape': '28px',
+              } as React.CSSProperties}
+            >
+              <div slot="headline" className="px-6 pt-6 pb-2 text-xl font-bold text-[var(--md-sys-color-on-surface)]">
+                确认退出登录？
+              </div>
+              <div slot="content" className="px-6 py-2 text-sm leading-relaxed text-[var(--md-sys-color-on-surface-variant)]">
+                退出登录后，再次进入需输入学号与密码重新验证。
+              </div>
+              <div slot="actions" className="px-6 pb-6 pt-3 flex items-center justify-end gap-3">
+                <OutlinedButton
+                  label="取消"
+                  className="h-10 min-h-[40px] px-5 text-sm"
+                  onClick={() => logoutDialogRef.current?.close()}
+                />
+                <PrimaryButton
+                  label="确认退出"
+                  className="h-10 min-h-[40px] px-5 text-sm"
+                  onClick={() => {
+                    logoutDialogRef.current?.close();
+                    logout();
+                  }}
+                />
+              </div>
+            </md-dialog>,
+            document.body
+          )
+        : null}
 
     </div>
   );

@@ -45,7 +45,7 @@ describe('AssessmentsPage', () => {
     });
   });
 
-  it('renders scale list and progress status banner', async () => {
+  it('renders scale list and does not render the removed counter container', async () => {
     render(
       <AuthProvider>
         <AssessmentsPage />
@@ -57,7 +57,8 @@ describe('AssessmentsPage', () => {
     });
 
     expect(screen.getByText('PHQ-9 抑郁健康问卷')).toBeDefined();
-    expect(screen.getByText(/1 \/ 2 完成/)).toBeDefined();
-    expect(screen.getByText('还有 1 项任务待完成')).toBeDefined();
+    // Counter container has been removed from AssessmentsPage (now handled in App Top Bar)
+    expect(screen.queryByText(/入学心理普查任务/)).toBeNull();
+    expect(screen.queryByText(/完成/)).toBeDefined(); // Status chips on cards still have completion badges
   });
 });
