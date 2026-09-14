@@ -211,32 +211,32 @@ export const AuthPage: React.FC = () => {
     }
   };
 
-  // Shared Brand Logo Header matching Google top-left logo placement
+  // Shared Brand Logo Header matching Google top-left logo placement, using theme color
   const renderLogo = () => (
     <div className="mb-6 select-none">
-      <span className="text-[34px] font-extrabold text-[#0b57d0] tracking-tight font-sans">
+      <span className="text-[34px] font-extrabold text-[var(--md-sys-color-primary)] tracking-tight font-sans">
         CSU
       </span>
     </div>
   );
 
-  // Shared Google-style Footer
+  // Shared Google-style Footer with original theme colors
   const renderFooter = () => (
-    <footer className="w-full max-w-[440px] mt-auto pt-10 pb-4 flex items-center justify-between text-[12px] text-[#444746] select-none">
-      <div className="inline-flex items-center gap-1 cursor-pointer hover:text-[#1f1f1f] transition-colors">
+    <footer className="w-full max-w-[440px] mt-auto pt-10 pb-4 flex items-center justify-between text-[12px] text-[var(--md-sys-color-on-surface-variant)] select-none">
+      <div className="inline-flex items-center gap-1 cursor-pointer hover:text-[var(--md-sys-color-on-surface)] transition-colors">
         <span>中文（简体）</span>
         <span className="material-symbols-outlined text-[16px] leading-none">arrow_drop_down</span>
       </div>
       <div className="flex items-center gap-6">
-        <a href="#help" onClick={(e) => e.preventDefault()} className="hover:text-[#1f1f1f] transition-colors">帮助</a>
-        <a href="#privacy" onClick={(e) => e.preventDefault()} className="hover:text-[#1f1f1f] transition-colors">隐私权</a>
-        <a href="#terms" onClick={(e) => e.preventDefault()} className="hover:text-[#1f1f1f] transition-colors">条款</a>
+        <a href="#help" onClick={(e) => e.preventDefault()} className="hover:text-[var(--md-sys-color-on-surface)] transition-colors">帮助</a>
+        <a href="#privacy" onClick={(e) => e.preventDefault()} className="hover:text-[var(--md-sys-color-on-surface)] transition-colors">隐私权</a>
+        <a href="#terms" onClick={(e) => e.preventDefault()} className="hover:text-[var(--md-sys-color-on-surface)] transition-colors">条款</a>
       </div>
     </footer>
   );
 
   return (
-    <div className="w-full min-h-[100dvh] bg-[#ffffff] text-[#1f1f1f] flex flex-col justify-between items-center px-6 py-8 sm:py-12">
+    <div className="w-full min-h-[100dvh] bg-[var(--md-sys-color-surface)] text-[var(--md-sys-color-on-surface)] flex flex-col justify-between items-center px-6 py-8 sm:py-12">
       {/* Top indeterminate progress bar during network requests */}
       <div className="h-1 w-full fixed top-0 left-0 z-50">
         {loading && (
@@ -254,7 +254,7 @@ export const AuthPage: React.FC = () => {
 
           {/* Error Banner */}
           {errorMessage && (
-            <div className="mb-6 p-3.5 rounded-lg bg-[#fce8e6] text-[#b3261e] text-[13px] flex items-center gap-2">
+            <div className="mb-6 p-3.5 rounded-lg bg-[var(--md-sys-color-error-container)] text-[var(--md-sys-color-on-error-container)] text-[13px] flex items-center gap-2">
               <span className="material-symbols-outlined text-[18px] shrink-0">error</span>
               <span className="leading-snug">{errorMessage}</span>
             </div>
@@ -263,10 +263,10 @@ export const AuthPage: React.FC = () => {
           {/* ==================== VIEW 1: 登录 (Sign in) ==================== */}
           {view === 'login' && (
             <div className="flex flex-col">
-              <h1 className="text-[32px] sm:text-[36px] font-normal leading-[40px] sm:leading-[44px] text-[#1f1f1f] tracking-tight">
+              <h1 className="text-[32px] sm:text-[36px] font-normal leading-[40px] sm:leading-[44px] text-[var(--md-sys-color-on-surface)] tracking-tight">
                 登录
               </h1>
-              <p className="text-[15px] sm:text-[16px] leading-[24px] text-[#444746] mt-3 mb-8 font-normal">
+              <p className="text-[15px] sm:text-[16px] leading-[24px] text-[var(--md-sys-color-on-surface-variant)] mt-3 mb-8 font-normal">
                 使用您的中南大学学号以继续心理普查
               </p>
 
@@ -315,13 +315,13 @@ export const AuthPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => alert('请联系校区辅导员或心理健康中心管理员协助找回学号与密码。')}
-                    className="text-[14px] font-medium text-[#0b57d0] hover:underline"
+                    className="text-[14px] font-medium text-[var(--md-sys-color-primary)] hover:underline"
                   >
                     忘记了学号或密码？
                   </button>
                 </div>
 
-                {/* Google-style Action Row: Left: Create account, Right: Next / Sign in */}
+                {/* Action Row: Left: Create account, Right: Next */}
                 <div className="flex items-center justify-between mt-10 pt-4">
                   <button
                     type="button"
@@ -330,7 +330,7 @@ export const AuthPage: React.FC = () => {
                       setFieldErrors({});
                       setView('register_step1');
                     }}
-                    className="text-[#0b57d0] text-[14px] font-medium hover:bg-[#0b57d0]/10 px-4 py-2.5 rounded-full transition-colors"
+                    className="text-[var(--md-sys-color-primary)] text-[14px] font-medium hover:bg-[var(--md-sys-color-primary)]/10 px-4 py-2.5 rounded-full transition-colors"
                   >
                     创建账号
                   </button>
@@ -339,7 +339,7 @@ export const AuthPage: React.FC = () => {
                     label={loading ? '登录中...' : '下一步'}
                     disabled={loading}
                     onClick={() => handleLoginSubmit()}
-                    className="h-10 min-h-[40px] px-6 text-[14px] font-medium rounded-full bg-[#0b57d0]"
+                    className="h-10 min-h-[40px] px-6 text-[14px] font-medium rounded-full"
                   />
                 </div>
               </form>
@@ -349,10 +349,10 @@ export const AuthPage: React.FC = () => {
           {/* ==================== VIEW 2: 注册第 1 步 (Create Account - Names & Phone) ==================== */}
           {view === 'register_step1' && (
             <div className="flex flex-col">
-              <h1 className="text-[32px] sm:text-[36px] font-normal leading-[40px] sm:leading-[44px] text-[#1f1f1f] tracking-tight">
+              <h1 className="text-[32px] sm:text-[36px] font-normal leading-[40px] sm:leading-[44px] text-[var(--md-sys-color-on-surface)] tracking-tight">
                 创建账号
               </h1>
-              <p className="text-[15px] sm:text-[16px] leading-[24px] text-[#444746] mt-3 mb-8 font-normal">
+              <p className="text-[15px] sm:text-[16px] leading-[24px] text-[var(--md-sys-color-on-surface-variant)] mt-3 mb-8 font-normal">
                 输入您的基本信息以建立新生档案
               </p>
 
@@ -405,7 +405,7 @@ export const AuthPage: React.FC = () => {
                   />
                 </div>
 
-                {/* Google-style Action Row */}
+                {/* Action Row */}
                 <div className="flex items-center justify-between mt-10 pt-4">
                   <button
                     type="button"
@@ -414,7 +414,7 @@ export const AuthPage: React.FC = () => {
                       setFieldErrors({});
                       setView('login');
                     }}
-                    className="text-[#0b57d0] text-[14px] font-medium hover:bg-[#0b57d0]/10 px-4 py-2.5 rounded-full transition-colors"
+                    className="text-[var(--md-sys-color-primary)] text-[14px] font-medium hover:bg-[var(--md-sys-color-primary)]/10 px-4 py-2.5 rounded-full transition-colors"
                   >
                     改为登录
                   </button>
@@ -423,7 +423,7 @@ export const AuthPage: React.FC = () => {
                     label={loading ? '发送中...' : '下一步'}
                     disabled={loading}
                     onClick={handleStep1Next}
-                    className="h-10 min-h-[40px] px-6 text-[14px] font-medium rounded-full bg-[#0b57d0]"
+                    className="h-10 min-h-[40px] px-6 text-[14px] font-medium rounded-full"
                   />
                 </div>
               </div>
@@ -433,18 +433,18 @@ export const AuthPage: React.FC = () => {
           {/* ==================== VIEW 3: 注册第 2 步 (Verify Phone) ==================== */}
           {view === 'register_step2' && (
             <div className="flex flex-col">
-              <h1 className="text-[32px] sm:text-[36px] font-normal leading-[40px] sm:leading-[44px] text-[#1f1f1f] tracking-tight">
+              <h1 className="text-[32px] sm:text-[36px] font-normal leading-[40px] sm:leading-[44px] text-[var(--md-sys-color-on-surface)] tracking-tight">
                 验证手机号码
               </h1>
 
-              <div className="mt-3 mb-8 text-[15px] sm:text-[16px] leading-[24px] text-[#444746] font-normal">
+              <div className="mt-3 mb-8 text-[15px] sm:text-[16px] leading-[24px] text-[var(--md-sys-color-on-surface-variant)] font-normal">
                 <span>系统已向以下号码发送了一条包含 6 位验证码的短信：</span>
                 <div className="mt-2 flex items-center gap-2">
-                  <span className="font-mono font-semibold text-[#1f1f1f] text-[16px]">{regPhone}</span>
+                  <span className="font-mono font-semibold text-[var(--md-sys-color-on-surface)] text-[16px]">{regPhone}</span>
                   <button
                     type="button"
                     onClick={() => setView('register_step1')}
-                    className="text-[13px] text-[#0b57d0] hover:underline font-medium"
+                    className="text-[13px] text-[var(--md-sys-color-primary)] hover:underline font-medium"
                   >
                     修改号码
                   </button>
@@ -477,14 +477,14 @@ export const AuthPage: React.FC = () => {
                     disabled={countdown > 0 || loading}
                     onClick={handleResendCode}
                     className={`text-[14px] font-medium transition-colors ${
-                      countdown > 0 ? 'text-[#747775] cursor-not-allowed' : 'text-[#0b57d0] hover:underline'
+                      countdown > 0 ? 'text-[var(--md-sys-color-outline)] cursor-not-allowed' : 'text-[var(--md-sys-color-primary)] hover:underline'
                     }`}
                   >
                     {countdown > 0 ? `${countdown} 秒后可重新获取` : '重新获取验证码'}
                   </button>
                 </div>
 
-                {/* Google-style Action Row */}
+                {/* Action Row */}
                 <div className="flex items-center justify-between mt-10 pt-4">
                   <button
                     type="button"
@@ -493,7 +493,7 @@ export const AuthPage: React.FC = () => {
                       setFieldErrors({});
                       setView('register_step1');
                     }}
-                    className="text-[#0b57d0] text-[14px] font-medium hover:bg-[#0b57d0]/10 px-4 py-2.5 rounded-full transition-colors"
+                    className="text-[var(--md-sys-color-primary)] text-[14px] font-medium hover:bg-[var(--md-sys-color-primary)]/10 px-4 py-2.5 rounded-full transition-colors"
                   >
                     上一步
                   </button>
@@ -502,7 +502,7 @@ export const AuthPage: React.FC = () => {
                     label={loading ? '校验中...' : '下一步'}
                     disabled={loading}
                     onClick={handleStep2Next}
-                    className="h-10 min-h-[40px] px-6 text-[14px] font-medium rounded-full bg-[#0b57d0]"
+                    className="h-10 min-h-[40px] px-6 text-[14px] font-medium rounded-full"
                   />
                 </div>
               </div>
@@ -512,10 +512,10 @@ export const AuthPage: React.FC = () => {
           {/* ==================== VIEW 4: 注册第 3 步 (Set Password) ==================== */}
           {view === 'register_step3' && (
             <div className="flex flex-col">
-              <h1 className="text-[32px] sm:text-[36px] font-normal leading-[40px] sm:leading-[44px] text-[#1f1f1f] tracking-tight">
+              <h1 className="text-[32px] sm:text-[36px] font-normal leading-[40px] sm:leading-[44px] text-[var(--md-sys-color-on-surface)] tracking-tight">
                 创建安全密码
               </h1>
-              <p className="text-[15px] sm:text-[16px] leading-[24px] text-[#444746] mt-3 mb-8 font-normal">
+              <p className="text-[15px] sm:text-[16px] leading-[24px] text-[var(--md-sys-color-on-surface-variant)] mt-3 mb-8 font-normal">
                 设置至少 6 位字符的密码以保护您的心理档案安全
               </p>
 
@@ -572,7 +572,7 @@ export const AuthPage: React.FC = () => {
                   </md-outlined-text-field>
                 </div>
 
-                {/* Google-style Action Row */}
+                {/* Action Row */}
                 <div className="flex items-center justify-between mt-10 pt-4">
                   <button
                     type="button"
@@ -581,7 +581,7 @@ export const AuthPage: React.FC = () => {
                       setFieldErrors({});
                       setView('register_step2');
                     }}
-                    className="text-[#0b57d0] text-[14px] font-medium hover:bg-[#0b57d0]/10 px-4 py-2.5 rounded-full transition-colors"
+                    className="text-[var(--md-sys-color-primary)] text-[14px] font-medium hover:bg-[var(--md-sys-color-primary)]/10 px-4 py-2.5 rounded-full transition-colors"
                   >
                     上一步
                   </button>
@@ -590,7 +590,7 @@ export const AuthPage: React.FC = () => {
                     label={loading ? '建档中...' : '完成'}
                     disabled={loading}
                     onClick={handleStep3Submit}
-                    className="h-10 min-h-[40px] px-6 text-[14px] font-medium rounded-full bg-[#0b57d0]"
+                    className="h-10 min-h-[40px] px-6 text-[14px] font-medium rounded-full"
                   />
                 </div>
               </div>
