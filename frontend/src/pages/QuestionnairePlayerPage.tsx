@@ -11,6 +11,13 @@ interface QuestionnairePlayerPageProps {
   onClose: (completed: boolean) => void;
 }
 
+const getOptionCornerRadius = (index: number, total: number): string => {
+  if (total <= 1) return 'rounded-[20px]';
+  if (index === 0) return 'rounded-t-[20px] rounded-b-[4px]';
+  if (index === total - 1) return 'rounded-t-[4px] rounded-b-[20px]';
+  return 'rounded-[4px]';
+};
+
 export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = ({
   scaleCode,
   studentNumber,
@@ -316,36 +323,33 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
 
                 {/* Option / Input list */}
                 {currentQuestion.type === 'single_choice' ? (
-                  <div className="space-y-3">
-                    {currentQuestion.options.map((opt) => {
+                  <div className="flex flex-col gap-[2px]">
+                    {currentQuestion.options.map((opt, optIndex) => {
                       const isSelected = currentAnswer === opt.value;
+                      const cornerRadius = getOptionCornerRadius(optIndex, currentQuestion.options.length);
                       return (
                         <button
                           key={String(opt.value)}
                           type="button"
                           onClick={() => handleSelectOption(opt.value)}
-                          className={`w-full min-h-[56px] p-4 rounded-xl border text-left flex items-center justify-between transition-all duration-150 cursor-pointer select-none active:scale-[0.98] ${
+                          className={`w-full min-h-[56px] px-5 py-4 text-left flex items-center justify-between transition-colors duration-150 cursor-pointer select-none relative overflow-hidden ${cornerRadius} ${
                             isSelected
-                              ? 'bg-[var(--md-sys-color-secondary-container)] border-[var(--md-sys-color-secondary)] text-[var(--md-sys-color-on-secondary-container)] shadow-sm'
-                              : 'bg-[var(--md-sys-color-surface-container-lowest)] border-[var(--md-sys-color-outline-variant)] hover:border-[var(--md-sys-color-outline)] text-[var(--md-sys-color-on-surface)]'
+                              ? 'bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)]'
+                              : 'bg-[var(--md-sys-color-surface-container-high)] hover:bg-[var(--md-sys-color-surface-container-highest)] text-[var(--md-sys-color-on-surface)]'
                           }`}
                         >
-                          <span className="text-base font-medium pr-3 leading-snug">
+                          <md-ripple></md-ripple>
+                          <span className={`text-base leading-snug pr-4 ${isSelected ? 'font-semibold' : 'font-medium'}`}>
                             {opt.label}
                           </span>
 
-                          {/* MD3 Radio Circle indicator */}
-                          <div
-                            className={`w-5 h-5 rounded-full border-2 shrink-0 flex items-center justify-center transition-colors ${
-                              isSelected
-                                ? 'border-[var(--md-sys-color-secondary)] bg-[var(--md-sys-color-secondary)]'
-                                : 'border-[var(--md-sys-color-outline)]'
-                            }`}
-                          >
-                            {isSelected && (
-                              <div className="w-2 h-2 rounded-full bg-[var(--md-sys-color-on-secondary)]" />
-                            )}
-                          </div>
+                          <md-radio
+                            checked={isSelected}
+                            name={`question_${currentQuestion.id}`}
+                            value={String(opt.value)}
+                            tabIndex={-1}
+                            className="pointer-events-none shrink-0"
+                          ></md-radio>
                         </button>
                       );
                     })}
