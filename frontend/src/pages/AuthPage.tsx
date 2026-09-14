@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { intakeApi } from '../api/intakeApi';
-import { PrimaryButton, TextButton, TertiaryButton } from '../components/common/Buttons';
+import { PrimaryButton } from '../components/common/Buttons';
 
 type AuthView = 'login' | 'register_step1' | 'register_step2' | 'register_step3';
 
@@ -211,218 +211,170 @@ export const AuthPage: React.FC = () => {
     }
   };
 
-  const getStepNumber = (): number => {
-    switch (view) {
-      case 'register_step1':
-        return 1;
-      case 'register_step2':
-        return 2;
-      case 'register_step3':
-        return 3;
-      default:
-        return 1;
-    }
-  };
+  // Shared Brand Logo Header matching Google top-left logo placement
+  const renderLogo = () => (
+    <div className="mb-6 select-none">
+      <span className="text-[34px] font-extrabold text-[#0b57d0] tracking-tight font-sans">
+        CSU
+      </span>
+    </div>
+  );
 
-  const handleBackNavigation = () => {
-    setErrorMessage(null);
-    setFieldErrors({});
-    if (view === 'register_step1') {
-      setView('login');
-    } else if (view === 'register_step2') {
-      setView('register_step1');
-    } else if (view === 'register_step3') {
-      setView('register_step2');
-    }
-  };
-
-  // --- RENDER: LOGIN SCREEN ---
-  if (view === 'login') {
-    return (
-      <div className="w-full min-h-[100dvh] bg-[var(--md-sys-color-surface)] flex justify-center">
-        <div className="w-full max-w-md min-h-[100dvh] bg-[var(--md-sys-color-surface)] px-6 py-8 sm:py-12 flex flex-col justify-between">
-          <div className="flex flex-col">
-            {/* Brand Header */}
-            <div className="flex flex-col items-center text-center mb-8">
-              <div className="mb-2 flex items-center justify-center">
-                <span className="text-[36px] font-extrabold text-[var(--md-sys-color-primary)] tracking-tight">
-                  CSU
-                </span>
-              </div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-[var(--md-sys-color-primary)]">
-                中南大学 · 心理健康教育与咨询中心
-              </span>
-              <h1 className="text-xl font-bold text-[var(--md-sys-color-on-surface)] mt-1">
-                新生心理普查与档案采集
-              </h1>
-            </div>
-
-            {/* Error Message */}
-            {errorMessage && (
-              <div className="mb-5 p-3.5 rounded-xl bg-[var(--md-sys-color-error-container)] text-[var(--md-sys-color-on-error-container)] text-xs flex items-start gap-2.5">
-                <md-icon style={{ fontSize: '18px', shrink: 0 }}>error</md-icon>
-                <div className="leading-snug">{errorMessage}</div>
-              </div>
-            )}
-
-            {/* Login Form */}
-            <form onSubmit={handleLoginSubmit} className="space-y-4">
-              <div>
-                <md-outlined-text-field
-                  label="学号"
-                  placeholder="例如：2026001"
-                  value={loginStudentNumber}
-                  required
-                  className="w-full"
-                  error={!!fieldErrors.loginStudentNumber}
-                  error-text={fieldErrors.loginStudentNumber}
-                  supporting-text="请输入您的学号"
-                  onInput={(e: any) => {
-                    setLoginStudentNumber(e.target.value);
-                    clearFieldError('loginStudentNumber');
-                  }}
-                >
-                  <md-icon slot="leading-icon">badge</md-icon>
-                </md-outlined-text-field>
-              </div>
-
-              <div>
-                <md-outlined-text-field
-                  label="登录密码"
-                  placeholder="请输入密码"
-                  type={showLoginPassword ? 'text' : 'password'}
-                  value={loginPassword}
-                  required
-                  className="w-full"
-                  error={!!fieldErrors.loginPassword}
-                  error-text={fieldErrors.loginPassword}
-                  onInput={(e: any) => {
-                    setLoginPassword(e.target.value);
-                    clearFieldError('loginPassword');
-                  }}
-                >
-                  <md-icon slot="leading-icon">lock</md-icon>
-                  <md-icon-button
-                    type="button"
-                    slot="trailing-icon"
-                    onClick={() => setShowLoginPassword(!showLoginPassword)}
-                    aria-label={showLoginPassword ? '隐藏密码' : '显示密码'}
-                  >
-                    <md-icon>{showLoginPassword ? 'visibility_off' : 'visibility'}</md-icon>
-                  </md-icon-button>
-                </md-outlined-text-field>
-              </div>
-
-              <div className="pt-2">
-                <PrimaryButton
-                  label={loading ? '登录中...' : '立即登录'}
-                  icon="login"
-                  className="w-full h-12 text-sm"
-                  disabled={loading}
-                  onClick={() => handleLoginSubmit()}
-                />
-              </div>
-            </form>
-          </div>
-
-          {/* Footer Navigation Link to Register Sequence */}
-          <div className="mt-8 pt-4 border-t border-[var(--md-sys-color-outline-variant)] border-opacity-30 text-center">
-            <p className="text-[11px] text-[var(--md-sys-color-on-surface-variant)] leading-relaxed">
-              新生首次填报请先完成身份建档验证
-            </p>
-            <div className="mt-2">
-              <TextButton
-                label="新同学登记 / 首次使用？立即建档"
-                onClick={() => {
-                  setErrorMessage(null);
-                  setFieldErrors({});
-                  setView('register_step1');
-                }}
-              />
-            </div>
-          </div>
-        </div>
+  // Shared Google-style Footer
+  const renderFooter = () => (
+    <footer className="w-full max-w-[440px] mt-auto pt-10 pb-4 flex items-center justify-between text-[12px] text-[#444746] select-none">
+      <div className="inline-flex items-center gap-1 cursor-pointer hover:text-[#1f1f1f] transition-colors">
+        <span>中文（简体）</span>
+        <span className="material-symbols-outlined text-[16px] leading-none">arrow_drop_down</span>
       </div>
-    );
-  }
-
-  // --- RENDER: 3-SCREEN REGISTRATION SEQUENCE ---
-  const currentStep = getStepNumber();
+      <div className="flex items-center gap-6">
+        <a href="#help" onClick={(e) => e.preventDefault()} className="hover:text-[#1f1f1f] transition-colors">帮助</a>
+        <a href="#privacy" onClick={(e) => e.preventDefault()} className="hover:text-[#1f1f1f] transition-colors">隐私权</a>
+        <a href="#terms" onClick={(e) => e.preventDefault()} className="hover:text-[#1f1f1f] transition-colors">条款</a>
+      </div>
+    </footer>
+  );
 
   return (
-    <div className="w-full min-h-[100dvh] bg-[var(--md-sys-color-surface)] flex justify-center">
-      <div className="w-full max-w-md min-h-[100dvh] bg-[var(--md-sys-color-surface)] px-6 py-6 sm:py-10 flex flex-col justify-between">
+    <div className="w-full min-h-[100dvh] bg-[#ffffff] text-[#1f1f1f] flex flex-col justify-between items-center px-6 py-8 sm:py-12">
+      {/* Top indeterminate progress bar during network requests */}
+      <div className="h-1 w-full fixed top-0 left-0 z-50">
+        {loading && (
+          <md-linear-progress
+            indeterminate
+            style={{ width: '100%', '--md-linear-progress-track-height': '3px' } as any}
+          />
+        )}
+      </div>
+
+      <div className="w-full max-w-[440px] flex-1 flex flex-col justify-between">
+        {/* Main Body */}
         <div className="flex flex-col">
-          
-          {/* Sequence Top Bar */}
-          <div className="flex items-center justify-between mb-4">
-            <button
-              type="button"
-              onClick={handleBackNavigation}
-              className="w-10 h-10 -ml-2 rounded-full flex items-center justify-center text-[var(--md-sys-color-on-surface-variant)] hover:bg-[var(--md-sys-color-surface-container-high)] transition"
-              aria-label="返回上一步"
-            >
-              <md-icon style={{ fontSize: '24px' }}>arrow_back</md-icon>
-            </button>
+          {renderLogo()}
 
-            <span className="text-xs font-bold text-[var(--md-sys-color-primary)] px-3 py-1 rounded-full bg-[var(--md-sys-color-primary-container)]">
-              第 {currentStep} / 3 步
-            </span>
-          </div>
-
-          {/* Linear Progress for 3 steps */}
-          <div className="w-full mb-6">
-            <md-linear-progress
-              value={currentStep}
-              max={3}
-              style={{ width: '100%', '--md-linear-progress-track-height': '4px' } as any}
-            ></md-linear-progress>
-          </div>
-
-          {/* Error Message */}
+          {/* Error Banner */}
           {errorMessage && (
-            <div className="mb-4 p-3.5 rounded-xl bg-[var(--md-sys-color-error-container)] text-[var(--md-sys-color-on-error-container)] text-xs flex items-start gap-2.5">
-              <md-icon style={{ fontSize: '18px', shrink: 0 }}>error</md-icon>
-              <div className="leading-snug">{errorMessage}</div>
+            <div className="mb-6 p-3.5 rounded-lg bg-[#fce8e6] text-[#b3261e] text-[13px] flex items-center gap-2">
+              <span className="material-symbols-outlined text-[18px] shrink-0">error</span>
+              <span className="leading-snug">{errorMessage}</span>
             </div>
           )}
 
-          {/* --- STEP 1: 基本档案信息 --- */}
-          {view === 'register_step1' && (
-            <div className="space-y-4">
-              <div>
-                <h2 className="text-xl font-bold text-[var(--md-sys-color-on-surface)]">
-                  填写基本信息
-                </h2>
-                <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] mt-1">
-                  请如实输入您的学号、姓名与联系手机
-                </p>
-              </div>
+          {/* ==================== VIEW 1: 登录 (Sign in) ==================== */}
+          {view === 'login' && (
+            <div className="flex flex-col">
+              <h1 className="text-[32px] sm:text-[36px] font-normal leading-[40px] sm:leading-[44px] text-[#1f1f1f] tracking-tight">
+                登录
+              </h1>
+              <p className="text-[15px] sm:text-[16px] leading-[24px] text-[#444746] mt-3 mb-8 font-normal">
+                使用您的中南大学学号以继续心理普查
+              </p>
 
-              <div className="space-y-4 pt-2">
+              <form onSubmit={handleLoginSubmit} className="space-y-6">
+                <div>
+                  <md-outlined-text-field
+                    label="学号"
+                    value={loginStudentNumber}
+                    required
+                    className="w-full"
+                    error={!!fieldErrors.loginStudentNumber}
+                    error-text={fieldErrors.loginStudentNumber}
+                    onInput={(e: any) => {
+                      setLoginStudentNumber(e.target.value);
+                      clearFieldError('loginStudentNumber');
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <md-outlined-text-field
+                    label="登录密码"
+                    type={showLoginPassword ? 'text' : 'password'}
+                    value={loginPassword}
+                    required
+                    className="w-full"
+                    error={!!fieldErrors.loginPassword}
+                    error-text={fieldErrors.loginPassword}
+                    onInput={(e: any) => {
+                      setLoginPassword(e.target.value);
+                      clearFieldError('loginPassword');
+                    }}
+                  >
+                    <md-icon-button
+                      type="button"
+                      slot="trailing-icon"
+                      onClick={() => setShowLoginPassword(!showLoginPassword)}
+                      aria-label={showLoginPassword ? '隐藏密码' : '显示密码'}
+                    >
+                      <md-icon>{showLoginPassword ? 'visibility_off' : 'visibility'}</md-icon>
+                    </md-icon-button>
+                  </md-outlined-text-field>
+                </div>
+
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => alert('请联系校区辅导员或心理健康中心管理员协助找回学号与密码。')}
+                    className="text-[14px] font-medium text-[#0b57d0] hover:underline"
+                  >
+                    忘记了学号或密码？
+                  </button>
+                </div>
+
+                {/* Google-style Action Row: Left: Create account, Right: Next / Sign in */}
+                <div className="flex items-center justify-between mt-10 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setErrorMessage(null);
+                      setFieldErrors({});
+                      setView('register_step1');
+                    }}
+                    className="text-[#0b57d0] text-[14px] font-medium hover:bg-[#0b57d0]/10 px-4 py-2.5 rounded-full transition-colors"
+                  >
+                    创建账号
+                  </button>
+
+                  <PrimaryButton
+                    label={loading ? '登录中...' : '下一步'}
+                    disabled={loading}
+                    onClick={() => handleLoginSubmit()}
+                    className="h-10 min-h-[40px] px-6 text-[14px] font-medium rounded-full bg-[#0b57d0]"
+                  />
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* ==================== VIEW 2: 注册第 1 步 (Create Account - Names & Phone) ==================== */}
+          {view === 'register_step1' && (
+            <div className="flex flex-col">
+              <h1 className="text-[32px] sm:text-[36px] font-normal leading-[40px] sm:leading-[44px] text-[#1f1f1f] tracking-tight">
+                创建账号
+              </h1>
+              <p className="text-[15px] sm:text-[16px] leading-[24px] text-[#444746] mt-3 mb-8 font-normal">
+                输入您的基本信息以建立新生档案
+              </p>
+
+              <div className="space-y-6">
                 <div>
                   <md-outlined-text-field
                     label="真实姓名"
-                    placeholder="请输入您的姓名"
                     value={regFullName}
                     required
                     className="w-full"
                     error={!!fieldErrors.regFullName}
                     error-text={fieldErrors.regFullName}
-                    supporting-text="请填写真实姓名用于档案核对"
                     onInput={(e: any) => {
                       setRegFullName(e.target.value);
                       clearFieldError('regFullName');
                     }}
-                  >
-                    <md-icon slot="leading-icon">person</md-icon>
-                  </md-outlined-text-field>
+                  />
                 </div>
 
                 <div>
                   <md-outlined-text-field
                     label="学号"
-                    placeholder="例如：2026001"
                     value={regStudentNumber}
                     required
                     className="w-full"
@@ -433,16 +385,13 @@ export const AuthPage: React.FC = () => {
                       setRegStudentNumber(e.target.value);
                       clearFieldError('regStudentNumber');
                     }}
-                  >
-                    <md-icon slot="leading-icon">badge</md-icon>
-                  </md-outlined-text-field>
+                  />
                 </div>
 
                 <div>
                   <md-outlined-text-field
                     type="tel"
                     label="手机号码"
-                    placeholder="11位手机号码"
                     value={regPhone}
                     required
                     className="w-full"
@@ -453,57 +402,61 @@ export const AuthPage: React.FC = () => {
                       setRegPhone(e.target.value);
                       clearFieldError('regPhone');
                     }}
-                  >
-                    <md-icon slot="leading-icon">call</md-icon>
-                  </md-outlined-text-field>
+                  />
                 </div>
 
-                <div className="pt-2">
+                {/* Google-style Action Row */}
+                <div className="flex items-center justify-between mt-10 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setErrorMessage(null);
+                      setFieldErrors({});
+                      setView('login');
+                    }}
+                    className="text-[#0b57d0] text-[14px] font-medium hover:bg-[#0b57d0]/10 px-4 py-2.5 rounded-full transition-colors"
+                  >
+                    改为登录
+                  </button>
+
                   <PrimaryButton
-                    label={loading ? '发送中...' : '下一步：获取验证码'}
-                    icon="arrow_forward"
-                    trailingIcon
-                    className="w-full h-12 text-sm"
+                    label={loading ? '发送中...' : '下一步'}
                     disabled={loading}
                     onClick={handleStep1Next}
+                    className="h-10 min-h-[40px] px-6 text-[14px] font-medium rounded-full bg-[#0b57d0]"
                   />
                 </div>
               </div>
             </div>
           )}
 
-          {/* --- STEP 2: 短信验证码确认 --- */}
+          {/* ==================== VIEW 3: 注册第 2 步 (Verify Phone) ==================== */}
           {view === 'register_step2' && (
-            <div className="space-y-4">
-              <div>
-                <h2 className="text-xl font-bold text-[var(--md-sys-color-on-surface)]">
-                  输入短信验证码
-                </h2>
-                {/* Prominently displays the entered phone number */}
-                <div className="mt-2 p-3 rounded-xl bg-[var(--md-sys-color-surface-container)] border border-[var(--md-sys-color-outline-variant)] border-opacity-40 flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs text-[var(--md-sys-color-on-surface)]">
-                    <md-icon style={{ fontSize: '18px' }}>phonelink_ring</md-icon>
-                    <span>
-                      已发送至 <span className="font-bold font-mono text-[var(--md-sys-color-primary)]">{regPhone}</span>
-                    </span>
-                  </div>
+            <div className="flex flex-col">
+              <h1 className="text-[32px] sm:text-[36px] font-normal leading-[40px] sm:leading-[44px] text-[#1f1f1f] tracking-tight">
+                验证手机号码
+              </h1>
+
+              <div className="mt-3 mb-8 text-[15px] sm:text-[16px] leading-[24px] text-[#444746] font-normal">
+                <span>系统已向以下号码发送了一条包含 6 位验证码的短信：</span>
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="font-mono font-semibold text-[#1f1f1f] text-[16px]">{regPhone}</span>
                   <button
                     type="button"
                     onClick={() => setView('register_step1')}
-                    className="text-xs font-semibold text-[var(--md-sys-color-primary)] hover:underline"
+                    className="text-[13px] text-[#0b57d0] hover:underline font-medium"
                   >
                     修改号码
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-4 pt-2">
+              <div className="space-y-6">
                 <div>
                   <md-outlined-text-field
                     type="tel"
                     inputmode="numeric"
                     label="6 位短信验证码"
-                    placeholder="请输入验证码"
                     value={verificationCode}
                     maxLength={6}
                     required
@@ -515,64 +468,73 @@ export const AuthPage: React.FC = () => {
                       setVerificationCode(e.target.value);
                       clearFieldError('verificationCode');
                     }}
-                  >
-                    <md-icon slot="leading-icon">sms</md-icon>
-                  </md-outlined-text-field>
-                </div>
-
-                <div className="flex justify-end">
-                  <TertiaryButton
-                    label={countdown > 0 ? `${countdown}s 后可重新获取` : '重新获取验证码'}
-                    icon="refresh"
-                    disabled={countdown > 0 || loading}
-                    onClick={handleResendCode}
                   />
                 </div>
 
-                <div className="pt-2">
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    disabled={countdown > 0 || loading}
+                    onClick={handleResendCode}
+                    className={`text-[14px] font-medium transition-colors ${
+                      countdown > 0 ? 'text-[#747775] cursor-not-allowed' : 'text-[#0b57d0] hover:underline'
+                    }`}
+                  >
+                    {countdown > 0 ? `${countdown} 秒后可重新获取` : '重新获取验证码'}
+                  </button>
+                </div>
+
+                {/* Google-style Action Row */}
+                <div className="flex items-center justify-between mt-10 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setErrorMessage(null);
+                      setFieldErrors({});
+                      setView('register_step1');
+                    }}
+                    className="text-[#0b57d0] text-[14px] font-medium hover:bg-[#0b57d0]/10 px-4 py-2.5 rounded-full transition-colors"
+                  >
+                    上一步
+                  </button>
+
                   <PrimaryButton
-                    label={loading ? '校验中...' : '下一步：设置密码'}
-                    icon="arrow_forward"
-                    trailingIcon
-                    className="w-full h-12 text-sm"
+                    label={loading ? '校验中...' : '下一步'}
                     disabled={loading}
                     onClick={handleStep2Next}
+                    className="h-10 min-h-[40px] px-6 text-[14px] font-medium rounded-full bg-[#0b57d0]"
                   />
                 </div>
               </div>
             </div>
           )}
 
-          {/* --- STEP 3: 设置密码与确认密码 --- */}
+          {/* ==================== VIEW 4: 注册第 3 步 (Set Password) ==================== */}
           {view === 'register_step3' && (
-            <div className="space-y-4">
-              <div>
-                <h2 className="text-xl font-bold text-[var(--md-sys-color-on-surface)]">
-                  设置账户登录密码
-                </h2>
-                <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] mt-1">
-                  请设置至少 6 位字符的安全密码用于日常登录
-                </p>
-              </div>
+            <div className="flex flex-col">
+              <h1 className="text-[32px] sm:text-[36px] font-normal leading-[40px] sm:leading-[44px] text-[#1f1f1f] tracking-tight">
+                创建安全密码
+              </h1>
+              <p className="text-[15px] sm:text-[16px] leading-[24px] text-[#444746] mt-3 mb-8 font-normal">
+                设置至少 6 位字符的密码以保护您的心理档案安全
+              </p>
 
-              <div className="space-y-4 pt-2">
+              <div className="space-y-6">
                 <div>
                   <md-outlined-text-field
                     label="登录密码"
-                    placeholder="至少 6 位字符"
                     type={showRegPassword ? 'text' : 'password'}
                     value={regPassword}
                     required
                     className="w-full"
                     error={!!fieldErrors.regPassword}
                     error-text={fieldErrors.regPassword}
-                    supporting-text="请妥善保管您的登录密码"
+                    supporting-text="至少 6 位字符"
                     onInput={(e: any) => {
                       setRegPassword(e.target.value);
                       clearFieldError('regPassword');
                     }}
                   >
-                    <md-icon slot="leading-icon">lock</md-icon>
                     <md-icon-button
                       type="button"
                       slot="trailing-icon"
@@ -586,21 +548,19 @@ export const AuthPage: React.FC = () => {
 
                 <div>
                   <md-outlined-text-field
-                    label="确认新密码"
-                    placeholder="请再次输入新密码"
+                    label="确认密码"
                     type={showRegConfirmPassword ? 'text' : 'password'}
                     value={regConfirmPassword}
                     required
                     className="w-full"
                     error={!!fieldErrors.regConfirmPassword}
                     error-text={fieldErrors.regConfirmPassword}
-                    supporting-text="确保两次输入一致"
+                    supporting-text="请再次输入新密码"
                     onInput={(e: any) => {
                       setRegConfirmPassword(e.target.value);
                       clearFieldError('regConfirmPassword');
                     }}
                   >
-                    <md-icon slot="leading-icon">lock_reset</md-icon>
                     <md-icon-button
                       type="button"
                       slot="trailing-icon"
@@ -612,38 +572,33 @@ export const AuthPage: React.FC = () => {
                   </md-outlined-text-field>
                 </div>
 
-                <div className="pt-2">
+                {/* Google-style Action Row */}
+                <div className="flex items-center justify-between mt-10 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setErrorMessage(null);
+                      setFieldErrors({});
+                      setView('register_step2');
+                    }}
+                    className="text-[#0b57d0] text-[14px] font-medium hover:bg-[#0b57d0]/10 px-4 py-2.5 rounded-full transition-colors"
+                  >
+                    上一步
+                  </button>
+
                   <PrimaryButton
-                    label={loading ? '建档中...' : '完成建档并进入'}
-                    icon="check_circle"
-                    className="w-full h-12 text-sm"
+                    label={loading ? '建档中...' : '完成'}
                     disabled={loading}
                     onClick={handleStep3Submit}
+                    className="h-10 min-h-[40px] px-6 text-[14px] font-medium rounded-full bg-[#0b57d0]"
                   />
                 </div>
               </div>
             </div>
           )}
-
         </div>
 
-        {/* Footer info notice */}
-        <div className="mt-8 pt-4 border-t border-[var(--md-sys-color-outline-variant)] border-opacity-30 text-center">
-          <p className="text-[11px] text-[var(--md-sys-color-on-surface-variant)] leading-relaxed">
-            已有账号？
-            <button
-              type="button"
-              onClick={() => {
-                setErrorMessage(null);
-                setFieldErrors({});
-                setView('login');
-              }}
-              className="ml-1 text-[var(--md-sys-color-primary)] font-semibold hover:underline"
-            >
-              直接登录
-            </button>
-          </p>
-        </div>
+        {renderFooter()}
       </div>
     </div>
   );
