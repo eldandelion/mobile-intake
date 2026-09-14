@@ -45,8 +45,7 @@ export const AssessmentCard: React.FC<AssessmentCardProps> = ({
           )}
         </div>
 
-        <span className="text-xs text-[var(--md-sys-color-on-surface-variant)] flex items-center gap-1">
-          <md-icon style={{ fontSize: '14px' }}>schedule</md-icon>
+        <span className="text-xs text-[var(--md-sys-color-on-surface-variant)]">
           约 {scale.estimatedMinutes} 分钟 • {scale.questionCount} 题
         </span>
       </div>
