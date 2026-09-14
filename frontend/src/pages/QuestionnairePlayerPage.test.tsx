@@ -150,4 +150,24 @@ describe('QuestionnairePlayerPage', () => {
     fireEvent.click(backBtn);
     expect(showSpy).toHaveBeenCalledTimes(2);
   });
+
+  it('locks body scroll on mount and restores original overflow on unmount', async () => {
+    document.body.style.overflow = 'visible';
+    const handleClose = vi.fn();
+    const { unmount } = render(
+      <QuestionnairePlayerPage
+        scaleCode="phq_9"
+        studentNumber="2026001"
+        onClose={handleClose}
+      />
+    );
+
+    // Should be locked while mounted
+    expect(document.body.style.overflow).toBe('hidden');
+    expect(document.documentElement.style.overflow).toBe('hidden');
+
+    // On unmount, should restore
+    unmount();
+    expect(document.body.style.overflow).toBe('visible');
+  });
 });

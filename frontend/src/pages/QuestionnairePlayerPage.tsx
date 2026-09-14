@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { intakeApi, ScaleDetail, ScaleQuestion } from '../api/intakeApi';
 import { PrimaryButton, OutlinedButton, TertiaryButton } from '../components/common/Buttons';
@@ -27,6 +28,19 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
   const dialogRef = useRef<MdDialog>(null);
 
   const draftKey = `intake_draft_${studentNumber}_${scaleCode}`;
+
+  // Prevent background scrolling while questionnaire session is active
+  useEffect(() => {
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = originalBodyOverflow;
+      document.documentElement.style.overflow = originalHtmlOverflow;
+    };
+  }, []);
 
   // Fetch scale details and load local draft
   useEffect(() => {
@@ -177,20 +191,21 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
 
   // Loading state
   if (loading) {
-    return (
-      <div className="fixed inset-0 z-50 bg-[var(--md-sys-color-surface)] flex flex-col items-center justify-center p-6 text-center">
+    const loadingContent = (
+      <div className="fixed inset-0 z-50 bg-[var(--md-sys-color-surface)] flex flex-col items-center justify-center p-6 text-center overflow-hidden overscroll-contain">
         <md-circular-progress indeterminate></md-circular-progress>
         <p className="mt-4 text-sm font-medium text-[var(--md-sys-color-on-surface-variant)]">
           正在加载测评问卷...
         </p>
       </div>
     );
+    return typeof document !== 'undefined' ? createPortal(loadingContent, document.body) : loadingContent;
   }
 
   // Error state
   if (error || !scale) {
-    return (
-      <div className="fixed inset-0 z-50 bg-[var(--md-sys-color-surface)] flex flex-col items-center justify-center p-6 text-center">
+    const errorContent = (
+      <div className="fixed inset-0 z-50 bg-[var(--md-sys-color-surface)] flex flex-col items-center justify-center p-6 text-center overflow-hidden overscroll-contain">
         <div className="w-16 h-16 rounded-full bg-[var(--md-sys-color-error-container)] text-[var(--md-sys-color-on-error-container)] flex items-center justify-center mb-4">
           <md-icon style={{ fontSize: '32px' }}>error</md-icon>
         </div>
@@ -203,13 +218,14 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
         </div>
       </div>
     );
+    return typeof document !== 'undefined' ? createPortal(errorContent, document.body) : errorContent;
   }
 
   // Completed outro screen
   if (isCompleted) {
-    return (
-      <div className="fixed inset-0 z-50 bg-[var(--md-sys-color-surface)] flex justify-center">
-        <div className="w-full max-w-md min-h-[100dvh] bg-[var(--md-sys-color-surface)] flex flex-col p-6 items-center justify-center text-center">
+    const completedContent = (
+      <div className="fixed inset-0 z-50 bg-[var(--md-sys-color-surface)] flex justify-center overflow-hidden overscroll-contain">
+        <div className="w-full max-w-md h-full bg-[var(--md-sys-color-surface)] flex flex-col p-6 items-center justify-center text-center overflow-hidden">
           <div className="w-20 h-20 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] flex items-center justify-center mb-6 shadow-md animate-bounce">
             <md-icon style={{ fontSize: '48px' }}>task_alt</md-icon>
           </div>
@@ -236,12 +252,13 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
         </div>
       </div>
     );
+    return typeof document !== 'undefined' ? createPortal(completedContent, document.body) : completedContent;
   }
 
-  return (
-    <div className="fixed inset-0 z-50 bg-[var(--md-sys-color-surface)] flex justify-center">
+  const playerContent = (
+    <div className="fixed inset-0 z-50 bg-[var(--md-sys-color-surface)] flex justify-center overflow-hidden overscroll-contain">
       {/* Mobile Frame Container */}
-      <div className="w-full max-w-md min-h-[100dvh] bg-[var(--md-sys-color-surface)] flex flex-col relative border-x border-[var(--md-sys-color-outline-variant)] border-opacity-30">
+      <div className="w-full max-w-md h-full bg-[var(--md-sys-color-surface)] flex flex-col relative border-x border-[var(--md-sys-color-outline-variant)] border-opacity-30 overflow-hidden">
         
         {/* Pinned Top Navigation Header */}
         <header className="shrink-0 bg-[var(--md-sys-color-surface-container-low)] border-b border-[var(--md-sys-color-outline-variant)] border-opacity-40">
@@ -279,7 +296,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
         </header>
 
         {/* Question Viewport Area */}
-        <main className="flex-1 p-5 pb-28 overflow-y-auto flex flex-col justify-start">
+        <main className="flex-1 p-5 pb-28 overflow-y-auto overscroll-contain flex flex-col justify-start">
           <AnimatePresence mode="wait">
             {currentQuestion && (
               <motion.div
@@ -422,4 +439,6 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
       </md-dialog>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(playerContent, document.body) : playerContent;
 };
