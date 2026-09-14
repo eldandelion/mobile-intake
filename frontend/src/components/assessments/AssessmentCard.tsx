@@ -54,19 +54,19 @@ export const AssessmentCard: React.FC<AssessmentCardProps> = ({
       </div>
 
       {/* Action Area */}
-      <div className="flex justify-end pt-1">
+      <div className="w-full flex justify-end pt-1">
         {isCompleted ? (
           <OutlinedButton
             label="查看已提交"
             icon="visibility"
-            className="w-full sm:w-auto h-10 text-xs"
+            className="h-10 px-4 text-xs font-medium"
             onClick={() => onView?.(scale.code)}
           />
         ) : (
           <PrimaryButton
             label={isDemographic ? '开始填报' : '开始测评'}
             icon={isDemographic ? 'edit_note' : 'play_arrow'}
-            className="w-full sm:w-auto h-11"
+            className="h-10 px-5 text-sm font-medium"
             onClick={() => onStart(scale.code)}
           />
         )}
