@@ -29,7 +29,7 @@ describe('AssessmentCard', () => {
     render(<AssessmentCard scale={mockUncompletedScale} onStart={handleStart} />);
 
     expect(screen.getByText('PHQ-9 抑郁健康问卷')).toBeDefined();
-    expect(screen.getByText('情绪评估')).toBeDefined();
+    expect(screen.queryByText('情绪评估')).toBeNull();
     expect(screen.getByText(/约 2 分钟 • 9 题/)).toBeDefined();
 
     const startBtn = screen.getByText('开始测评');

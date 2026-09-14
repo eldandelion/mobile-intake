@@ -55,12 +55,7 @@ export const AssessmentCard: React.FC<AssessmentCardProps> = ({
         <h3 className="text-base font-semibold text-[var(--md-sys-color-on-surface)] leading-snug">
           {scale.title}
         </h3>
-        {scale.subtitle && (
-          <p className="text-xs font-medium text-[var(--md-sys-color-primary)] mt-0.5">
-            {scale.subtitle}
-          </p>
-        )}
-        <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] line-clamp-2 mt-1.5 leading-relaxed">
+        <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] line-clamp-2 mt-1 leading-relaxed">
           {scale.description}
         </p>
       </div>
