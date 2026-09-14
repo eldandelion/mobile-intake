@@ -300,11 +300,8 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
                 transition={{ duration: 0.18, ease: 'easeOut' }}
                 className="flex flex-col flex-1"
               >
-                {/* Question index badge & text */}
+                {/* Question text */}
                 <div className="mb-6">
-                  <span className="inline-block px-2.5 py-1 rounded-md bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] text-xs font-bold mb-3">
-                    第 {currentIndex + 1} 题
-                  </span>
                   <h3 className="text-lg sm:text-xl font-semibold text-[var(--md-sys-color-on-surface)] leading-relaxed">
                     {currentQuestion.text}
                   </h3>
