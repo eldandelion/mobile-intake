@@ -273,7 +273,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
     <div className="fixed inset-0 z-50 bg-[var(--md-sys-color-surface)] flex flex-col justify-between overflow-hidden overscroll-contain">
       {/* Pinned Top Navigation Header - spans full width on wider screens */}
       <header className="shrink-0 w-full bg-[var(--md-sys-color-surface-container-low)] border-b border-[var(--md-sys-color-outline-variant)] border-opacity-40">
-        <div className="w-full max-w-2xl mx-auto flex items-center justify-between px-3 sm:px-6 py-2.5">
+        <div className="w-full px-4 sm:px-8 py-2.5 flex items-center justify-between">
           <div className="flex items-center gap-1 sm:gap-2 min-w-0">
             <md-icon-button
               onClick={handleAttemptClose}
@@ -281,7 +281,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
             >
               <md-icon>arrow_back</md-icon>
             </md-icon-button>
-            <div className="truncate max-w-[220px] sm:max-w-md">
+            <div className="truncate max-w-[220px] sm:max-w-xl">
               <h2 className="text-sm sm:text-base font-bold text-[var(--md-sys-color-on-surface)] truncate">
                 {scale.title}
               </h2>
@@ -383,36 +383,40 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
         </div>
       </main>
 
-      {/* Pinned Bottom Action Footer - spans full width on wider screens */}
-      <footer className="shrink-0 w-full bg-[var(--md-sys-color-surface-container)] p-4 flex justify-center z-10">
-        <div className="w-full max-w-md flex items-center justify-between gap-3">
-          <TertiaryButton
-            label="上一题"
-            icon="chevron_left"
-            className="h-11 px-4"
-            disabled={currentIndex === 0}
-            onClick={handlePrev}
-          />
+      {/* Pinned Bottom Action Footer - spans full width on wider screens with zero bottom gap */}
+      <footer
+        className="shrink-0 w-full bg-[var(--md-sys-color-surface-container)] px-4 sm:px-8 py-3.5 flex items-center justify-between gap-3 z-10"
+        style={{
+          marginBottom: '-2px',
+          paddingBottom: 'calc(0.875rem + 2px)',
+        }}
+      >
+        <TertiaryButton
+          label="上一题"
+          icon="chevron_left"
+          className="h-11 px-4"
+          disabled={currentIndex === 0}
+          onClick={handlePrev}
+        />
 
-          {currentIndex === totalQuestions - 1 ? (
-            <PrimaryButton
-              label={submitting ? '提交中...' : '完成并提交'}
-              icon="check"
-              className="flex-1 h-11"
-              disabled={submitting || !isCurrentAnswered}
-              onClick={handleSubmit}
-            />
-          ) : (
-            <PrimaryButton
-              label="下一题"
-              icon="chevron_right"
-              trailingIcon
-              className="flex-1 h-11"
-              disabled={!isCurrentAnswered}
-              onClick={handleNext}
-            />
-          )}
-        </div>
+        {currentIndex === totalQuestions - 1 ? (
+          <PrimaryButton
+            label={submitting ? '提交中...' : '完成并提交'}
+            icon="check"
+            className="h-11 min-w-[140px]"
+            disabled={submitting || !isCurrentAnswered}
+            onClick={handleSubmit}
+          />
+        ) : (
+          <PrimaryButton
+            label="下一题"
+            icon="chevron_right"
+            trailingIcon
+            className="h-11 min-w-[120px]"
+            disabled={!isCurrentAnswered}
+            onClick={handleNext}
+          />
+        )}
       </footer>
 
       {/* Exit Confirmation Dialog */}
