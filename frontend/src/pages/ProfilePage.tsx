@@ -1,13 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { intakeApi, ScaleSummaryDto } from '../api/intakeApi';
 import { OutlinedButton, PrimaryButton } from '../components/common/Buttons';
+import { setCenteredDialogAnimation } from '../utils/dialogAnimation';
 import type { MdDialog } from '@material/web/dialog/dialog';
 
 export const ProfilePage: React.FC = () => {
   const { student, logout } = useAuth();
   const [scales, setScales] = useState<ScaleSummaryDto[]>([]);
   const logoutDialogRef = React.useRef<MdDialog>(null);
+  const setLogoutDialogRef = useCallback((node: MdDialog | null) => {
+    (logoutDialogRef as React.MutableRefObject<MdDialog | null>).current = node;
+    if (node) {
+      setCenteredDialogAnimation(node);
+    }
+  }, []);
 
   useEffect(() => {
     intakeApi
@@ -118,7 +125,7 @@ export const ProfilePage: React.FC = () => {
       </div>
 
       {/* Logout Confirmation Dialog */}
-      <md-dialog ref={logoutDialogRef}>
+      <md-dialog ref={setLogoutDialogRef}>
         <div slot="headline">确认退出登录？</div>
         <div slot="content" className="text-sm text-[var(--md-sys-color-on-surface-variant)]">
           退出登录后，再次进入需输入学号与密码重新验证。

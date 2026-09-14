@@ -4,6 +4,7 @@ import { AssessmentCard } from '../components/assessments/AssessmentCard';
 import { QuestionnairePlayerPage } from './QuestionnairePlayerPage';
 import { useAuth } from '../contexts/AuthContext';
 import { PrimaryButton, OutlinedButton } from '../components/common/Buttons';
+import { setCenteredDialogAnimation } from '../utils/dialogAnimation';
 import type { MdDialog } from '@material/web/dialog/dialog';
 
 export const AssessmentsPage: React.FC = () => {
@@ -20,6 +21,12 @@ export const AssessmentsPage: React.FC = () => {
   const [submissionData, setSubmissionData] = useState<any | null>(null);
   const [loadingSubmission, setLoadingSubmission] = useState<boolean>(false);
   const viewDialogRef = React.useRef<MdDialog>(null);
+  const setViewDialogRef = useCallback((node: MdDialog | null) => {
+    (viewDialogRef as React.MutableRefObject<MdDialog | null>).current = node;
+    if (node) {
+      setCenteredDialogAnimation(node);
+    }
+  }, []);
 
   const fetchScales = useCallback(async () => {
     try {
@@ -141,7 +148,7 @@ export const AssessmentsPage: React.FC = () => {
       )}
 
       {/* Submission Detail Modal */}
-      <md-dialog ref={viewDialogRef}>
+      <md-dialog ref={setViewDialogRef}>
         <div slot="headline">
           问卷提交状态 {viewingScaleCode ? `· ${viewingScaleCode}` : ''}
         </div>

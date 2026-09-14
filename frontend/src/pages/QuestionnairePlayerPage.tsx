@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { intakeApi, ScaleDetail, ScaleQuestion } from '../api/intakeApi';
 import { PrimaryButton, OutlinedButton, TertiaryButton } from '../components/common/Buttons';
+import { setCenteredDialogAnimation } from '../utils/dialogAnimation';
 import type { MdDialog } from '@material/web/dialog/dialog';
 
 interface QuestionnairePlayerPageProps {
@@ -33,6 +34,12 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
 
   const autoAdvanceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const dialogRef = useRef<MdDialog>(null);
+  const setDialogRef = useCallback((node: MdDialog | null) => {
+    (dialogRef as React.MutableRefObject<MdDialog | null>).current = node;
+    if (node) {
+      setCenteredDialogAnimation(node);
+    }
+  }, []);
 
   const draftKey = `intake_draft_${studentNumber}_${scaleCode}`;
 
@@ -271,14 +278,12 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
         <header className="shrink-0 bg-[var(--md-sys-color-surface-container-low)] border-b border-[var(--md-sys-color-outline-variant)] border-opacity-40">
           <div className="flex items-center justify-between px-3 py-2.5">
             <div className="flex items-center gap-1">
-              <button
-                type="button"
-                className="w-10 h-10 rounded-full flex items-center justify-center text-[var(--md-sys-color-on-surface-variant)] hover:bg-[var(--md-sys-color-surface-container-high)] transition"
+              <md-icon-button
                 onClick={handleAttemptClose}
                 aria-label="退出"
               >
-                <md-icon style={{ fontSize: '22px' }}>arrow_back</md-icon>
-              </button>
+                <md-icon>arrow_back</md-icon>
+              </md-icon-button>
               <div className="truncate max-w-[200px]">
                 <h2 className="text-sm font-bold text-[var(--md-sys-color-on-surface)] truncate">
                   {scale.title}
@@ -412,7 +417,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
 
       {/* Exit Confirmation Dialog */}
       <md-dialog
-        ref={dialogRef}
+        ref={setDialogRef}
         style={{
           maxWidth: 'min(420px, calc(100vw - 32px))',
           minWidth: '300px',
