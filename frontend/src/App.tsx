@@ -23,37 +23,12 @@ function AppContent() {
     return <AuthPage />;
   }
 
-  const firstLetter = student.fullName ? student.fullName.slice(0, 1) : '学';
-
   return (
     <div className="w-full min-h-[100dvh] bg-[var(--md-sys-color-surface)] flex justify-center">
       {/* Mobile-constrained viewport shell */}
-      <div className="w-full max-w-md min-h-[100dvh] bg-[var(--md-sys-color-surface)] border-x border-[var(--md-sys-color-outline-variant)] border-opacity-30 flex flex-col relative shadow-xl">
-        
-        {/* Top App Header */}
-        <header className="px-5 pt-5 pb-3.5 bg-[var(--md-sys-color-surface-container-low)] border-b border-[var(--md-sys-color-outline-variant)] border-opacity-40">
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-[var(--md-sys-color-primary)]">
-                中南大学 · 心理健康中心
-              </span>
-              <h1 className="text-lg font-bold text-[var(--md-sys-color-on-surface)] mt-0.5">
-                新生心理普查与建档
-              </h1>
-            </div>
-            <button
-              type="button"
-              onClick={() => setActiveTab(1)}
-              className="w-9 h-9 rounded-full bg-[var(--md-sys-color-tertiary-container)] text-[var(--md-sys-color-on-tertiary-container)] flex items-center justify-center font-bold text-sm shadow-xs active:scale-95 transition"
-              title="查看个人中心"
-            >
-              {firstLetter}
-            </button>
-          </div>
-        </header>
-
+      <div className="w-full max-w-md min-h-[100dvh] bg-[var(--md-sys-color-surface)] flex flex-col relative">
         {/* Main Body Content */}
-        <main className="flex-1 p-4 sm:p-5 pb-24 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-5 pt-6 sm:pt-8 pb-24 overflow-y-auto">
           {activeTab === 0 ? <AssessmentsPage /> : <ProfilePage />}
         </main>
 

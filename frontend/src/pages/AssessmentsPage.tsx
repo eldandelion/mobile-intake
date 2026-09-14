@@ -81,7 +81,7 @@ export const AssessmentsPage: React.FC = () => {
       )}
 
       {/* Progress Overview Card */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-[var(--md-sys-color-surface-container)] border border-[var(--md-sys-color-outline-variant)] border-opacity-40">
+      <div className="p-4 sm:p-5 rounded-2xl border border-[var(--md-sys-color-outline-variant)]">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold text-[var(--md-sys-color-primary)] uppercase tracking-wider">
             入学心理普查任务
