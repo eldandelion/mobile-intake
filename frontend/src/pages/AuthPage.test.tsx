@@ -39,7 +39,8 @@ describe('AuthPage', () => {
     const submitBtn = screen.getByText('快速建档并进入');
     fireEvent.click(submitBtn);
 
-    // Shows required validation or prompts
-    expect(screen.getByText('学号')).toBeDefined();
+    // Shows required validation error text on Material Web text field
+    expect(document.querySelector('md-outlined-text-field[error-text="请输入您的学号"]')).not.toBeNull();
+    expect(document.querySelector('md-outlined-text-field[label="学号"]')).not.toBeNull();
   });
 });

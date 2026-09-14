@@ -23,6 +23,9 @@ declare global {
         href?: string;
         target?: string;
         ariaLabel?: string;
+        'aria-label'?: string;
+        toggle?: boolean;
+        selected?: boolean;
       }, HTMLElement>;
       'md-dialog': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
         open?: boolean;
@@ -52,10 +55,19 @@ declare global {
         placeholder?: string;
         value?: string;
         disabled?: boolean;
+        required?: boolean;
         'supporting-text'?: string;
+        supportingText?: string;
         maxLength?: number;
         error?: boolean;
         'error-text'?: string;
+        errorText?: string;
+        'prefix-text'?: string;
+        prefixText?: string;
+        autocomplete?: string;
+        inputmode?: string;
+        onInput?: (e: any) => void;
+        onChange?: (e: any) => void;
       }, HTMLElement>;
       'md-navigation-bar': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
         'active-index'?: number;

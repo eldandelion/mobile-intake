@@ -347,28 +347,23 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
                     })}
                   </div>
                 ) : (
-                  /* Text Input Question */
+                  /* Text Input Question with MD3 outlined text field */
                   <div className="space-y-4 pt-2">
-                    <div className="rounded-xl border border-[var(--md-sys-color-outline)] focus-within:border-[var(--md-sys-color-primary)] focus-within:ring-2 focus-within:ring-[var(--md-sys-color-primary-container)] bg-[var(--md-sys-color-surface-container-lowest)] p-3.5 transition">
-                      <label className="block text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-1">
-                        填写回答
-                      </label>
-                      <input
-                        type="text"
-                        value={currentAnswer || ''}
-                        placeholder={currentQuestion.placeholder || '请输入...'}
-                        onChange={(e) => handleTextInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && isCurrentAnswered) {
-                            handleNext();
-                          }
-                        }}
-                        className="w-full bg-transparent text-base text-[var(--md-sys-color-on-surface)] outline-none placeholder:text-[var(--md-sys-color-outline)]"
-                      />
-                    </div>
-                    <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] px-1">
-                      输入完成后点击下方“下一题”即可继续。
-                    </p>
+                    <md-outlined-text-field
+                      label="填写回答"
+                      value={currentAnswer || ''}
+                      placeholder={currentQuestion.placeholder || '请输入...'}
+                      className="w-full"
+                      supporting-text="输入完成后点击下方“下一题”即可继续作答"
+                      onInput={(e: any) => handleTextInput(e.target.value)}
+                      onKeyDown={(e: any) => {
+                        if (e.key === 'Enter' && isCurrentAnswered) {
+                          handleNext();
+                        }
+                      }}
+                    >
+                      <md-icon slot="leading-icon">edit_note</md-icon>
+                    </md-outlined-text-field>
                   </div>
                 )}
               </motion.div>

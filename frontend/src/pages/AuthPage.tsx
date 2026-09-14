@@ -11,18 +11,48 @@ export const AuthPage: React.FC = () => {
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   // UI status
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const clearFieldError = (field: string) => {
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+    if (errorMessage) setErrorMessage(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+    const errors: Record<string, string> = {};
 
     const cleanStudentNumber = studentNumber.trim();
     if (!cleanStudentNumber) {
-      setErrorMessage('请输入您的学号');
+      errors.studentNumber = '请输入您的学号';
+    }
+
+    if (isRegisterMode) {
+      const cleanName = fullName.trim();
+      const cleanPhone = phone.trim();
+
+      if (!cleanName) {
+        errors.fullName = '请输入您的真实姓名';
+      }
+      if (!cleanPhone || cleanPhone.length < 11) {
+        errors.phone = '请输入正确的11位手机号码';
+      }
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
 
@@ -30,24 +60,10 @@ export const AuthPage: React.FC = () => {
 
     try {
       if (isRegisterMode) {
-        const cleanName = fullName.trim();
-        const cleanPhone = phone.trim();
-
-        if (!cleanName) {
-          setErrorMessage('请输入您的真实姓名');
-          setLoading(false);
-          return;
-        }
-        if (!cleanPhone || cleanPhone.length < 11) {
-          setErrorMessage('请输入正确的11位手机号码');
-          setLoading(false);
-          return;
-        }
-
         await register({
           studentNumber: cleanStudentNumber,
-          fullName: cleanName,
-          phone: cleanPhone,
+          fullName: fullName.trim(),
+          phone: phone.trim(),
           password: password.trim() || undefined,
         });
       } else {
@@ -58,7 +74,12 @@ export const AuthPage: React.FC = () => {
       }
     } catch (err: any) {
       console.error('Auth error:', err);
-      setErrorMessage(err.message || (isRegisterMode ? '登记建档失败，请重试' : '登录失败，请核对学号与密码'));
+      setErrorMessage(
+        err.message ||
+          (isRegisterMode
+            ? '登记建档失败，请重试'
+            : '登录失败，请核对学号与密码')
+      );
     } finally {
       setLoading(false);
     }
@@ -80,7 +101,9 @@ export const AuthPage: React.FC = () => {
             新生心理普查与档案采集
           </h1>
           <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] mt-1.5">
-            {isRegisterMode ? '仅需 30 秒快速登记即可开始测评' : '输入学号与密码登录系统'}
+            {isRegisterMode
+              ? '仅需 30 秒快速登记即可开始测评'
+              : '输入学号与密码登录系统'}
           </p>
         </div>
 
@@ -96,6 +119,7 @@ export const AuthPage: React.FC = () => {
             onClick={() => {
               setIsRegisterMode(true);
               setErrorMessage(null);
+              setFieldErrors({});
             }}
           >
             新同学登记
@@ -110,13 +134,14 @@ export const AuthPage: React.FC = () => {
             onClick={() => {
               setIsRegisterMode(false);
               setErrorMessage(null);
+              setFieldErrors({});
             }}
           >
             已有学号登录
           </button>
         </div>
 
-        {/* Error Alert Box */}
+        {/* Global Error Alert Box */}
         {errorMessage && (
           <div className="mb-4 p-3.5 rounded-xl bg-[var(--md-sys-color-error-container)] text-[var(--md-sys-color-on-error-container)] text-xs flex items-start gap-2.5">
             <md-icon style={{ fontSize: '18px', shrink: 0 }}>error</md-icon>
@@ -124,89 +149,117 @@ export const AuthPage: React.FC = () => {
           </div>
         )}
 
-        {/* Form */}
+        {/* Form using Material Design 3 Text Fields */}
         <form onSubmit={handleSubmit} className="space-y-4">
+          
+          {/* Student Number Input */}
           <div>
-            <label className="block text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-1.5">
-              学号 <span className="text-[var(--md-sys-color-error)]">*</span>
-            </label>
-            <div className="rounded-xl border border-[var(--md-sys-color-outline-variant)] focus-within:border-[var(--md-sys-color-primary)] focus-within:ring-2 focus-within:ring-[var(--md-sys-color-primary-container)] bg-[var(--md-sys-color-surface-container-lowest)] px-3.5 py-3 transition">
-              <input
-                type="text"
-                value={studentNumber}
-                onChange={(e) => setStudentNumber(e.target.value)}
-                placeholder="例如：2026001"
-                required
-                className="w-full bg-transparent text-sm text-[var(--md-sys-color-on-surface)] outline-none placeholder:text-[var(--md-sys-color-outline)]"
-              />
-            </div>
+            <md-outlined-text-field
+              label="学号"
+              placeholder="例如：2026001"
+              value={studentNumber}
+              required
+              className="w-full"
+              error={!!fieldErrors.studentNumber}
+              error-text={fieldErrors.studentNumber}
+              supporting-text="校方分配的个人学工号"
+              onInput={(e: any) => {
+                setStudentNumber(e.target.value);
+                clearFieldError('studentNumber');
+              }}
+            >
+              <md-icon slot="leading-icon">badge</md-icon>
+            </md-outlined-text-field>
           </div>
 
           {isRegisterMode && (
             <>
+              {/* Full Name Input */}
               <div>
-                <label className="block text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-1.5">
-                  真实姓名 <span className="text-[var(--md-sys-color-error)]">*</span>
-                </label>
-                <div className="rounded-xl border border-[var(--md-sys-color-outline-variant)] focus-within:border-[var(--md-sys-color-primary)] focus-within:ring-2 focus-within:ring-[var(--md-sys-color-primary-container)] bg-[var(--md-sys-color-surface-container-lowest)] px-3.5 py-3 transition">
-                  <input
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="请输入您的姓名"
-                    required
-                    className="w-full bg-transparent text-sm text-[var(--md-sys-color-on-surface)] outline-none placeholder:text-[var(--md-sys-color-outline)]"
-                  />
-                </div>
+                <md-outlined-text-field
+                  label="真实姓名"
+                  placeholder="请输入您的姓名"
+                  value={fullName}
+                  required
+                  className="w-full"
+                  error={!!fieldErrors.fullName}
+                  error-text={fieldErrors.fullName}
+                  supporting-text="请填写真实姓名用于档案核对"
+                  onInput={(e: any) => {
+                    setFullName(e.target.value);
+                    clearFieldError('fullName');
+                  }}
+                >
+                  <md-icon slot="leading-icon">person</md-icon>
+                </md-outlined-text-field>
               </div>
 
+              {/* Phone Input */}
               <div>
-                <label className="block text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] mb-1.5">
-                  手机号码 <span className="text-[var(--md-sys-color-error)]">*</span>
-                </label>
-                <div className="rounded-xl border border-[var(--md-sys-color-outline-variant)] focus-within:border-[var(--md-sys-color-primary)] focus-within:ring-2 focus-within:ring-[var(--md-sys-color-primary-container)] bg-[var(--md-sys-color-surface-container-lowest)] px-3.5 py-3 transition">
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="11位手机号码"
-                    required
-                    className="w-full bg-transparent text-sm text-[var(--md-sys-color-on-surface)] outline-none placeholder:text-[var(--md-sys-color-outline)]"
-                  />
-                </div>
+                <md-outlined-text-field
+                  type="tel"
+                  label="手机号码"
+                  placeholder="11位手机号码"
+                  value={phone}
+                  required
+                  className="w-full"
+                  error={!!fieldErrors.phone}
+                  error-text={fieldErrors.phone}
+                  supporting-text="常用联系手机，接收健康通知"
+                  onInput={(e: any) => {
+                    setPhone(e.target.value);
+                    clearFieldError('phone');
+                  }}
+                >
+                  <md-icon slot="leading-icon">call</md-icon>
+                </md-outlined-text-field>
               </div>
             </>
           )}
 
+          {/* Password Input */}
           <div>
-            <div className="flex justify-between items-center mb-1.5">
-              <label className="block text-xs font-medium text-[var(--md-sys-color-on-surface-variant)]">
-                {isRegisterMode ? '设置密码 (选填)' : '登录密码'}
-              </label>
-              {isRegisterMode && (
-                <span className="text-[11px] text-[var(--md-sys-color-outline)]">
-                  默认使用手机号后6位
-                </span>
-              )}
-            </div>
-            <div className="rounded-xl border border-[var(--md-sys-color-outline-variant)] focus-within:border-[var(--md-sys-color-primary)] focus-within:ring-2 focus-within:ring-[var(--md-sys-color-primary-container)] bg-[var(--md-sys-color-surface-container-lowest)] px-3.5 py-3 transition">
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={isRegisterMode ? '选填，至少6位字符' : '请输入密码'}
-                className="w-full bg-transparent text-sm text-[var(--md-sys-color-on-surface)] outline-none placeholder:text-[var(--md-sys-color-outline)]"
-              />
-            </div>
+            <md-outlined-text-field
+              label={isRegisterMode ? '设置密码 (选填)' : '登录密码'}
+              placeholder={isRegisterMode ? '选填，至少6位字符' : '请输入密码'}
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              className="w-full"
+              error={!!fieldErrors.password}
+              error-text={fieldErrors.password}
+              supporting-text={
+                isRegisterMode ? '默认使用手机号后6位' : undefined
+              }
+              onInput={(e: any) => {
+                setPassword(e.target.value);
+                clearFieldError('password');
+              }}
+            >
+              <md-icon slot="leading-icon">lock</md-icon>
+              <md-icon-button
+                type="button"
+                slot="trailing-icon"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? '隐藏密码' : '显示密码'}
+              >
+                <md-icon>{showPassword ? 'visibility_off' : 'visibility'}</md-icon>
+              </md-icon-button>
+            </md-outlined-text-field>
           </div>
 
-          <div className="pt-3">
+          <div className="pt-2">
             <PrimaryButton
-              label={loading ? '处理中...' : isRegisterMode ? '快速建档并进入' : '立即登录'}
+              label={
+                loading
+                  ? '处理中...'
+                  : isRegisterMode
+                  ? '快速建档并进入'
+                  : '立即登录'
+              }
               icon={isRegisterMode ? 'how_to_reg' : 'login'}
               className="w-full h-12 text-sm"
               disabled={loading}
-              onClick={() => {}}
+              onClick={() => handleSubmit({ preventDefault: () => {} } as any)}
             />
           </div>
         </form>
@@ -222,6 +275,7 @@ export const AuthPage: React.FC = () => {
               onClick={() => {
                 setIsRegisterMode(!isRegisterMode);
                 setErrorMessage(null);
+                setFieldErrors({});
               }}
             />
           </div>
