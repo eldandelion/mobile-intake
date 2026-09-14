@@ -36,13 +36,6 @@ export const AssessmentCard: React.FC<AssessmentCardProps> = ({
           >
             {isDemographic ? '必填档案' : '心理测评'}
           </span>
-
-          {isCompleted && (
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-[var(--md-sys-color-tertiary-container)] text-[var(--md-sys-color-on-tertiary-container)] font-medium flex items-center gap-1">
-              <md-icon style={{ fontSize: '13px' }}>check_circle</md-icon>
-              已完成
-            </span>
-          )}
         </div>
 
         <span className="text-xs text-[var(--md-sys-color-on-surface-variant)]">

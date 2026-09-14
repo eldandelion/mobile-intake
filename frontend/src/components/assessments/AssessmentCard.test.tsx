@@ -39,12 +39,12 @@ describe('AssessmentCard', () => {
     expect(handleStart).toHaveBeenCalledWith('phq_9');
   });
 
-  it('renders completed scale with checkmark chip and view button', () => {
+  it('renders completed scale with view button and without completed pill', () => {
     const handleView = vi.fn();
     render(<AssessmentCard scale={mockCompletedScale} onStart={vi.fn()} onView={handleView} />);
 
     expect(screen.getByText('个人基本信息核对')).toBeDefined();
-    expect(screen.getByText('已完成')).toBeDefined();
+    expect(screen.queryByText('已完成')).toBeNull();
 
     const viewBtn = screen.getByText('查看已提交');
     expect(viewBtn).toBeDefined();
