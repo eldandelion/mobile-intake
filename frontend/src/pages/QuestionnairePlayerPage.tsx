@@ -359,7 +359,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
         </main>
 
         {/* Pinned Bottom Action Footer */}
-        <footer className="absolute bottom-0 inset-x-0 bg-[var(--md-sys-color-surface-container)] border-t border-[var(--md-sys-color-outline-variant)] border-opacity-40 p-4 flex items-center justify-between gap-3">
+        <footer className="absolute bottom-0 inset-x-0 bg-[var(--md-sys-color-surface-container)] p-4 flex items-center justify-between gap-3">
           <TertiaryButton
             label="上一题"
             icon="chevron_left"

@@ -33,7 +33,7 @@ function AppContent() {
         </main>
 
         {/* MD3 Bottom Navigation Bar */}
-        <nav className="fixed bottom-0 max-w-md w-full bg-[var(--md-sys-color-surface-container)] border-t border-[var(--md-sys-color-outline-variant)] border-opacity-40">
+        <nav className="fixed bottom-0 max-w-md w-full bg-[var(--md-sys-color-surface-container)]">
           <md-navigation-bar active-index={activeTab}>
             <md-navigation-tab
               label="问卷测评"
