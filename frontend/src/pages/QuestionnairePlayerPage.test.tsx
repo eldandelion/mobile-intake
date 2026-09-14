@@ -112,4 +112,42 @@ describe('QuestionnairePlayerPage', () => {
     });
     expect(screen.getByText('返回测评列表')).toBeDefined();
   });
+
+  it('opens exit confirmation dialog multiple times without getting stuck', async () => {
+    const handleClose = vi.fn();
+    render(
+      <QuestionnairePlayerPage
+        scaleCode="phq_9"
+        studentNumber="2026001"
+        onClose={handleClose}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('1. 做事提不起劲或没有兴趣')).toBeDefined();
+    });
+
+    // Answer Question 1 so answeredCount > 0
+    fireEvent.click(screen.getByText('好几天'));
+
+    const dialogEl = document.querySelector('md-dialog') as any;
+    if (!dialogEl.show) dialogEl.show = vi.fn();
+    if (!dialogEl.close) dialogEl.close = vi.fn();
+    const showSpy = vi.spyOn(dialogEl, 'show');
+    const closeSpy = vi.spyOn(dialogEl, 'close');
+
+    // 1st click on exit button
+    const backBtn = screen.getByLabelText('退出');
+    fireEvent.click(backBtn);
+    expect(showSpy).toHaveBeenCalledTimes(1);
+
+    // Click "继续作答"
+    const continueBtn = screen.getByText('继续作答');
+    fireEvent.click(continueBtn);
+    expect(closeSpy).toHaveBeenCalledTimes(1);
+
+    // 2nd click on exit button - verify it opens again!
+    fireEvent.click(backBtn);
+    expect(showSpy).toHaveBeenCalledTimes(2);
+  });
 });

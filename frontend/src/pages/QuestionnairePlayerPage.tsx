@@ -22,7 +22,6 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
-  const [showExitDialog, setShowExitDialog] = useState<boolean>(false);
 
   const autoAdvanceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const dialogRef = useRef<MdDialog>(null);
@@ -82,15 +81,6 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
       console.warn('Failed to persist draft:', e);
     }
   }, [draftKey]);
-
-  // Dialog open/close sync
-  useEffect(() => {
-    if (showExitDialog) {
-      dialogRef.current?.show();
-    } else {
-      dialogRef.current?.close();
-    }
-  }, [showExitDialog]);
 
   const questions: ScaleQuestion[] = scale?.questions || [];
   const totalQuestions = questions.length;
@@ -181,7 +171,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
     if (isCompleted || answeredCount === 0) {
       onClose(isCompleted);
     } else {
-      setShowExitDialog(true);
+      dialogRef.current?.show();
     }
   };
 
@@ -399,22 +389,33 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
         </footer>
 
         {/* Exit Confirmation Dialog */}
-        <md-dialog ref={dialogRef}>
-          <div slot="headline">退出问卷作答？</div>
-          <div slot="content" className="text-sm text-[var(--md-sys-color-on-surface-variant)]">
-            当前已作答 {answeredCount} 道题目。您的作答内容已保存在本地设备中，稍后可随时进入继续完成。
+        <md-dialog
+          ref={dialogRef}
+          style={{
+            maxWidth: 'min(420px, calc(100vw - 32px))',
+            minWidth: '300px',
+            '--md-dialog-container-shape': '28px',
+          } as React.CSSProperties}
+        >
+          <div slot="headline" className="px-6 pt-6 pb-2 text-xl font-bold text-[var(--md-sys-color-on-surface)]">
+            退出问卷作答？
           </div>
-          <div slot="actions">
+          <div slot="content" className="px-6 py-2 text-sm leading-relaxed text-[var(--md-sys-color-on-surface-variant)]">
+            当前已作答 <span className="font-semibold text-[var(--md-sys-color-primary)] font-mono">{answeredCount}</span> 道题目。您的作答内容已保存在本地设备中，稍后可随时进入继续完成。
+          </div>
+          <div slot="actions" className="px-6 pb-6 pt-3 flex items-center justify-end gap-3">
             <OutlinedButton
               label="退出"
+              className="h-10 min-h-[40px] px-5 text-sm"
               onClick={() => {
-                setShowExitDialog(false);
+                dialogRef.current?.close();
                 onClose(false);
               }}
             />
             <PrimaryButton
               label="继续作答"
-              onClick={() => setShowExitDialog(false)}
+              className="h-10 min-h-[40px] px-5 text-sm"
+              onClick={() => dialogRef.current?.close()}
             />
           </div>
         </md-dialog>
