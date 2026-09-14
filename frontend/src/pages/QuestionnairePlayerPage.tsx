@@ -390,6 +390,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
             <PrimaryButton
               label="下一题"
               icon="chevron_right"
+              trailingIcon
               className="flex-1 h-11"
               disabled={!isCurrentAnswered}
               onClick={handleNext}
