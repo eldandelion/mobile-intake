@@ -270,45 +270,43 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
   }
 
   const playerContent = (
-    <div className="fixed inset-0 z-50 bg-[var(--md-sys-color-surface)] flex justify-center overflow-hidden overscroll-contain">
-      {/* Mobile Frame Container */}
-      <div className="w-full max-w-md h-full bg-[var(--md-sys-color-surface)] flex flex-col relative border-x border-[var(--md-sys-color-outline-variant)] border-opacity-30 overflow-hidden">
-        
-        {/* Pinned Top Navigation Header */}
-        <header className="shrink-0 bg-[var(--md-sys-color-surface-container-low)] border-b border-[var(--md-sys-color-outline-variant)] border-opacity-40">
-          <div className="flex items-center justify-between px-3 py-2.5">
-            <div className="flex items-center gap-1">
-              <md-icon-button
-                onClick={handleAttemptClose}
-                aria-label="退出"
-              >
-                <md-icon>arrow_back</md-icon>
-              </md-icon-button>
-              <div className="truncate max-w-[200px]">
-                <h2 className="text-sm font-bold text-[var(--md-sys-color-on-surface)] truncate">
-                  {scale.title}
-                </h2>
-              </div>
-            </div>
-
-            {/* Question Counter Pill */}
-            <div className="px-3 py-1 rounded-full bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-primary)] text-xs font-semibold flex items-center gap-1">
-              <span>第 {currentIndex + 1} / {totalQuestions} 题</span>
+    <div className="fixed inset-0 z-50 bg-[var(--md-sys-color-surface)] flex flex-col justify-between overflow-hidden overscroll-contain">
+      {/* Pinned Top Navigation Header - spans full width on wider screens */}
+      <header className="shrink-0 w-full bg-[var(--md-sys-color-surface-container-low)] border-b border-[var(--md-sys-color-outline-variant)] border-opacity-40">
+        <div className="w-full max-w-2xl mx-auto flex items-center justify-between px-3 sm:px-6 py-2.5">
+          <div className="flex items-center gap-1 sm:gap-2 min-w-0">
+            <md-icon-button
+              onClick={handleAttemptClose}
+              aria-label="退出"
+            >
+              <md-icon>arrow_back</md-icon>
+            </md-icon-button>
+            <div className="truncate max-w-[220px] sm:max-w-md">
+              <h2 className="text-sm sm:text-base font-bold text-[var(--md-sys-color-on-surface)] truncate">
+                {scale.title}
+              </h2>
             </div>
           </div>
 
-          {/* Linear Progress Bar */}
-          <div className="w-full">
-            <md-linear-progress
-              value={answeredCount}
-              max={totalQuestions}
-              style={{ width: '100%', '--md-linear-progress-track-height': '4px' } as any}
-            ></md-linear-progress>
+          {/* Question Counter Pill */}
+          <div className="px-3 py-1 rounded-full bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-primary)] text-xs sm:text-sm font-semibold flex items-center gap-1 shrink-0">
+            <span>第 {currentIndex + 1} / {totalQuestions} 题</span>
           </div>
-        </header>
+        </div>
 
-        {/* Question Viewport Area */}
-        <main className="flex-1 p-5 pb-28 overflow-y-auto overscroll-contain flex flex-col justify-start">
+        {/* Linear Progress Bar */}
+        <div className="w-full">
+          <md-linear-progress
+            value={answeredCount}
+            max={totalQuestions}
+            style={{ width: '100%', '--md-linear-progress-track-height': '4px' } as any}
+          ></md-linear-progress>
+        </div>
+      </header>
+
+      {/* Question Viewport Area - centered reading container */}
+      <main className="flex-1 w-full overflow-y-auto overscroll-contain flex justify-center">
+        <div className="w-full max-w-md p-5 pb-8 sm:p-6 sm:pb-8 flex flex-col justify-start">
           <AnimatePresence mode="wait">
             {currentQuestion && (
               <motion.div
@@ -382,10 +380,12 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
               </motion.div>
             )}
           </AnimatePresence>
-        </main>
+        </div>
+      </main>
 
-        {/* Pinned Bottom Action Footer */}
-        <footer className="absolute bottom-0 inset-x-0 bg-[var(--md-sys-color-surface-container)] p-4 flex items-center justify-between gap-3">
+      {/* Pinned Bottom Action Footer - spans full width on wider screens */}
+      <footer className="shrink-0 w-full bg-[var(--md-sys-color-surface-container)] p-4 flex justify-center z-10">
+        <div className="w-full max-w-md flex items-center justify-between gap-3">
           <TertiaryButton
             label="上一题"
             icon="chevron_left"
@@ -412,8 +412,8 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
               onClick={handleNext}
             />
           )}
-        </footer>
-      </div>
+        </div>
+      </footer>
 
       {/* Exit Confirmation Dialog */}
       <md-dialog
