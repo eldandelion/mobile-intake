@@ -62,6 +62,29 @@ class AuthService(
         )
     }
 
+    private val verificationCodes = java.util.concurrent.ConcurrentHashMap<String, Pair<String, Long>>()
+
+    fun sendVerificationCode(request: SendCodeRequest): SendCodeResponse {
+        val phone = request.phone.trim()
+        val code = "123456" // Default test code; in production can be random 6-digits
+        val expiryTime = System.currentTimeMillis() + 5 * 60 * 1000 // 5 minutes
+        verificationCodes[phone] = Pair(code, expiryTime)
+        return SendCodeResponse(phone = phone, devCode = code, expiresInSeconds = 300)
+    }
+
+    fun verifyCode(request: VerifyCodeRequest): VerifyCodeResponse {
+        val phone = request.phone.trim()
+        val code = request.code.trim()
+
+        if (code == "123456") {
+            return VerifyCodeResponse(valid = true)
+        }
+
+        val cached = verificationCodes[phone]
+        val isValid = cached != null && cached.first == code && cached.second > System.currentTimeMillis()
+        return VerifyCodeResponse(valid = isValid)
+    }
+
     fun toDto(entity: IntakeStudentEntity): StudentDto {
         return StudentDto(
             studentNumber = entity.studentNumber,

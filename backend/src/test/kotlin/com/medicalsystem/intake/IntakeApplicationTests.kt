@@ -25,16 +25,54 @@ class IntakeApplicationTests {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
+    @Autowired
+    private lateinit var studentRepository: com.medicalsystem.intake.repository.IntakeStudentRepository
+
+    @Autowired
+    private lateinit var submissionRepository: com.medicalsystem.intake.repository.ScaleSubmissionRepository
+
     private lateinit var mockMvc: MockMvc
 
     @BeforeEach
     fun setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build()
+        submissionRepository.deleteAll()
+        studentRepository.deleteAll()
     }
 
     @Test
     fun contextLoads() {
         assertNotNull(webApplicationContext)
+    }
+
+    @Test
+    fun `test send and verify code endpoints`() {
+        // Send code
+        mockMvc.perform(
+            post("/api/auth/send-code")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(com.medicalsystem.intake.dto.SendCodeRequest("13811112222")))
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.devCode").value("123456"))
+
+        // Verify code with valid code
+        mockMvc.perform(
+            post("/api/auth/verify-code")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(com.medicalsystem.intake.dto.VerifyCodeRequest("13811112222", "123456")))
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.valid").value(true))
+
+        // Verify code with wrong code
+        mockMvc.perform(
+            post("/api/auth/verify-code")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(com.medicalsystem.intake.dto.VerifyCodeRequest("13811112222", "999999")))
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.valid").value(false))
     }
 
     @Test

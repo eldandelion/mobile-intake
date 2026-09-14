@@ -42,3 +42,27 @@ data class AuthResponse(
     val token: String,
     val student: StudentDto
 )
+
+data class SendCodeRequest(
+    @field:NotBlank(message = "Phone number is required")
+    @field:Pattern(regexp = "^1[3-9]\\d{9}$", message = "Invalid Chinese mobile phone number format")
+    val phone: String
+)
+
+data class SendCodeResponse(
+    val phone: String,
+    val devCode: String = "123456",
+    val expiresInSeconds: Int = 300
+)
+
+data class VerifyCodeRequest(
+    @field:NotBlank(message = "Phone number is required")
+    val phone: String,
+
+    @field:NotBlank(message = "Verification code is required")
+    val code: String
+)
+
+data class VerifyCodeResponse(
+    val valid: Boolean
+)

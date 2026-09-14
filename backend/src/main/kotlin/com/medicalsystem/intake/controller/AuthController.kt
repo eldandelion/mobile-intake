@@ -26,6 +26,18 @@ class AuthController(
         return ResponseEntity.ok(response)
     }
 
+    @PostMapping("/send-code")
+    fun sendCode(@Valid @RequestBody request: SendCodeRequest): ResponseEntity<SendCodeResponse> {
+        val response = authService.sendVerificationCode(request)
+        return ResponseEntity.ok(response)
+    }
+
+    @PostMapping("/verify-code")
+    fun verifyCode(@Valid @RequestBody request: VerifyCodeRequest): ResponseEntity<VerifyCodeResponse> {
+        val response = authService.verifyCode(request)
+        return ResponseEntity.ok(response)
+    }
+
     @GetMapping("/me")
     fun me(@CurrentStudent student: IntakeStudentEntity): ResponseEntity<StudentDto> {
         return ResponseEntity.ok(authService.toDto(student))
