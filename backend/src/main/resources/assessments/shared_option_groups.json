@@ -1,0 +1,265 @@
+[
+  {
+    "name": "FOUR_POINT_FREQUENCY",
+    "options": [
+      { "value": 0, "label": "完全不会" },
+      { "value": 1, "label": "好几天" },
+      { "value": 2, "label": "一半以上时间" },
+      { "value": 3, "label": "几乎每天" }
+    ]
+  },
+  {
+    "name": "FIVE_POINT_SEVERITY",
+    "options": [
+      { "value": 1, "label": "从无" },
+      { "value": 2, "label": "轻度" },
+      { "value": 3, "label": "中度" },
+      { "value": 4, "label": "偏重" },
+      { "value": 5, "label": "严重" }
+    ]
+  },
+  {
+    "name": "SLEEP_SEVERITY",
+    "options": [
+      { "value": 0, "label": "无" },
+      { "value": 1, "label": "轻度" },
+      { "value": 2, "label": "中度" },
+      { "value": 3, "label": "重度" },
+      { "value": 4, "label": "极重度" }
+    ]
+  },
+  {
+    "name": "APQ_OPTIONS",
+    "options": [
+      { "value": 1, "label": "从不发生" },
+      { "value": 2, "label": "几乎没有" },
+      { "value": 3, "label": "有时发生" },
+      { "value": 4, "label": "经常发生" },
+      { "value": 5, "label": "总是发生" }
+    ]
+  },
+  {
+    "name": "MOBILE_ADDICTION_OPTIONS",
+    "options": [
+      { "value": 1, "label": "完全不同意" },
+      { "value": 2, "label": "基本不同意" },
+      { "value": 3, "label": "有点不同意" },
+      { "value": 4, "label": "有点同意" },
+      { "value": 5, "label": "基本同意" },
+      { "value": 6, "label": "完全同意" }
+    ]
+  },
+  {
+    "name": "GAME_ADDICTION_OPTIONS",
+    "options": [
+      { "value": 1, "label": "从不" },
+      { "value": 2, "label": "很少" },
+      { "value": 3, "label": "有时" },
+      { "value": 4, "label": "经常" },
+      { "value": 5, "label": "总是" }
+    ]
+  },
+  {
+    "name": "PROCRASTINATION_OPTIONS",
+    "options": [
+      { "value": 1, "label": "非常不符合" },
+      { "value": 2, "label": "比较不符合" },
+      { "value": 3, "label": "一般符合" },
+      { "value": 4, "label": "比较符合" },
+      { "value": 5, "label": "非常符合" }
+    ]
+  },
+  {
+    "name": "EATING_HABITS_OPTIONS_1",
+    "options": [
+      { "value": 1, "label": "完全不符合" },
+      { "value": 2, "label": "有点不符合" },
+      { "value": 3, "label": "有点符合" },
+      { "value": 4, "label": "完全符合" }
+    ]
+  },
+  {
+    "name": "PEER_RELATIONSHIP_OPTIONS",
+    "options": [
+      { "value": 1, "label": "完全不符合" },
+      { "value": 2, "label": "比较不符合" },
+      { "value": 3, "label": "不确定" },
+      { "value": 4, "label": "比较符合" },
+      { "value": 5, "label": "完全符合" }
+    ]
+  },
+  {
+    "name": "LONELINESS_OPTIONS",
+    "options": [
+      { "value": 1, "label": "从不" },
+      { "value": 2, "label": "有时" },
+      { "value": 3, "label": "经常" },
+      { "value": 4, "label": "总是" }
+    ]
+  },
+  {
+    "name": "SOCIAL_SUPPORT_OPTIONS",
+    "options": [
+      { "value": 1, "label": "完全不同意" },
+      { "value": 2, "label": "大多不同意" },
+      { "value": 3, "label": "少许不同意" },
+      { "value": 4, "label": "中立" },
+      { "value": 5, "label": "少许同意" },
+      { "value": 6, "label": "大多同意" },
+      { "value": 7, "label": "完全同意" }
+    ]
+  },
+  {
+    "name": "IMPULSIVITY_OPTIONS",
+    "options": [
+      { "value": 1, "label": "完全不符合" },
+      { "value": 2, "label": "不符合" },
+      { "value": 3, "label": "符合" },
+      { "value": 4, "label": "完全符合" }
+    ]
+  },
+  {
+    "name": "SELF_CONTROL_OPTIONS",
+    "options": [
+      { "value": 1, "label": "完全不符合" },
+      { "value": 2, "label": "较少不符合" },
+      { "value": 3, "label": "一般符合" },
+      { "value": 4, "label": "比较符合" },
+      { "value": 5, "label": "完全符合" }
+    ]
+  },
+  {
+    "name": "GRIT_OPTIONS",
+    "options": [
+      { "value": 1, "label": "完全不像我" },
+      { "value": 2, "label": "大部分不像我" },
+      { "value": 3, "label": "有些像我" },
+      { "value": 4, "label": "大部分像我" },
+      { "value": 5, "label": "完全像我" }
+    ]
+  },
+  {
+    "name": "EMOTION_REGULATION_OPTIONS",
+    "options": [
+      { "value": 1, "label": "非常不符合" },
+      { "value": 2, "label": "不符合" },
+      { "value": 3, "label": "有点不符合" },
+      { "value": 4, "label": "不确定" },
+      { "value": 5, "label": "有点符合" },
+      { "value": 6, "label": "符合" },
+      { "value": 7, "label": "完全符合" }
+    ]
+  },
+  {
+    "name": "LIFE_EVENTS_OPTIONS",
+    "options": [
+      { "value": 0, "label": "未发生" },
+      { "value": 1, "label": "没有" },
+      { "value": 2, "label": "轻度" },
+      { "value": 3, "label": "中度" },
+      { "value": 4, "label": "重度" },
+      { "value": 5, "label": "极度" }
+    ]
+  },
+  {
+    "name": "CHILDHOOD_SES_OPTIONS",
+    "options": [
+      { "value": 1, "label": "完全不符合" },
+      { "value": 2, "label": "大多不符合" },
+      { "value": 3, "label": "少许不符合" },
+      { "value": 4, "label": "中立" },
+      { "value": 5, "label": "少许符合" },
+      { "value": 6, "label": "大多符合" },
+      { "value": 7, "label": "完全符合" }
+    ]
+  },
+  {
+    "name": "CHILDHOOD_TRAUMA_OPTIONS",
+    "options": [
+      { "value": 1, "label": "没有" },
+      { "value": 2, "label": "偶尔" },
+      { "value": 3, "label": "有时" },
+      { "value": 4, "label": "经常" },
+      { "value": 5, "label": "总是" }
+    ]
+  },
+  {
+    "name": "NSSI_OPTIONS",
+    "options": [
+      { "value": 1, "label": "0次" },
+      { "value": 2, "label": "1~2次" },
+      { "value": 3, "label": "3~5次" },
+      { "value": 4, "label": "6次及以上" }
+    ]
+  },
+  {
+    "name": "PQ16_OPTIONS",
+    "options": [
+      { "value": 0, "label": "否" },
+      { "value": 1, "label": "是，无痛苦" },
+      { "value": 2, "label": "是，轻度痛苦" },
+      { "value": 3, "label": "是，中度痛苦" },
+      { "value": 4, "label": "是，重度痛苦" }
+    ]
+  },
+  {
+    "name": "ADHD_OPTIONS",
+    "options": [
+      { "value": 0, "label": "从不" },
+      { "value": 1, "label": "很少" },
+      { "value": 2, "label": "有时" },
+      { "value": 3, "label": "经常" },
+      { "value": 4, "label": "非常频繁" }
+    ]
+  },
+  {
+    "name": "BRIEF_A_OPTIONS",
+    "options": [
+      { "value": 1, "label": "从不" },
+      { "value": 2, "label": "偶尔" },
+      { "value": 3, "label": "经常" }
+    ]
+  },
+  {
+    "name": "AGGRESSION_OPTIONS",
+    "options": [
+      { "value": 1, "label": "完全不符合" },
+      { "value": 2, "label": "较少不符合" },
+      { "value": 3, "label": "一般符合" },
+      { "value": 4, "label": "比较符合" },
+      { "value": 5, "label": "完全符合" }
+    ]
+  },
+  {
+    "name": "COPING_OPTIONS",
+    "options": [
+      { "value": 1, "label": "不采取" },
+      { "value": 2, "label": "偶尔采取" },
+      { "value": 3, "label": "有时采取" },
+      { "value": 4, "label": "经常采取" }
+    ]
+  },
+  {
+    "name": "SWLS_OPTIONS",
+    "options": [
+      { "value": 1, "label": "完全不同意" },
+      { "value": 2, "label": "大多不同意" },
+      { "value": 3, "label": "少许不同意" },
+      { "value": 4, "label": "中立" },
+      { "value": 5, "label": "少许同意" },
+      { "value": 6, "label": "大多同意" },
+      { "value": 7, "label": "完全同意" }
+    ]
+  },
+  {
+    "name": "BIG_FIVE_OPTIONS",
+    "options": [
+      { "value": 1, "label": "完全不符合" },
+      { "value": 2, "label": "较不符合" },
+      { "value": 3, "label": "有点不符合" },
+      { "value": 4, "label": "有点符合" },
+      { "value": 5, "label": "比较符合" },
+      { "value": 6, "label": "完全符合" }
+    ]
+  }
+]
