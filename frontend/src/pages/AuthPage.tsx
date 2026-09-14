@@ -86,60 +86,61 @@ export const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full min-h-[100dvh] bg-[var(--md-sys-color-surface)] flex justify-center items-center p-4">
-      <div className="w-full max-w-md bg-[var(--md-sys-color-surface-container-lowest)] rounded-3xl border border-[var(--md-sys-color-outline-variant)] border-opacity-50 p-6 sm:p-8 shadow-sm flex flex-col">
+    <div className="w-full min-h-[100dvh] bg-[var(--md-sys-color-surface)] flex justify-center">
+      <div className="w-full max-w-md min-h-[100dvh] bg-[var(--md-sys-color-surface)] px-6 py-8 sm:py-12 flex flex-col justify-between">
         
-        {/* Brand Header */}
-        <div className="flex flex-col items-center text-center mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] flex items-center justify-center mb-3 shadow-xs">
-            <md-icon style={{ fontSize: '32px' }}>psychology</md-icon>
+        <div className="flex flex-col">
+          {/* Brand Header */}
+          <div className="flex flex-col items-center text-center mb-6">
+            <div className="w-14 h-14 rounded-2xl bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] flex items-center justify-center mb-3 shadow-xs">
+              <md-icon style={{ fontSize: '32px' }}>psychology</md-icon>
+            </div>
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--md-sys-color-primary)]">
+              中南大学 · 心理健康教育与咨询中心
+            </span>
+            <h1 className="text-xl font-bold text-[var(--md-sys-color-on-surface)] mt-1">
+              新生心理普查与档案采集
+            </h1>
+            <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] mt-1.5">
+              {isRegisterMode
+                ? '仅需 30 秒快速登记即可开始测评'
+                : '输入学号与密码登录系统'}
+            </p>
           </div>
-          <span className="text-xs font-semibold uppercase tracking-wider text-[var(--md-sys-color-primary)]">
-            中南大学 · 心理健康教育与咨询中心
-          </span>
-          <h1 className="text-xl font-bold text-[var(--md-sys-color-on-surface)] mt-1">
-            新生心理普查与档案采集
-          </h1>
-          <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] mt-1.5">
-            {isRegisterMode
-              ? '仅需 30 秒快速登记即可开始测评'
-              : '输入学号与密码登录系统'}
-          </p>
-        </div>
 
-        {/* Tab switch */}
-        <div className="flex bg-[var(--md-sys-color-surface-container)] p-1 rounded-xl mb-6">
-          <button
-            type="button"
-            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-              isRegisterMode
-                ? 'bg-[var(--md-sys-color-surface-container-lowest)] text-[var(--md-sys-color-primary)] shadow-xs'
-                : 'text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)]'
-            }`}
-            onClick={() => {
-              setIsRegisterMode(true);
-              setErrorMessage(null);
-              setFieldErrors({});
-            }}
-          >
-            新同学登记
-          </button>
-          <button
-            type="button"
-            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-              !isRegisterMode
-                ? 'bg-[var(--md-sys-color-surface-container-lowest)] text-[var(--md-sys-color-primary)] shadow-xs'
-                : 'text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)]'
-            }`}
-            onClick={() => {
-              setIsRegisterMode(false);
-              setErrorMessage(null);
-              setFieldErrors({});
-            }}
-          >
-            已有学号登录
-          </button>
-        </div>
+          {/* Tab switch */}
+          <div className="flex bg-[var(--md-sys-color-surface-container)] p-1 rounded-xl mb-6">
+            <button
+              type="button"
+              className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
+                isRegisterMode
+                  ? 'bg-[var(--md-sys-color-surface)] text-[var(--md-sys-color-primary)] shadow-xs'
+                  : 'text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)]'
+              }`}
+              onClick={() => {
+                setIsRegisterMode(true);
+                setErrorMessage(null);
+                setFieldErrors({});
+              }}
+            >
+              新同学登记
+            </button>
+            <button
+              type="button"
+              className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
+                !isRegisterMode
+                  ? 'bg-[var(--md-sys-color-surface)] text-[var(--md-sys-color-primary)] shadow-xs'
+                  : 'text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)]'
+              }`}
+              onClick={() => {
+                setIsRegisterMode(false);
+                setErrorMessage(null);
+                setFieldErrors({});
+              }}
+            >
+              已有学号登录
+            </button>
+          </div>
 
         {/* Global Error Alert Box */}
         {errorMessage && (
@@ -263,9 +264,10 @@ export const AuthPage: React.FC = () => {
             />
           </div>
         </form>
+        </div>
 
         {/* Footnote */}
-        <div className="mt-6 pt-4 border-t border-[var(--md-sys-color-outline-variant)] border-opacity-30 text-center">
+        <div className="mt-8 pt-4 border-t border-[var(--md-sys-color-outline-variant)] border-opacity-30 text-center">
           <p className="text-[11px] text-[var(--md-sys-color-on-surface-variant)] leading-relaxed">
             数据安全承诺：您的个人档案及心理作答受《中华人民共和国个人信息保护法》及医疗隐私规范严格保密。
           </p>
