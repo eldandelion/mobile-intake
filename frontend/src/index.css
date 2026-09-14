@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Roboto Flex', 'Roboto', 'Noto Sans SC', 'Noto Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+/**
+ * Prevent Tailwind's preflight from overriding Material Web Web Components
+ */
+@layer base {
+  :is(md-filled-button, md-outlined-button, md-text-button,
+    md-elevated-button, md-filled-tonal-button,
+    md-icon-button, md-filled-icon-button, md-filled-tonal-icon-button,
+    md-outlined-icon-button,
+    md-fab, md-branded-fab,
+    md-chip-set, md-filter-chip, md-assist-chip,
+    md-suggestion-chip, md-input-chip,
+    md-dialog,
+    md-menu, md-menu-item, md-sub-menu,
+    md-list, md-list-item,
+    md-checkbox, md-radio, md-switch, md-slider,
+    md-tabs, md-primary-tab, md-secondary-tab,
+    md-navigation-bar, md-navigation-tab,
+    md-navigation-drawer, md-navigation-drawer-modal,
+    md-icon, md-divider,
+    md-outlined-text-field, md-filled-text-field,
+    md-outlined-select, md-filled-select, md-select-option,
+    md-circular-progress, md-linear-progress,
+    md-outlined-segmented-button, md-outlined-segmented-button-set,
+    md-ripple, md-focus-ring,
+    md-tooltip, md-snackbar) {
+    all: revert-layer;
+  }
+}
+
+body {
+  font-family: 'Roboto Flex', 'Roboto', 'Noto Sans SC', 'Noto Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  min-height: 100dvh;
+}
+
+/* CSU Light Theme Variables */
+:root,
+.light {
+  --md-ref-typeface-brand: 'Roboto Flex', 'Roboto', 'Noto Sans SC', 'Noto Sans', system-ui, sans-serif;
+  --md-ref-typeface-plain: 'Roboto Flex', 'Roboto', 'Noto Sans SC', 'Noto Sans', system-ui, sans-serif;
+  --md-sys-color-primary: rgb(101 85 143);
+  --md-sys-color-surface-tint: rgb(103 80 164);
+  --md-sys-color-on-primary: rgb(255 255 255);
+  --md-sys-color-primary-container: rgb(234 221 255);
+  --md-sys-color-on-primary-container: rgb(79 55 139);
+  --md-sys-color-secondary: rgb(98 91 113);
+  --md-sys-color-on-secondary: rgb(255 255 255);
+  --md-sys-color-secondary-container: rgb(232 222 248);
+  --md-sys-color-on-secondary-container: rgb(74 68 88);
+  --md-sys-color-tertiary: rgb(125 82 96);
+  --md-sys-color-on-tertiary: rgb(255 255 255);
+  --md-sys-color-tertiary-container: rgb(255 216 228);
+  --md-sys-color-on-tertiary-container: rgb(99 59 72);
+  --md-sys-color-error: rgb(179 38 30);
+  --md-sys-color-on-error: rgb(255 255 255);
+  --md-sys-color-error-container: rgb(249 222 220);
+  --md-sys-color-on-error-container: rgb(140 29 24);
+  --md-sys-color-background: rgb(254 247 255);
+  --md-sys-color-on-background: rgb(29 27 32);
+  --md-sys-color-surface: rgb(254 247 255);
+  --md-sys-color-on-surface: rgb(29 27 32);
+  --md-sys-color-surface-variant: rgb(231 224 236);
+  --md-sys-color-on-surface-variant: rgb(73 69 79);
+  --md-sys-color-outline: rgb(121 116 126);
+  --md-sys-color-outline-variant: rgb(202 196 208);
+  --md-sys-color-shadow: rgb(0 0 0);
+  --md-sys-color-scrim: rgb(0 0 0);
+  --md-sys-color-surface-dim: rgb(222 216 225);
+  --md-sys-color-surface-bright: rgb(254 247 255);
+  --md-sys-color-surface-container-lowest: rgb(255 255 255);
+  --md-sys-color-surface-container-low: rgb(247 242 250);
+  --md-sys-color-surface-container: rgb(243 237 247);
+  --md-sys-color-surface-container-high: rgb(236 230 240);
+  --md-sys-color-surface-container-highest: rgb(230 224 233);
+}

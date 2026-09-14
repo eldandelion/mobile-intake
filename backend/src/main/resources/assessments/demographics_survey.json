@@ -1,0 +1,82 @@
+{
+  "id": "demographics_survey",
+  "title": "个人基本信息核对",
+  "subtitle": "新生入学档案与健康信息登记",
+  "estimatedMinutes": 3,
+  "description": "请认真核对并如实填写您的个人基本档案与紧急联系人信息，该信息仅用于校方档案与心理健康监护备案。",
+  "sections": [
+    {
+      "id": "demographics_section",
+      "title": "基本信息",
+      "questions": [
+        {
+          "id": "demo_gender",
+          "field": "gender",
+          "text": "1. 您的性别是？",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "男" },
+            { "value": 2, "label": "女" }
+          ]
+        },
+        {
+          "id": "demo_ethnicity",
+          "field": "ethnicity",
+          "text": "2. 您的民族是？",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "汉族" },
+            { "value": 2, "label": "回族" },
+            { "value": 3, "label": "满族" },
+            { "value": 4, "label": "维吾尔族" },
+            { "value": 5, "label": "壮族" },
+            { "value": 6, "label": "蒙古族" },
+            { "value": 7, "label": "其他少数民族" }
+          ]
+        },
+        {
+          "id": "demo_id_card",
+          "field": "idCardNumber",
+          "text": "3. 请输入您的居民身份证号（18位）：",
+          "type": "text",
+          "placeholder": "请输入18位身份证号码"
+        },
+        {
+          "id": "demo_major",
+          "field": "major",
+          "text": "4. 您所就读的院系与专业名称：",
+          "type": "text",
+          "placeholder": "例如：计算机学院 软件工程"
+        },
+        {
+          "id": "demo_email",
+          "field": "email",
+          "text": "5. 您的常用电子邮箱：",
+          "type": "text",
+          "placeholder": "例如：student@univ.edu.cn"
+        },
+        {
+          "id": "demo_home_address",
+          "field": "homeAddress",
+          "text": "6. 您的家庭常住地址：",
+          "type": "text",
+          "placeholder": "省、市、区（县）及详细居住地址"
+        },
+        {
+          "id": "demo_emergency_contact",
+          "field": "emergencyContactName",
+          "text": "7. 紧急联系人姓名：",
+          "type": "text",
+          "placeholder": "例如：父亲/母亲姓名"
+        },
+        {
+          "id": "demo_emergency_phone",
+          "field": "emergencyContactPhone",
+          "text": "8. 紧急联系人联系电话：",
+          "type": "text",
+          "placeholder": "11位手机号码"
+        }
+      ]
+    }
+  ]
+}

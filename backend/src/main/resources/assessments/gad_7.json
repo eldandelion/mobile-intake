@@ -1,0 +1,15 @@
+{
+  "code": "gad_7",
+  "title": "焦虑状况评估 (GAD-7)",
+  "subtitle": "GAD-7 广泛性焦虑障碍量表",
+  "description": "在过去的两周里，您有多少时间受到以下问题的困扰？",
+  "questions": [
+    { "code": "gad7_1", "text": "感觉紧张，焦虑或急切", "orderNum": 1, "optionGroupName": "FOUR_POINT_FREQUENCY" },
+    { "code": "gad7_2", "text": "不能够停止或控制担忧", "orderNum": 2, "optionGroupName": "FOUR_POINT_FREQUENCY" },
+    { "code": "gad7_3", "text": "对各种各样的事情担忧过多", "orderNum": 3, "optionGroupName": "FOUR_POINT_FREQUENCY" },
+    { "code": "gad7_4", "text": "很难放松下来", "orderNum": 4, "optionGroupName": "FOUR_POINT_FREQUENCY" },
+    { "code": "gad7_5", "text": "由于不安而无法静坐", "orderNum": 5, "optionGroupName": "FOUR_POINT_FREQUENCY" },
+    { "code": "gad7_6", "text": "变得容易烦恼或急躁", "orderNum": 6, "optionGroupName": "FOUR_POINT_FREQUENCY" },
+    { "code": "gad7_7", "text": "感到似乎将有可怕的事情发生而害怕", "orderNum": 7, "optionGroupName": "FOUR_POINT_FREQUENCY" }
+  ]
+}

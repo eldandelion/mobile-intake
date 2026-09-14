@@ -1,0 +1,26 @@
+# Operating System
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+
+# Build & Dependencies - Frontend
+node_modules/
+dist/
+.vite/
+
+# Build & Dependencies - Backend
+target/
+*.class
+
+# SQLite Database & Storage
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Logs
+*.log
