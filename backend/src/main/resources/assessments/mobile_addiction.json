@@ -1,0 +1,14 @@
+{
+  "code": "mobile_addiction",
+  "title": "数字化行为评估 (手机成瘾)",
+  "subtitle": "手机成瘾量表",
+  "description": "请根据您的实际手机使用体验，选择最符合的同意程度。",
+  "questions": [
+    { "code": "mobile_addiction_1", "text": "手机是我生命里最重要的东西", "orderNum": 1, "optionGroupName": "MOBILE_ADDICTION_OPTIONS" },
+    { "code": "mobile_addiction_2", "text": "使用手机会使我和父母或家人之间出现冲突", "orderNum": 2, "optionGroupName": "MOBILE_ADDICTION_OPTIONS" },
+    { "code": "mobile_addiction_3", "text": "当我心情不好时，使用手机使我变得开心，可以暂时逃避或摆脱所面临的烦恼", "orderNum": 3, "optionGroupName": "MOBILE_ADDICTION_OPTIONS" },
+    { "code": "mobile_addiction_4", "text": "随着时间推移，我在手机上浪费了越来越多的时间", "orderNum": 4, "optionGroupName": "MOBILE_ADDICTION_OPTIONS" },
+    { "code": "mobile_addiction_5", "text": "在我想要时，如果我不能使用或接触手机，我觉得难过，喜怒无常，或急躁易怒", "orderNum": 5, "optionGroupName": "MOBILE_ADDICTION_OPTIONS" },
+    { "code": "mobile_addiction_6", "text": "当我试着减少使用手机的时间，我只能坚持一段时间，但最终我还是会像以前那样使用它，甚至使用的更多", "orderNum": 6, "optionGroupName": "MOBILE_ADDICTION_OPTIONS" }
+  ]
+}

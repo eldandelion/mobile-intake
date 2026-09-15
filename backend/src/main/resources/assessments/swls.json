@@ -1,0 +1,13 @@
+{
+  "code": "swls",
+  "title": "生活展望评估 (主观幸福感)",
+  "subtitle": "生活满意度量表",
+  "description": "请根据您对当前生活质量与状态的真实评价进行选择。",
+  "questions": [
+    { "code": "swls_1", "text": "我现在的生活大致符合我的期待", "orderNum": 1, "optionGroupName": "SWLS_OPTIONS" },
+    { "code": "swls_2", "text": "我的生活状态非常幸福", "orderNum": 2, "optionGroupName": "SWLS_OPTIONS" },
+    { "code": "swls_3", "text": "我能得到我想要的重要东西", "orderNum": 3, "optionGroupName": "SWLS_OPTIONS" },
+    { "code": "swls_4", "text": "我满意自己的生活", "orderNum": 4, "optionGroupName": "SWLS_OPTIONS" },
+    { "code": "swls_5", "text": "如果回到过去我也不想改变什么", "orderNum": 5, "optionGroupName": "SWLS_OPTIONS" }
+  ]
+}

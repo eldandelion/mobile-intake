@@ -1,0 +1,18 @@
+{
+  "code": "procrastination",
+  "title": "自律与自控评估 (拖延倾向)",
+  "subtitle": "拖延量表",
+  "description": "请根据以下拖延描述和您实际情况的相符程度进行选择，答案无好坏对错之分。",
+  "questions": [
+    { "code": "procrastination_1", "text": "我总是到拖得不能再拖时才做决定。", "orderNum": 1, "optionGroupName": "PROCRASTINATION_OPTIONS" },
+    { "code": "procrastination_2", "text": "即便我做好了决定，我仍迟迟不愿行动。", "orderNum": 2, "optionGroupName": "PROCRASTINATION_OPTIONS" },
+    { "code": "procrastination_3", "text": "我总是在琐事上花费很多时间才能做出最终决定。", "orderNum": 3, "optionGroupName": "PROCRASTINATION_OPTIONS" },
+    { "code": "procrastination_4", "text": "在截止日期之前，我经常浪费时间做其他的事情。", "orderNum": 4, "optionGroupName": "PROCRASTINATION_OPTIONS" },
+    { "code": "procrastination_5", "text": "即使这项任务只需要我坐下来去做就可以了，我也会推迟几天再做。", "orderNum": 5, "optionGroupName": "PROCRASTINATION_OPTIONS" },
+    { "code": "procrastination_6", "text": "我觉得我经常把今天的事情推到明天去干。", "orderNum": 6, "optionGroupName": "PROCRASTINATION_OPTIONS" },
+    { "code": "procrastination_7", "text": "我发现自己时间不够用了。", "orderNum": 7, "optionGroupName": "PROCRASTINATION_OPTIONS" },
+    { "code": "procrastination_8", "text": "我没按时完成课业或工作。", "orderNum": 8, "optionGroupName": "PROCRASTINATION_OPTIONS" },
+    { "code": "procrastination_9", "text": "我一般不能够在截止时间前完成必须做的事情。", "orderNum": 9, "optionGroupName": "PROCRASTINATION_OPTIONS" },
+    { "code": "procrastination_10", "text": "我曾经拖延工作，代价不菲。", "orderNum": 10, "optionGroupName": "PROCRASTINATION_OPTIONS" }
+  ]
+}

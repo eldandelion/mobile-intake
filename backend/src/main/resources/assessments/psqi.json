@@ -1,0 +1,26 @@
+{
+  "code": "psqi",
+  "title": "睡眠状况评估 (PSQI)",
+  "subtitle": "匹兹堡睡眠质量指数",
+  "description": "下面是一些有关睡眠的问题。请根据最近1个月的情况填写。",
+  "questions": [
+    { "code": "psqi_1", "text": "描述你当前(最近一个月)失眠问题的严重程度：入睡困难", "orderNum": 1, "optionGroupName": "SLEEP_SEVERITY" },
+    { "code": "psqi_2", "text": "描述你当前(最近一个月)失眠问题的严重程度：维持睡眠困难", "orderNum": 2, "optionGroupName": "SLEEP_SEVERITY" },
+    { "code": "psqi_3", "text": "描述你当前(最近一个月)失眠问题的严重程度：早醒", "orderNum": 3, "optionGroupName": "SLEEP_SEVERITY" },
+    {
+      "code": "psqi_4",
+      "text": "对自己当前睡眠情况的满意度",
+      "orderNum": 4,
+      "customOptions": [
+        { "value": 0, "label": "很满意" },
+        { "value": 1, "label": "满意" },
+        { "value": 2, "label": "一般" },
+        { "value": 3, "label": "不满意" },
+        { "value": 4, "label": "很不满意" }
+      ]
+    },
+    { "code": "psqi_5", "text": "睡眠问题在多大程度上影响了你的日间功能（如日间疲倦、情绪波动等）", "orderNum": 5, "optionGroupName": "SLEEP_SEVERITY" },
+    { "code": "psqi_6", "text": "你的睡眠问题在多大程度上引起了别人的注意或使他们担心", "orderNum": 6, "optionGroupName": "SLEEP_SEVERITY" },
+    { "code": "psqi_7", "text": "你对自己当前的睡眠问题有多担心/痛苦", "orderNum": 7, "optionGroupName": "SLEEP_SEVERITY" }
+  ]
+}

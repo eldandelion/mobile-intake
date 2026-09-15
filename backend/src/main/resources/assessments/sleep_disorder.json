@@ -1,0 +1,26 @@
+{
+  "code": "sleep_disorder",
+  "title": "睡眠状况评估",
+  "subtitle": "最近1个月的睡眠与失眠状况调查",
+  "description": "综合评估睡眠质量、入睡时间与睡眠障碍。",
+  "questions": [
+    { "code": "sleep_1", "text": "描述你当前(最近一个月)失眠问题的严重程度：入睡困难", "orderNum": 1, "optionGroupName": "SLEEP_SEVERITY" },
+    { "code": "sleep_2", "text": "描述你当前(最近一个月)失眠问题的严重程度：维持睡眠困难", "orderNum": 2, "optionGroupName": "SLEEP_SEVERITY" },
+    { "code": "sleep_3", "text": "描述你当前(最近一个月)失眠问题的严重程度：早醒", "orderNum": 3, "optionGroupName": "SLEEP_SEVERITY" },
+    {
+      "code": "sleep_4",
+      "text": "对自己当前睡眠情况的满意度",
+      "orderNum": 4,
+      "customOptions": [
+        { "value": 0, "label": "很不满意" },
+        { "value": 1, "label": "不满意" },
+        { "value": 2, "label": "一般" },
+        { "value": 3, "label": "满意" },
+        { "value": 4, "label": "很满意" }
+      ]
+    },
+    { "code": "sleep_5", "text": "你认为您的睡眠问题在多大程度上干扰了您的日间功能(如:日间疲劳、处理工作 and 日常事务的能力、注意力、记忆力、情绪等)？", "orderNum": 5, "optionGroupName": "SLEEP_SEVERITY" },
+    { "code": "sleep_6", "text": "与其他人相比，你的失眠问题对您的生活质量有多大程度的影响或损害？", "orderNum": 6, "optionGroupName": "SLEEP_SEVERITY" },
+    { "code": "sleep_7", "text": "你对自己当前睡眠问题有多大程度担忧或烦忧？", "orderNum": 7, "optionGroupName": "SLEEP_SEVERITY" }
+  ]
+}

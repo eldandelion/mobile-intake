@@ -1,0 +1,18 @@
+{
+  "code": "emotion_regulation",
+  "title": "情绪机制评估 (调节策略)",
+  "subtitle": "认知重评与表达抑制量表",
+  "description": "请根据您日常处理情绪时的真实表现，选择最相符的程度。",
+  "questions": [
+    { "code": "emotion_regulation_1", "text": "当我想让自己更快乐时，我改变些观念就能实现。", "orderNum": 1, "optionGroupName": "EMOTION_REGULATION_OPTIONS" },
+    { "code": "emotion_regulation_2", "text": "我会控制自己的情绪", "orderNum": 2, "optionGroupName": "EMOTION_REGULATION_OPTIONS" },
+    { "code": "emotion_regulation_3", "text": "当我想让自己少点消极情绪，我改变些想法就可实现", "orderNum": 3, "optionGroupName": "EMOTION_REGULATION_OPTIONS" },
+    { "code": "emotion_regulation_4", "text": "我高兴时，我会压抑自己不把这种情绪外显", "orderNum": 4, "optionGroupName": "EMOTION_REGULATION_OPTIONS" },
+    { "code": "emotion_regulation_5", "text": "面对压力，我会使用一些策略让自己保持冷静", "orderNum": 5, "optionGroupName": "EMOTION_REGULATION_OPTIONS" },
+    { "code": "emotion_regulation_6", "text": "我通常采用压抑的方式来控制自己的情绪", "orderNum": 6, "optionGroupName": "EMOTION_REGULATION_OPTIONS" },
+    { "code": "emotion_regulation_7", "text": "当想让情绪更积极，我会换种方式看待糟糕的处境", "orderNum": 7, "optionGroupName": "EMOTION_REGULATION_OPTIONS" },
+    { "code": "emotion_regulation_8", "text": "我会换种角度看待周边环境，以此达到控制情绪目的", "orderNum": 8, "optionGroupName": "EMOTION_REGULATION_OPTIONS" },
+    { "code": "emotion_regulation_9", "text": "当我体验到消极情绪时，我会压抑这种情绪表现出来", "orderNum": 9, "optionGroupName": "EMOTION_REGULATION_OPTIONS" },
+    { "code": "emotion_regulation_10", "text": "当想减少消极情绪，我会换种方式看待不利处境", "orderNum": 10, "optionGroupName": "EMOTION_REGULATION_OPTIONS" }
+  ]
+}

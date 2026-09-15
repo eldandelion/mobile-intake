@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets
 class CsvExportService(
     private val studentRepository: IntakeStudentRepository,
     private val submissionRepository: ScaleSubmissionRepository,
+    private val scaleCatalogService: ScaleCatalogService,
     private val objectMapper: ObjectMapper
 ) {
     // UTF-8 Byte Order Mark for Excel
@@ -120,9 +121,10 @@ class CsvExportService(
             }
 
             for ((qId, value) in answers) {
+                val canonicalScaleCode = scaleCatalogService.lookupScaleCodeForQuestion(qId) ?: sub.scaleCode
                 val row = listOf(
                     escapeCsv(sub.studentNumber),
-                    escapeCsv(sub.scaleCode),
+                    escapeCsv(canonicalScaleCode),
                     escapeCsv(qId),
                     escapeCsv(value.toString()),
                     escapeCsv(sub.completedAt.toString())

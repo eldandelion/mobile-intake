@@ -1,0 +1,96 @@
+{
+  "MENTAL_HEALTH_ASSESSMENT": {
+    "title": "年度身心健康状况综合评估",
+    "subtitle": "2025-2026 学年学生心理健康普查",
+    "description": "涵盖抑郁、焦虑及家庭教养方式的全方位综合身心健康评估。",
+    "duration": "15 分钟",
+    "questionnaires": [
+      "phq_9",
+      "gad_7",
+      "apq_9_father",
+      "apq_9_mother",
+      "scl_90"
+    ]
+  },
+  "SLEEP_ASSESSMENT": {
+    "title": "睡眠状况评估",
+    "subtitle": "最近1个月的睡眠与失眠状况调查",
+    "description": "综合评估睡眠质量、入睡时间与睡眠障碍。",
+    "duration": "10 分钟",
+    "questionnaires": [
+      "sleep_disorder",
+      "psqi"
+    ]
+  },
+  "DIGITAL_HABITS_DAILY_BEHAVIORS_ASSESSMENT": {
+    "title": "数字化行为与日常行为评估",
+    "subtitle": "日常习惯综合筛查",
+    "description": "评估手机使用、游戏依赖、拖延倾向及饮食习惯对日常生活的影响。",
+    "duration": "15 分钟",
+    "questionnaires": [
+      "mobile_addiction",
+      "game_addiction",
+      "procrastination",
+      "eating_habits"
+    ]
+  },
+  "SOCIAL_ENVIRONMENT_SUPPORT_ASSESSMENT": {
+    "title": "社交环境与支持系统评估",
+    "subtitle": "人际交往与社会支持度调查",
+    "description": "评估同伴关系、师生关系、孤独体验及可获得的社会支持网络。",
+    "duration": "10 分钟",
+    "questionnaires": [
+      "peer_relationship",
+      "teacher_relationship",
+      "loneliness",
+      "social_support"
+    ]
+  },
+  "SELF_REGULATION_PERSONALITY_ASSESSMENT": {
+    "title": "自我调节与自制力评估",
+    "subtitle": "行为控制与情绪调节特质测试",
+    "description": "评估冲动倾向、自我控制能力、坚毅品质及情绪调节策略。",
+    "duration": "15 分钟",
+    "questionnaires": [
+      "impulsivity",
+      "self_control",
+      "grit",
+      "emotion_regulation"
+    ]
+  },
+  "FAMILY_BACKGROUND_EARLY_EXPERIENCES_ASSESSMENT": {
+    "title": "家庭背景与早期经历评估",
+    "subtitle": "成长环境与逆境影响筛查",
+    "description": "调查重大生活事件、童年社会经济地位及早期可能存在的忽视与创伤经历。",
+    "duration": "20 分钟",
+    "questionnaires": [
+      "life_events",
+      "childhood_ses",
+      "childhood_trauma"
+    ]
+  },
+  "CLINICAL_SCREENING_NEURODIVERGENCE_ASSESSMENT": {
+    "title": "临床高危筛查与神经多样性评估",
+    "subtitle": "特殊心理特质与执行功能专项评估",
+    "description": "筛查非自杀性自伤行为、超高危精神症状、ADHD倾向及执行功能障碍。",
+    "duration": "25 分钟",
+    "questionnaires": [
+      "nssi",
+      "pq16",
+      "adhd",
+      "brief_a"
+    ]
+  },
+  "PERSONALITY_COPING_OUTLOOK_ASSESSMENT": {
+    "title": "人格特质、应对方式与生活展望评估",
+    "subtitle": "综合心理资源与应对机制测试",
+    "description": "评估情绪宣泄方式（攻击性）、压力应对策略、主观幸福感及大五人格特质。",
+    "duration": "20 分钟",
+    "questionnaires": [
+      "aggression",
+      "coping_styles",
+      "swls",
+      "big_five"
+    ]
+  }
+}

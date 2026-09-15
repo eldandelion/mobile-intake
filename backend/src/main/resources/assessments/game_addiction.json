@@ -1,0 +1,17 @@
+{
+  "code": "game_addiction",
+  "title": "数字化行为评估 (网络游戏)",
+  "subtitle": "网络游戏成瘾量表",
+  "description": "请根据您最近的网络游戏使用情况，客观地选择频率。",
+  "questions": [
+    { "code": "game_addiction_1", "text": "你是否觉得对网络游戏过于关注（如放学后还想着刚才网络游戏中的场景、或计划下次再去玩；你是否认为游戏已经成为你日常生活中的主要活动？）？", "orderNum": 1, "optionGroupName": "GAME_ADDICTION_OPTIONS" },
+    { "code": "game_addiction_2", "text": "你是否感觉需要不断增加网络游戏的时间才能得到满足？", "orderNum": 2, "optionGroupName": "GAME_ADDICTION_OPTIONS" },
+    { "code": "game_addiction_3", "text": "你是否曾多次试图控制、减少或停止玩网络游戏的次数或时间，但没有成功？", "orderNum": 3, "optionGroupName": "GAME_ADDICTION_OPTIONS" },
+    { "code": "game_addiction_4", "text": "当你试图减少或停止玩网络游戏时，你是否感到焦虑不安、沮丧或易激惹？", "orderNum": 4, "optionGroupName": "GAME_ADDICTION_OPTIONS" },
+    { "code": "game_addiction_5", "text": "你是否明知游戏会给你和其他人之间带来麻烦，却仍然继续玩游戏？", "orderNum": 5, "optionGroupName": "GAME_ADDICTION_OPTIONS" },
+    { "code": "game_addiction_6", "text": "你是否因为沉迷于游戏而对以前的爱好和其他娱乐活动失去了兴趣？", "orderNum": 6, "optionGroupName": "GAME_ADDICTION_OPTIONS" },
+    { "code": "game_addiction_7", "text": "你是否因为你的游戏活动过多而欺骗了你的家人、老师或其他大？", "orderNum": 7, "optionGroupName": "GAME_ADDICTION_OPTIONS" },
+    { "code": "game_addiction_8", "text": "你是否为了暂时逃避或缓解负面情绪（如无助、内疚、焦虑）而玩游戏？", "orderNum": 8, "optionGroupName": "GAME_ADDICTION_OPTIONS" },
+    { "code": "game_addiction_9", "text": "你是否因为你的游戏活动而危及或失去了一段重要的关系、教育或职业机会？", "orderNum": 9, "optionGroupName": "GAME_ADDICTION_OPTIONS" }
+  ]
+}

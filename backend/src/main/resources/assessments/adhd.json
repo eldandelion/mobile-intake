@@ -1,0 +1,27 @@
+{
+  "code": "adhd",
+  "title": "神经多样性评估 (执行力与注意力)",
+  "subtitle": "成人 ADHD 自我报告量表 (ASRS)",
+  "description": "请根据您在过去六个月中的真实感受与行为表现，在右侧选择最相符的频率。",
+  "questions": [
+    { "code": "adhd_1", "text": "当必须进行一件枯燥或困难的计划时，你会多常粗心犯错？", "orderNum": 1, "optionGroupName": "ADHD_OPTIONS" },
+    { "code": "adhd_2", "text": "当正在做枯燥或重复性的工作时，你多常有持续专注的困难？", "orderNum": 2, "optionGroupName": "ADHD_OPTIONS" },
+    { "code": "adhd_3", "text": "即使有人直接对你说话，你会多常有困难专注于别人跟你讲话的内容？", "orderNum": 3, "optionGroupName": "ADHD_OPTIONS" },
+    { "code": "adhd_4", "text": "一旦完成任何计划中最具挑战的部份之后，你多常有完成计划最后细节的困难？", "orderNum": 4, "optionGroupName": "ADHD_OPTIONS" },
+    { "code": "adhd_5", "text": "当必须从事需要有组织规划性的任务时，你会多常有困难并然有序地去做？", "orderNum": 5, "optionGroupName": "ADHD_OPTIONS" },
+    { "code": "adhd_6", "text": "当有一件需要多费心思考的工作时，你会多常逃避或是延后开始去做？", "orderNum": 6, "optionGroupName": "ADHD_OPTIONS" },
+    { "code": "adhd_7", "text": "在家里或是在工作时，你会多常没有把东西放对地方或是找不到东西？", "orderNum": 7, "optionGroupName": "ADHD_OPTIONS" },
+    { "code": "adhd_8", "text": "你会多常因身旁的活动或声音而分心？", "orderNum": 8, "optionGroupName": "ADHD_OPTIONS" },
+    { "code": "adhd_9", "text": "你会多常有问题去记得约会或是必须要做的事？", "orderNum": 9, "optionGroupName": "ADHD_OPTIONS" },
+    { "code": "adhd_10", "text": "当你必须长时间坐着时，你会多常坐不安稳或扭动手脚？", "orderNum": 10, "optionGroupName": "ADHD_OPTIONS" },
+    { "code": "adhd_11", "text": "你会多常在开会时或在其他被期待坐好的场合中离开座位？", "orderNum": 11, "optionGroupName": "ADHD_OPTIONS" },
+    { "code": "adhd_12", "text": "你会多常觉得静下来或烦躁不安？", "orderNum": 12, "optionGroupName": "ADHD_OPTIONS" },
+    { "code": "adhd_13", "text": "当有自己独处的时间时，你会多常觉得有困难使自己平静和放松？", "orderNum": 13, "optionGroupName": "ADHD_OPTIONS" },
+    { "code": "adhd_14", "text": "你会多常像被马达所驱动一样，觉得自己过度地活跃，不得不做事情？", "orderNum": 14, "optionGroupName": "ADHD_OPTIONS" },
+    { "code": "adhd_15", "text": "在社交场合中，你会多常发现自己话讲得太多？", "orderNum": 15, "optionGroupName": "ADHD_OPTIONS" },
+    { "code": "adhd_16", "text": "当与他人交谈时，你会多常在别人还没把话讲完前就插嘴或接话替对方把话讲完？", "orderNum": 16, "optionGroupName": "ADHD_OPTIONS" },
+    { "code": "adhd_17", "text": "在需要轮流排队的场合时，你会多常有困难轮流等待？", "orderNum": 17, "optionGroupName": "ADHD_OPTIONS" },
+    { "code": "adhd_18", "text": "你会多常在别人忙碌时打断别人？", "orderNum": 18, "optionGroupName": "ADHD_OPTIONS" },
+    { "code": "adhd_19", "text": "小时候老师或家长多常会说你容易走神/坐不住/太好动？", "orderNum": 19, "optionGroupName": "ADHD_OPTIONS" }
+  ]
+}

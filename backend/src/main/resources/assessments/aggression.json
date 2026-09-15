@@ -1,0 +1,21 @@
+{
+  "code": "aggression",
+  "title": "人格倾向评估 (情绪宣泄方式)",
+  "subtitle": "攻击量表",
+  "description": "下列是一些日常行为表现的描述，请仔细阅读每一条，然后尽可能根据自己的真实情况回答下列问题与你的符合程度。",
+  "questions": [
+    { "code": "aggression_1", "text": "当人们与我意见不和时，我会忍不住与他们争论", "orderNum": 1, "optionGroupName": "AGGRESSION_OPTIONS" },
+    { "code": "aggression_2", "text": "不知道为什么有时我会对一些事情感到如此痛苦", "orderNum": 2, "optionGroupName": "AGGRESSION_OPTIONS" },
+    { "code": "aggression_3", "text": "我曾威胁过我认识的人", "orderNum": 3, "optionGroupName": "AGGRESSION_OPTIONS" },
+    { "code": "aggression_4", "text": "如果受到足够的刺激，我可能会揍另一个来出气", "orderNum": 4, "optionGroupName": "AGGRESSION_OPTIONS" },
+    { "code": "aggression_5", "text": "有时候我觉得在生活中受到了不公平的待遇", "orderNum": 5, "optionGroupName": "AGGRESSION_OPTIONS" },
+    { "code": "aggression_6", "text": "我难于控制自己的脾气", "orderNum": 6, "optionGroupName": "AGGRESSION_OPTIONS" },
+    { "code": "aggression_7", "text": "我经常发现自己和人们意见不和", "orderNum": 7, "optionGroupName": "AGGRESSION_OPTIONS" },
+    { "code": "aggression_8", "text": "有时，我感觉自己像一个随时要爆炸的火药筒一样", "orderNum": 8, "optionGroupName": "AGGRESSION_OPTIONS" },
+    { "code": "aggression_9", "text": "别人似乎总能交好运", "orderNum": 9, "optionGroupName": "AGGRESSION_OPTIONS" },
+    { "code": "aggression_10", "text": "如果有人很用力推我，我们就会打起来", "orderNum": 10, "optionGroupName": "AGGRESSION_OPTIONS" },
+    { "code": "aggression_11", "text": "朋友们说我有点儿好与人争辩", "orderNum": 11, "optionGroupName": "AGGRESSION_OPTIONS" },
+    { "code": "aggression_12", "text": "有时我会无缘无故地发火", "orderNum": 12, "optionGroupName": "AGGRESSION_OPTIONS" },
+    { "code": "aggression_13", "text": "请在此题选择第一个选项", "orderNum": 13, "optionGroupName": "AGGRESSION_OPTIONS" }
+  ]
+}

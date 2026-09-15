@@ -1,0 +1,78 @@
+{
+  "code": "eating_habits",
+  "title": "日常生活评估 (饮食习惯)",
+  "subtitle": "饮食情况评估",
+  "description": "请根据您平常吃东西的实际情况，选择最适合的选项。",
+  "questions": [
+    { "code": "eating_habits_1", "text": "当我闻到或看到美味可口的食物，即使才刚吃完饭，我也很难克制自己不吃。", "orderNum": 1, "optionGroupName": "EATING_HABITS_OPTIONS_1" },
+    { "code": "eating_habits_2", "text": "我会刻意用取用小分量来控制体重。", "orderNum": 2, "optionGroupName": "EATING_HABITS_OPTIONS_1" },
+    { "code": "eating_habits_3", "text": "当我觉得焦虑不安时，我会吃东西。", "orderNum": 3, "optionGroupName": "EATING_HABITS_OPTIONS_1" },
+    { "code": "eating_habits_4", "text": "有时候，当我一开始吃就停不下来。", "orderNum": 4, "optionGroupName": "EATING_HABITS_OPTIONS_1" },
+    { "code": "eating_habits_5", "text": "和一个正在吃东西的人在一起时，会让我觉得饿也需要去吃东西。", "orderNum": 5, "optionGroupName": "EATING_HABITS_OPTIONS_1" },
+    { "code": "eating_habits_6", "text": "当我心情不好时，我常会吃得过多。", "orderNum": 6, "optionGroupName": "EATING_HABITS_OPTIONS_1" },
+    { "code": "eating_habits_7", "text": "当我看到好吃的东西时，常会感到很饿，所以必须立刻去吃掉它。", "orderNum": 7, "optionGroupName": "EATING_HABITS_OPTIONS_1" },
+    { "code": "eating_habits_8", "text": "我常会饿得要命，觉得自己的胃像无底洞。", "orderNum": 8, "optionGroupName": "EATING_HABITS_OPTIONS_1" },
+    { "code": "eating_habits_9", "text": "我总是感到饿，所以在桌上还有饭菜时就叫我停止吃是很困难的。", "orderNum": 9, "optionGroupName": "EATING_HABITS_OPTIONS_1" },
+    { "code": "eating_habits_10", "text": "当我感到寂寞时，我会以吃东西来安慰自己。", "orderNum": 10, "optionGroupName": "EATING_HABITS_OPTIONS_1" },
+    { "code": "eating_habits_11", "text": "为了不使体重增加，吃饭时我会刻意控制自己吃东西的量。", "orderNum": 11, "optionGroupName": "EATING_HABITS_OPTIONS_1" },
+    { "code": "eating_habits_12", "text": "我不吃会使我变胖的食物。", "orderNum": 12, "optionGroupName": "EATING_HABITS_OPTIONS_1" },
+    { "code": "eating_habits_13", "text": "我常饿到可以在任何时间吃东西。", "orderNum": 13, "optionGroupName": "EATING_HABITS_OPTIONS_1" },
+    {
+      "code": "eating_habits_14",
+      "text": "你常在何时感到饥饿？",
+      "orderNum": 14,
+      "customOptions": [
+        { "value": 1, "label": "只有在吃饭时间" },
+        { "value": 2, "label": "有时在两正餐之间" },
+        { "value": 3, "label": "常常在两正餐之间" },
+        { "value": 4, "label": "几乎随时" }
+      ]
+    },
+    {
+      "code": "eating_habits_15",
+      "text": "你会克制自己，不要吃过多好吃的东西吗？",
+      "orderNum": 15,
+      "customOptions": [
+        { "value": 1, "label": "几乎没有" },
+        { "value": 2, "label": "很少" },
+        { "value": 3, "label": "经常" },
+        { "value": 4, "label": "总是如此" }
+      ]
+    },
+    {
+      "code": "eating_habits_16",
+      "text": "有可能刻意限制自己吃东西的量吗？",
+      "orderNum": 16,
+      "customOptions": [
+        { "value": 1, "label": "不可能" },
+        { "value": 2, "label": "有点不可能" },
+        { "value": 3, "label": "可能" },
+        { "value": 4, "label": "非常可能" }
+      ]
+    },
+    {
+      "code": "eating_habits_17",
+      "text": "你曾在不饿时也拼命地大吃吗？",
+      "orderNum": 17,
+      "customOptions": [
+        { "value": 1, "label": "从未" },
+        { "value": 2, "label": "很少" },
+        { "value": 3, "label": "有时" },
+        { "value": 4, "label": "一周至少一次" }
+      ]
+    },
+    {
+      "code": "eating_habits_18",
+      "text": "请从以下选项中勾选出一个最符合你自己吃东西情况的描述：",
+      "orderNum": 18,
+      "customOptions": [
+        { "value": 0, "label": "你在想吃的时候，会去吃任何想吃的东西。" },
+        { "value": 1, "label": "你在想吃的时候，通常会去吃任何想吃的东西。" },
+        { "value": 2, "label": "你在想吃的时候，经常会去吃任何想吃的东西。" },
+        { "value": 3, "label": "你经常会限制自己吃东西的量，但也经常会放弃。" },
+        { "value": 4, "label": "你经常会限制自己吃东西的量，且很少会放弃。" },
+        { "value": 5, "label": "你持续地限制自己吃东西的量，且从未放弃。" }
+      ]
+    }
+  ]
+}

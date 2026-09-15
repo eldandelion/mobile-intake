@@ -1,0 +1,20 @@
+{
+  "code": "social_support",
+  "title": "支持系统评估 (社会支持)",
+  "subtitle": "社会支持量表",
+  "description": "下面的问题主要反映了您身边所能获得的支持，根据实际情况选择最相符的程度。",
+  "questions": [
+    { "code": "social_support_1", "text": "在我遇到问题时有些人（亲戚、老师、同学）会出现在我的身旁", "orderNum": 1, "optionGroupName": "SOCIAL_SUPPORT_OPTIONS" },
+    { "code": "social_support_2", "text": "我能够与有些人（亲戚、老师、同学）分享快乐与忧伤", "orderNum": 2, "optionGroupName": "SOCIAL_SUPPORT_OPTIONS" },
+    { "code": "social_support_3", "text": "我的家庭能够切实具体地给我帮助", "orderNum": 3, "optionGroupName": "SOCIAL_SUPPORT_OPTIONS" },
+    { "code": "social_support_4", "text": "我能够从家庭中获得感情上帮助和支持", "orderNum": 4, "optionGroupName": "SOCIAL_SUPPORT_OPTIONS" },
+    { "code": "social_support_5", "text": "当我有困难时有些人（亲戚、老师、同学）是安慰我的真正源泉", "orderNum": 5, "optionGroupName": "SOCIAL_SUPPORT_OPTIONS" },
+    { "code": "social_support_6", "text": "我的朋友们能真正的帮助我", "orderNum": 6, "optionGroupName": "SOCIAL_SUPPORT_OPTIONS" },
+    { "code": "social_support_7", "text": "在发生困难时我可以依靠我的朋友们", "orderNum": 7, "optionGroupName": "SOCIAL_SUPPORT_OPTIONS" },
+    { "code": "social_support_8", "text": "我能与自己的家庭谈论我的难题", "orderNum": 8, "optionGroupName": "SOCIAL_SUPPORT_OPTIONS" },
+    { "code": "social_support_9", "text": "我的朋友们能与我分享快乐与忧伤", "orderNum": 9, "optionGroupName": "SOCIAL_SUPPORT_OPTIONS" },
+    { "code": "social_support_10", "text": "有些人（老师同学）关心我情绪情感", "orderNum": 10, "optionGroupName": "SOCIAL_SUPPORT_OPTIONS" },
+    { "code": "social_support_11", "text": "我的家庭能协助我作出各种决定", "orderNum": 11, "optionGroupName": "SOCIAL_SUPPORT_OPTIONS" },
+    { "code": "social_support_12", "text": "我能与朋友们讨论自己的难题", "orderNum": 12, "optionGroupName": "SOCIAL_SUPPORT_OPTIONS" }
+  ]
+}

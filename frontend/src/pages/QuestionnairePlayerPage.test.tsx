@@ -324,4 +324,34 @@ describe('QuestionnairePlayerPage', () => {
     });
     expect(screen.getByText('第 2 / 2 题')).toBeDefined();
   });
+
+  it('displays sectionTitle badge when present on current question', async () => {
+    vi.spyOn(intakeApi, 'getScaleDetail').mockResolvedValue({
+      ...mockScaleDetail,
+      questions: [
+        {
+          ...mockScaleDetail.questions[0],
+          sectionCode: 'phq_9',
+          sectionTitle: 'PHQ-9 抑郁症筛查',
+        },
+      ],
+    });
+
+    render(
+      <QuestionnairePlayerPage
+        scaleCode="phq_9"
+        studentNumber="2026001"
+        onClose={vi.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('开始作答')).toBeDefined();
+    });
+    fireEvent.click(screen.getByText('开始作答'));
+
+    await waitFor(() => {
+      expect(screen.getByText('PHQ-9 抑郁症筛查')).toBeDefined();
+    });
+  });
 });

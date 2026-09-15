@@ -1,0 +1,16 @@
+{
+  "code": "coping_styles",
+  "title": "压力应对评估 (心理防卫机制)",
+  "subtitle": "应对方式量表",
+  "description": "以下列出的是当你在生活中收到挫折打击，或遇到困难时可能采取的态度和做法。请你仔细阅读每一项，选择最适合你的选项。",
+  "questions": [
+    { "code": "coping_styles_1", "text": "试图休息或放假，暂时把问题(烦恼)抛开", "orderNum": 1, "optionGroupName": "COPING_OPTIONS" },
+    { "code": "coping_styles_2", "text": "通过吸烟、喝酒、服药和吃东西来解除烦恼", "orderNum": 2, "optionGroupName": "COPING_OPTIONS" },
+    { "code": "coping_styles_3", "text": "认为时间会改变现状，唯一要做的是等待", "orderNum": 3, "optionGroupName": "COPING_OPTIONS" },
+    { "code": "coping_styles_4", "text": "试图忘记整个事情", "orderNum": 4, "optionGroupName": "COPING_OPTIONS" },
+    { "code": "coping_styles_5", "text": "依靠别人解决问题", "orderNum": 5, "optionGroupName": "COPING_OPTIONS" },
+    { "code": "coping_styles_6", "text": "接受现实，因为没有其它办法", "orderNum": 6, "optionGroupName": "COPING_OPTIONS" },
+    { "code": "coping_styles_7", "text": "幻想可能会发生某种奇迹改变现状", "orderNum": 7, "optionGroupName": "COPING_OPTIONS" },
+    { "code": "coping_styles_8", "text": "自己安慰自己", "orderNum": 8, "optionGroupName": "COPING_OPTIONS" }
+  ]
+}

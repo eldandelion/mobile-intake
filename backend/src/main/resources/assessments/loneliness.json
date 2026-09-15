@@ -1,0 +1,16 @@
+{
+  "code": "loneliness",
+  "title": "心理感受评估 (孤独体验)",
+  "subtitle": "孤独感量表",
+  "description": "请根据您近期在人际交往中的主观感受，选择最符合的频率。",
+  "questions": [
+    { "code": "loneliness_1", "text": "我感到自己缺少伙伴", "orderNum": 1, "optionGroupName": "LONELINESS_OPTIONS" },
+    { "code": "loneliness_2", "text": "当当我遇到困难时，周围没有人能帮助我", "orderNum": 2, "optionGroupName": "LONELINESS_OPTIONS" },
+    { "code": "loneliness_3", "text": "我是一个好相处的人", "orderNum": 3, "optionGroupName": "LONELINESS_OPTIONS" },
+    { "code": "loneliness_4", "text": "我感到被人忽视", "orderNum": 4, "optionGroupName": "LONELINESS_OPTIONS" },
+    { "code": "loneliness_5", "text": "我觉得自己与别人(同学、朋友)的关系不亲密", "orderNum": 5, "optionGroupName": "LONELINESS_OPTIONS" },
+    { "code": "loneliness_6", "text": "当当我愿意时就能找到伙伴", "orderNum": 6, "optionGroupName": "LONELINESS_OPTIONS" },
+    { "code": "loneliness_7", "text": "对于自己的离群（或孤独），我是不开心的", "orderNum": 7, "optionGroupName": "LONELINESS_OPTIONS" },
+    { "code": "loneliness_8", "text": "我感觉我周围的人不关心我", "orderNum": 8, "optionGroupName": "LONELINESS_OPTIONS" }
+  ]
+}

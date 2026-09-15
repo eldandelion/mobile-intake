@@ -1,0 +1,14 @@
+{
+  "code": "peer_relationship",
+  "title": "社交环境评估 (同伴关系)",
+  "subtitle": "同伴关系量表",
+  "description": "下面描述的是您日常生活中与人交往的情况，请按照实际情况回答。",
+  "questions": [
+    { "code": "peer_relationship_1", "text": "同学们都不喜欢我", "orderNum": 1, "optionGroupName": "PEER_RELATIONSHIP_OPTIONS" },
+    { "code": "peer_relationship_2", "text": "在学校里，我很孤单", "orderNum": 2, "optionGroupName": "PEER_RELATIONSHIP_OPTIONS" },
+    { "code": "peer_relationship_3", "text": "许多同学和我有矛盾", "orderNum": 3, "optionGroupName": "PEER_RELATIONSHIP_OPTIONS" },
+    { "code": "peer_relationship_4", "text": "学校里，没有同学和我一起玩", "orderNum": 4, "optionGroupName": "PEER_RELATIONSHIP_OPTIONS" },
+    { "code": "peer_relationship_5", "text": "在班上，我没有朋友可以交谈", "orderNum": 5, "optionGroupName": "PEER_RELATIONSHIP_OPTIONS" },
+    { "code": "peer_relationship_6", "text": "同学们对我不好", "orderNum": 6, "optionGroupName": "PEER_RELATIONSHIP_OPTIONS" }
+  ]
+}

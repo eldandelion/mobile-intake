@@ -1,0 +1,26 @@
+{
+  "code": "brief_a",
+  "title": "神经多样性评估 (执行功能障碍)",
+  "subtitle": "行为评定量表 (Brief-A)",
+  "description": "请使用三个等级来评价以下描述和您实际情况的相符程度，答案无好坏对错之分。",
+  "questions": [
+    { "code": "brief_a_1", "text": "我难以集中精力做事情（例如家务阅读或者工作）", "orderNum": 1, "optionGroupName": "BRIEF_A_OPTIONS" },
+    { "code": "brief_a_2", "text": "我难以完成包含多个步骤的工作或任务", "orderNum": 2, "optionGroupName": "BRIEF_A_OPTIONS" },
+    { "code": "brief_a_3", "text": "我做事中途忘记自己在干什么", "orderNum": 3, "optionGroupName": "BRIEF_A_OPTIONS" },
+    { "code": "brief_a_4", "text": "我交谈时难以保持在同一话题", "orderNum": 4, "optionGroupName": "BRIEF_A_OPTIONS" },
+    { "code": "brief_a_5", "text": "我注意力持续时间短", "orderNum": 5, "optionGroupName": "BRIEF_A_OPTIONS" },
+    { "code": "brief_a_6", "text": "我容易忘记指示", "orderNum": 6, "optionGroupName": "BRIEF_A_OPTIONS" },
+    { "code": "brief_a_7", "text": "即使只隔几分钟我也难以记住（方位，电话号码）之类的事情", "orderNum": 7, "optionGroupName": "BRIEF_A_OPTIONS" },
+    { "code": "brief_a_8", "text": "我难以同时做两件事情", "orderNum": 8, "optionGroupName": "BRIEF_A_OPTIONS" },
+    { "code": "brief_a_9", "text": "我承受不了大任务", "orderNum": 9, "optionGroupName": "BRIEF_A_OPTIONS" },
+    { "code": "brief_a_10", "text": "我难以区分活动的优先次序", "orderNum": 10, "optionGroupName": "BRIEF_A_OPTIONS" },
+    { "code": "brief_a_11", "text": "我没准备好恰当的材料就开始做事，如做饭，实施一项计划等", "orderNum": 11, "optionGroupName": "BRIEF_A_OPTIONS" },
+    { "code": "brief_a_12", "text": "我不为未来活动提前做计划", "orderNum": 12, "optionGroupName": "BRIEF_A_OPTIONS" },
+    { "code": "brief_a_13", "text": "我有不现实的计划", "orderNum": 13, "optionGroupName": "BRIEF_A_OPTIONS" },
+    { "code": "brief_a_14", "text": "我有好的想法但是难以使之成文", "orderNum": 14, "optionGroupName": "BRIEF_A_OPTIONS" },
+    { "code": "brief_a_15", "text": "我难以独自完成任务", "orderNum": 15, "optionGroupName": "BRIEF_A_OPTIONS" },
+    { "code": "brief_a_16", "text": "我不提前为需要完成的任务做计划", "orderNum": 16, "optionGroupName": "BRIEF_A_OPTIONS" },
+    { "code": "brief_a_17", "text": "我难以组织活动", "orderNum": 17, "optionGroupName": "BRIEF_A_OPTIONS" },
+    { "code": "brief_a_18", "text": "我难以组织工作", "orderNum": 18, "optionGroupName": "BRIEF_A_OPTIONS" }
+  ]
+}

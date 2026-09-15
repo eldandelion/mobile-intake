@@ -1,0 +1,12 @@
+{
+  "code": "childhood_ses",
+  "title": "早期经历与背景评估 (经济地位)",
+  "subtitle": "童年社会经济地位量表",
+  "description": "请根据您对童年成长时期家庭经济及社会层级的真实感受进行选择。",
+  "questions": [
+    { "code": "childhood_ses_1", "text": "我童年时家庭有足够的钱来满足各种需求", "orderNum": 1, "optionGroupName": "CHILDHOOD_SES_OPTIONS" },
+    { "code": "childhood_ses_2", "text": "我童年时，父母在当地有较高的社会地位", "orderNum": 2, "optionGroupName": "CHILDHOOD_SES_OPTIONS" },
+    { "code": "childhood_ses_3", "text": "相比于童年的伙伴，我的生活更加富足", "orderNum": 3, "optionGroupName": "CHILDHOOD_SES_OPTIONS" },
+    { "code": "childhood_ses_4", "text": "我成长在一个富足稳定的小区环境", "orderNum": 4, "optionGroupName": "CHILDHOOD_SES_OPTIONS" }
+  ]
+}

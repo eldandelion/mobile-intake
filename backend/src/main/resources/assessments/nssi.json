@@ -1,0 +1,13 @@
+{
+  "code": "nssi",
+  "title": "高危筛查评估 (非自杀性自伤行为)",
+  "subtitle": "自伤量表",
+  "description": "请您选择在过去的一年内出现以下行为的次数。选择最适合的选项。",
+  "questions": [
+    { "code": "nssi_1", "text": "刻意用刀划自己", "orderNum": 1, "optionGroupName": "NSSI_OPTIONS" },
+    { "code": "nssi_2", "text": "刻意用力咬自己", "orderNum": 2, "optionGroupName": "NSSI_OPTIONS" },
+    { "code": "nssi_3", "text": "刻意用力抓破皮肤", "orderNum": 3, "optionGroupName": "NSSI_OPTIONS" },
+    { "code": "nssi_4", "text": "刻意将物体刺入指甲或皮肤", "orderNum": 4, "optionGroupName": "NSSI_OPTIONS" },
+    { "code": "nssi_5", "text": "刻意用拳头猛打自己", "orderNum": 5, "optionGroupName": "NSSI_OPTIONS" }
+  ]
+}

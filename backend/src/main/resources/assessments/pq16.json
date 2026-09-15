@@ -1,0 +1,24 @@
+{
+  "code": "pq16",
+  "title": "临床筛查评估 (感知与思维模式)",
+  "subtitle": "超高危筛查量表",
+  "description": "在过去的一个月内，您的想法、情感或体验是否存在以下情况？（注：请勿将使用酒精或药物后的反应计算在内，若回答“是”，请评定其带来的痛苦程度）。",
+  "questions": [
+    { "code": "pq16_1", "text": "我对喜欢的事情不再有兴趣。", "orderNum": 1, "optionGroupName": "PQ16_OPTIONS" },
+    { "code": "pq16_2", "text": "我经常经历一些似曾发生过的事情。", "orderNum": 2, "optionGroupName": "PQ16_OPTIONS" },
+    { "code": "pq16_3", "text": "我有时可以闻到别人闻不到的气味，或尝到别人尝不到的味道。", "orderNum": 3, "optionGroupName": "PQ16_OPTIONS" },
+    { "code": "pq16_4", "text": "我耳朵里经常出现一些不寻常的声音，如撞击声、破裂声、嘶嘶声、拍打声、铃声等。", "orderNum": 4, "optionGroupName": "PQ16_OPTIONS" },
+    { "code": "pq16_5", "text": "我有时会对自己经历的事情是真实的还是想象的感到困惑。", "orderNum": 5, "optionGroupName": "PQ16_OPTIONS" },
+    { "code": "pq16_6", "text": "当我注视他们或者镜子中的自己时，会发现面部在发生变化。", "orderNum": 6, "optionGroupName": "PQ16_OPTIONS" },
+    { "code": "pq16_7", "text": "我与人首次见面时会非常不安。", "orderNum": 7, "optionGroupName": "PQ16_OPTIONS" },
+    { "code": "pq16_8", "text": "我曾看到过别人无法看到的事物。", "orderNum": 8, "optionGroupName": "PQ16_OPTIONS" },
+    { "code": "pq16_9", "text": "我的想法有时很强烈以至于我几乎都能听到。", "orderNum": 9, "optionGroupName": "PQ16_OPTIONS" },
+    { "code": "pq16_10", "text": "我有时能从广告、商店橱窗或者周围事物的排列方式中发现特别的意义。", "orderNum": 10, "optionGroupName": "PQ16_OPTIONS" },
+    { "code": "pq16_11", "text": "有时我觉得无法控制自己的思维或想法。", "orderNum": 11, "optionGroupName": "PQ16_OPTIONS" },
+    { "code": "pq16_12", "text": "有时我会突然被远处一些平时没意识到的声音弄得分心。", "orderNum": 12, "optionGroupName": "PQ16_OPTIONS" },
+    { "code": "pq16_13", "text": "我曾听到别人无法听到的声音，诸如窃窃私语或谈话声。", "orderNum": 13, "optionGroupName": "PQ16_OPTIONS" },
+    { "code": "pq16_14", "text": "我经常感到别人在针对我。", "orderNum": 14, "optionGroupName": "PQ16_OPTIONS" },
+    { "code": "pq16_15", "text": "我曾感到过有人或某种力量在我周围，虽然我看不见。", "orderNum": 15, "optionGroupName": "PQ16_OPTIONS" },
+    { "code": "pq16_16", "text": "我感到身体的某些部位以某种方式发生了变化，或某些部位的功能与以往不同。", "orderNum": 16, "optionGroupName": "PQ16_OPTIONS" }
+  ]
+}

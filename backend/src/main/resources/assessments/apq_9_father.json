@@ -1,0 +1,17 @@
+{
+  "code": "apq_9_father",
+  "title": "教养行为评估 (父亲篇)",
+  "subtitle": "APQ-9 父亲",
+  "description": "此问卷是关于您的父亲对您的教养方式，请实事求是地回答。",
+  "questions": [
+    { "code": "apq9_f_1", "text": "当我很好地完成一项任务时，父亲会告诉我：“你做的很棒（或其他肯定的话）！”", "orderNum": 1, "optionGroupName": "APQ_OPTIONS" },
+    { "code": "apq9_f_2", "text": "父亲会威胁要惩罚我，但是事实上并没有那么做", "orderNum": 2, "optionGroupName": "APQ_OPTIONS" },
+    { "code": "apq9_f_3", "text": "我没有让父亲知道我将要去哪里", "orderNum": 3, "optionGroupName": "APQ_OPTIONS" },
+    { "code": "apq9_f_4", "text": "做了错事后，我会和父亲理论以避免受到惩罚", "orderNum": 4, "optionGroupName": "APQ_OPTIONS" },
+    { "code": "apq9_f_5", "text": "在晚上，过了规定的时间我仍然逗留在外", "orderNum": 5, "optionGroupName": "APQ_OPTIONS" },
+    { "code": "apq9_f_6", "text": "当我做得好时父亲会称赞我", "orderNum": 6, "optionGroupName": "APQ_OPTIONS" },
+    { "code": "apq9_f_7", "text": "如果我表现好父亲会表扬我", "orderNum": 7, "optionGroupName": "APQ_OPTIONS" },
+    { "code": "apq9_f_8", "text": "父亲不知道我和谁一起出去玩耍", "orderNum": 8, "optionGroupName": "APQ_OPTIONS" },
+    { "code": "apq9_f_9", "text": "父亲会提前结束对我的惩罚（如惩罚结束的时间比之前说得更早）", "orderNum": 9, "optionGroupName": "APQ_OPTIONS" }
+  ]
+}

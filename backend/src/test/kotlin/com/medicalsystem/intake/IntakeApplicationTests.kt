@@ -140,34 +140,47 @@ class IntakeApplicationTests {
             .andReturn()
 
         val scaleSummaries = objectMapper.readTree(listResult.response.contentAsString)
-        assertTrue(scaleSummaries.size() >= 4)
-        val phqSummary = scaleSummaries.first { it.get("code").asText() == "phq_9" }
-        assertEquals("NOT_STARTED", phqSummary.get("status").asText())
+        assertEquals(9, scaleSummaries.size())
+        val demoSummary = scaleSummaries.get(0)
+        assertEquals("demographics_survey", demoSummary.get("code").asText())
+        assertEquals("NOT_STARTED", demoSummary.get("status").asText())
 
-        // 5. Fetch Scale Details for PHQ-9
+        val sleepSummary = scaleSummaries.first { it.get("code").asText() == "SLEEP_ASSESSMENT" }
+        assertEquals("NOT_STARTED", sleepSummary.get("status").asText())
+        assertEquals(14, sleepSummary.get("questionCount").asInt())
+
+        // 5. Fetch Scale Details for SLEEP_ASSESSMENT
         mockMvc.perform(
-            get("/api/scales/phq_9")
+            get("/api/scales/SLEEP_ASSESSMENT")
                 .header("Authorization", "Bearer $token")
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.code").value("phq_9"))
+            .andExpect(jsonPath("$.code").value("SLEEP_ASSESSMENT"))
             .andExpect(jsonPath("$.questions").isArray)
-            .andExpect(jsonPath("$.questions.length()").value(9))
+            .andExpect(jsonPath("$.questions.length()").value(14))
+            .andExpect(jsonPath("$.sections.length()").value(2))
+            .andExpect(jsonPath("$.sections[0].code").value("sleep_disorder"))
+            .andExpect(jsonPath("$.sections[1].code").value("psqi"))
 
         // 5.5 Submit with out-of-bounds option value -> 400 Bad Request
         val invalidOptionAnswers = mapOf(
-            "phq9_1" to 999,
-            "phq9_2" to 0,
-            "phq9_3" to 2,
-            "phq9_4" to 1,
-            "phq9_5" to 0,
-            "phq9_6" to 1,
-            "phq9_7" to 0,
-            "phq9_8" to 0,
-            "phq9_9" to 0
+            "sleep_1" to 999,
+            "sleep_2" to 0,
+            "sleep_3" to 0,
+            "sleep_4" to 2,
+            "sleep_5" to 0,
+            "sleep_6" to 1,
+            "sleep_7" to 0,
+            "psqi_1" to 0,
+            "psqi_2" to 1,
+            "psqi_3" to 0,
+            "psqi_4" to 2,
+            "psqi_5" to 0,
+            "psqi_6" to 1,
+            "psqi_7" to 0
         )
         mockMvc.perform(
-            post("/api/scales/phq_9/submit")
+            post("/api/scales/SLEEP_ASSESSMENT/submit")
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(SubmitScaleRequest(invalidOptionAnswers)))
@@ -175,51 +188,78 @@ class IntakeApplicationTests {
             .andExpect(status().isBadRequest)
 
         // 5.6 Submit with missing question -> 400 Bad Request
-        val missingAnswers = mapOf("phq9_1" to 1)
+        val missingAnswers = mapOf("sleep_1" to 1)
         mockMvc.perform(
-            post("/api/scales/phq_9/submit")
+            post("/api/scales/SLEEP_ASSESSMENT/submit")
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(SubmitScaleRequest(missingAnswers)))
         )
             .andExpect(status().isBadRequest)
 
-        // 6. Submit PHQ-9 Scale (Valid)
-        val phqAnswers = mapOf(
-            "phq9_1" to 1,
-            "phq9_2" to 0,
-            "phq9_3" to 2,
-            "phq9_4" to 1,
-            "phq9_5" to 0,
-            "phq9_6" to 1,
-            "phq9_7" to 0,
-            "phq9_8" to 0,
-            "phq9_9" to 0
+        // 6. Submit SLEEP_ASSESSMENT Battery (Valid 14 questions across 2 sections)
+        val sleepAnswers = mapOf(
+            "sleep_1" to 0,
+            "sleep_2" to 1,
+            "sleep_3" to 0,
+            "sleep_4" to 2,
+            "sleep_5" to 0,
+            "sleep_6" to 1,
+            "sleep_7" to 0,
+            "psqi_1" to 0,
+            "psqi_2" to 1,
+            "psqi_3" to 0,
+            "psqi_4" to 2,
+            "psqi_5" to 0,
+            "psqi_6" to 1,
+            "psqi_7" to 0
         )
         mockMvc.perform(
-            post("/api/scales/phq_9/submit")
+            post("/api/scales/SLEEP_ASSESSMENT/submit")
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(SubmitScaleRequest(phqAnswers)))
+                .content(objectMapper.writeValueAsString(SubmitScaleRequest(sleepAnswers)))
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.scaleCode").value("phq_9"))
+            .andExpect(jsonPath("$.scaleCode").value("SLEEP_ASSESSMENT"))
             .andExpect(jsonPath("$.status").value("COMPLETED"))
 
-        // 7. Verify status is now COMPLETED
+        // 6.1 Submit demographics_survey
+        val demoAnswers = mapOf(
+            "demo_gender" to 1,
+            "demo_ethnicity" to 1,
+            "demo_id_card" to "110101200001011234",
+            "demo_major" to "计算机学院 软件工程",
+            "demo_email" to "$studentNumber@univ.edu.cn",
+            "demo_home_address" to "北京市海淀区",
+            "demo_emergency_contact" to "张父",
+            "demo_emergency_phone" to "13900002222"
+        )
+        mockMvc.perform(
+            post("/api/scales/demographics_survey/submit")
+                .header("Authorization", "Bearer $token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(SubmitScaleRequest(demoAnswers)))
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.scaleCode").value("demographics_survey"))
+            .andExpect(jsonPath("$.status").value("COMPLETED"))
+
+        // 7. Verify statuses are now COMPLETED
         mockMvc.perform(
             get("/api/scales")
                 .header("Authorization", "Bearer $token")
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$[?(@.code == 'phq_9')].status").value("COMPLETED"))
+            .andExpect(jsonPath("$[?(@.code == 'SLEEP_ASSESSMENT')].status").value("COMPLETED"))
+            .andExpect(jsonPath("$[?(@.code == 'demographics_survey')].status").value("COMPLETED"))
 
         // 8. Resubmitting should return 409 Conflict (Locked)
         mockMvc.perform(
-            post("/api/scales/phq_9/submit")
+            post("/api/scales/SLEEP_ASSESSMENT/submit")
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(SubmitScaleRequest(phqAnswers)))
+                .content(objectMapper.writeValueAsString(SubmitScaleRequest(sleepAnswers)))
         )
             .andExpect(status().isConflict)
 
@@ -247,8 +287,9 @@ class IntakeApplicationTests {
         assertTrue(csvString.contains("学号,姓名,专业"))
         assertTrue(csvString.contains(studentNumber))
         assertTrue(csvString.contains("张三丰"))
+        assertTrue(csvString.contains("计算机学院 软件工程"))
 
-        // 11. Admin Assessment CSV Export
+        // 11. Admin Assessment CSV Export with canonical instrument codes (ACL bridge)
         val assessCsvResult = mockMvc.perform(
             get("/api/admin/export/assessments.csv")
                 .header("X-Admin-Secret", adminSecret)
@@ -259,7 +300,12 @@ class IntakeApplicationTests {
         val assessCsvString = String(assessCsvResult.response.contentAsByteArray, Charsets.UTF_8)
         assertTrue(assessCsvString.contains("student_number,scale_code,question_id,selected_value,completed_at"))
         assertTrue(assessCsvString.contains(studentNumber))
-        assertTrue(assessCsvString.contains("phq_9"))
-        assertTrue(assessCsvString.contains("phq9_1,1"))
+        // Verify ACL resolves question to canonical scale codes sleep_disorder and psqi
+        assertTrue(assessCsvString.contains("sleep_disorder,sleep_1,0"))
+        assertTrue(assessCsvString.contains("psqi,psqi_1,0"))
+        // And demographics_survey questions
+        assertTrue(assessCsvString.contains("demographics_survey,demo_gender,1"))
+        // Must NOT output the composite battery code SLEEP_ASSESSMENT in scale_code column
+        assertFalse(assessCsvString.contains("SLEEP_ASSESSMENT"))
     }
 }

@@ -53,6 +53,15 @@ export interface ScaleQuestion {
   type: string; // 'single_choice' | 'text' | 'select'
   placeholder?: string;
   options: ScaleOption[];
+  sectionCode?: string;
+  sectionTitle?: string;
+}
+
+export interface BatterySection {
+  code: string;
+  title: string;
+  questionCount: number;
+  orderNum: number;
 }
 
 export interface ScaleIntroItem {
@@ -70,6 +79,7 @@ export interface ScaleDetail {
   instructions?: string;
   introItems?: ScaleIntroItem[];
   questions: ScaleQuestion[];
+  sections?: BatterySection[];
 }
 
 export interface SubmitScaleResponse {

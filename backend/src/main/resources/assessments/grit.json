@@ -1,0 +1,16 @@
+{
+  "code": "grit",
+  "title": "意志毅力评估 (坚毅品质)",
+  "subtitle": "坚毅量表",
+  "description": "请根据您对以下描述的相符程度，选择最符合您的实际选项。",
+  "questions": [
+    { "code": "grit_1", "text": "新的计划和想法有时候会让我想无法专心于现有的计划。", "orderNum": 1, "optionGroupName": "GRIT_OPTIONS" },
+    { "code": "grit_2", "text": "挫折不会使我气馁。", "orderNum": 2, "optionGroupName": "GRIT_OPTIONS" },
+    { "code": "grit_3", "text": "当我着迷于某件计划一阵子后，会失去兴趣。", "orderNum": 3, "optionGroupName": "GRIT_OPTIONS" },
+    { "code": "grit_4", "text": "我是个努力工作的人。", "orderNum": 4, "optionGroupName": "GRIT_OPTIONS" },
+    { "code": "grit_5", "text": "我时常立下一个目标，但一阵子过后又改追求别的目标。", "orderNum": 5, "optionGroupName": "GRIT_OPTIONS" },
+    { "code": "grit_6", "text": "我很难把我的注意力集中在一个要好几个月才能完成的计划上。", "orderNum": 6, "optionGroupName": "GRIT_OPTIONS" },
+    { "code": "grit_7", "text": "无论什么事情，我开了头就要完成它。", "orderNum": 7, "optionGroupName": "GRIT_OPTIONS" },
+    { "code": "grit_8", "text": "我很勤劳（我不轻言放弃）。", "orderNum": 8, "optionGroupName": "GRIT_OPTIONS" }
+  ]
+}

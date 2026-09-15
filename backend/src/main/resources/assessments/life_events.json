@@ -1,0 +1,20 @@
+{
+  "code": "life_events",
+  "title": "家庭背景与环境评估 (生活事件)",
+  "subtitle": "一般生活事件量表",
+  "description": "下面想了解一下过去任何时候你经历过且近 12 个月内对你心理有不良影响的生活事件。若发生过，请填写对你心理不良影响的影响程度。",
+  "questions": [
+    { "code": "life_events_1", "text": "夫妻或恋人间发生矛盾", "orderNum": 1, "optionGroupName": "LIFE_EVENTS_OPTIONS" },
+    { "code": "life_events_2", "text": "与生育有关的问题(流产、不孕不育等)", "orderNum": 2, "optionGroupName": "LIFE_EVENTS_OPTIONS" },
+    { "code": "life_events_3", "text": "恋爱或结婚问题（失恋、离婚等）", "orderNum": 3, "optionGroupName": "LIFE_EVENTS_OPTIONS" },
+    { "code": "life_events_4", "text": "与家庭其他成员发生矛盾", "orderNum": 4, "optionGroupName": "LIFE_EVENTS_OPTIONS" },
+    { "code": "life_events_5", "text": "与其他人发生矛盾", "orderNum": 5, "optionGroupName": "LIFE_EVENTS_OPTIONS" },
+    { "code": "life_events_6", "text": "家庭其他成员间发生矛盾", "orderNum": 6, "optionGroupName": "LIFE_EVENTS_OPTIONS" },
+    { "code": "life_events_7", "text": "患急、重病或外伤", "orderNum": 7, "optionGroupName": "LIFE_EVENTS_OPTIONS" },
+    { "code": "life_events_8", "text": "经济问题", "orderNum": 8, "optionGroupName": "LIFE_EVENTS_OPTIONS" },
+    { "code": "life_events_9", "text": "工作或学习问题", "orderNum": 9, "optionGroupName": "LIFE_EVENTS_OPTIONS" },
+    { "code": "life_events_10", "text": "亲友患重病或去世", "orderNum": 10, "optionGroupName": "LIFE_EVENTS_OPTIONS" },
+    { "code": "life_events_11", "text": "被虐待", "orderNum": 11, "optionGroupName": "LIFE_EVENTS_OPTIONS" },
+    { "code": "life_events_12", "text": "其它负性生活事件", "orderNum": 12, "optionGroupName": "LIFE_EVENTS_OPTIONS" }
+  ]
+}

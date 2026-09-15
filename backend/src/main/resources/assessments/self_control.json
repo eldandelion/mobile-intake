@@ -1,0 +1,15 @@
+{
+  "code": "self_control",
+  "title": "自我管理评估 (自制力状况)",
+  "subtitle": "自我控制量表",
+  "description": "下列是一些日常行为表现的描述，请仔细阅读每一条，然后尽可能根据自己的真实情况回答下列问题与你的符合程度。",
+  "questions": [
+    { "code": "self_control_1", "text": "我能很好地抵抗诱惑", "orderNum": 1, "optionGroupName": "SELF_CONTROL_OPTIONS" },
+    { "code": "self_control_2", "text": "大家说我有钢铁般的自制力", "orderNum": 2, "optionGroupName": "SELF_CONTROL_OPTIONS" },
+    { "code": "self_control_3", "text": "我能为了一个长远目标高效地工作", "orderNum": 3, "optionGroupName": "SELF_CONTROL_OPTIONS" },
+    { "code": "self_control_4", "text": "我会做一些能给自己带来快乐但对自己有害的事", "orderNum": 4, "optionGroupName": "SELF_CONTROL_OPTIONS" },
+    { "code": "self_control_5", "text": "有时我会被有趣的事情干扰而不能按时完成任务", "orderNum": 5, "optionGroupName": "SELF_CONTROL_OPTIONS" },
+    { "code": "self_control_6", "text": "有时我会忍不住去做一些明明知道不对的事情", "orderNum": 6, "optionGroupName": "SELF_CONTROL_OPTIONS" },
+    { "code": "self_control_7", "text": "我常常考虑不周就付诸行动", "orderNum": 7, "optionGroupName": "SELF_CONTROL_OPTIONS" }
+  ]
+}

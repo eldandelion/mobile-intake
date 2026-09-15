@@ -424,6 +424,12 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
               >
                 {/* Question text */}
                 <div className="mb-6">
+                  {currentQuestion.sectionTitle && (
+                    <div className="mb-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-primary)]">
+                      <md-icon style={{ fontSize: '14px' }}>category</md-icon>
+                      <span>{currentQuestion.sectionTitle}</span>
+                    </div>
+                  )}
                   <h3 className="text-lg sm:text-xl font-semibold text-[var(--md-sys-color-on-surface)] leading-relaxed">
                     {currentQuestion.text}
                   </h3>
