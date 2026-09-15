@@ -18,10 +18,10 @@ export const AssessmentCard: React.FC<AssessmentCardProps> = ({
 
   return (
     <div
-      className={`rounded-2xl border border-[var(--md-sys-color-outline-variant)] transition-all duration-200 p-5 flex flex-col gap-3.5 ${
+      className={`rounded-2xl bg-[var(--md-sys-color-surface-container-low)] transition-all duration-200 p-5 flex flex-col gap-3.5 ${
         isCompleted
           ? 'opacity-80'
-          : 'hover:border-[var(--md-sys-color-outline)]'
+          : 'hover:bg-[var(--md-sys-color-surface-container)]'
       }`}
     >
       {/* Header chips */}
