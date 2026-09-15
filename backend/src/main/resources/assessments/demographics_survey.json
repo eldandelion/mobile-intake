@@ -4,6 +4,24 @@
   "subtitle": "新生入学档案与健康信息登记",
   "estimatedMinutes": 3,
   "description": "请认真核对并如实填写您的个人基本档案与紧急联系人信息，该信息仅用于校方档案与心理健康监护备案。",
+  "instructions": "请仔细核对并如实填报您的个人身份信息、家庭住址与紧急联系人电话。所填信息将记入学生入学健康档案。",
+  "introItems": [
+    {
+      "icon": "badge",
+      "title": "登记内容",
+      "description": "包含个人基础档案（性别、民族、身份证号、家庭住址）及直系亲属紧急联系人核对，共 6 项。"
+    },
+    {
+      "icon": "verified",
+      "title": "如实核对",
+      "description": "所填信息将作为您在校期间的重要健康档案基础及突发紧急状况时的联络途径，请务必准确填写。"
+    },
+    {
+      "icon": "lock",
+      "title": "隐私保密",
+      "description": "所有身份及联络信息均按照高校学生档案管理规定严格受控加密存储，绝不外泄。"
+    }
+  ],
   "sections": [
     {
       "id": "demographics_section",

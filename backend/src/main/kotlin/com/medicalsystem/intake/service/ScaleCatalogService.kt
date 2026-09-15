@@ -21,12 +21,20 @@ data class ScaleQuestion(
     val options: List<ScaleOption> = emptyList()
 )
 
+data class ScaleIntroItem(
+    val icon: String = "assignment",
+    val title: String,
+    val description: String
+)
+
 data class ScaleDetail(
     val code: String,
     val title: String,
     val subtitle: String? = null,
     val description: String,
     val estimatedMinutes: Int,
+    val instructions: String? = null,
+    val introItems: List<ScaleIntroItem> = emptyList(),
     val questions: List<ScaleQuestion>
 )
 
@@ -103,12 +111,52 @@ class ScaleCatalogService(
                 }
             }
 
+            val instructions = root.get("instructions")?.asText() ?: description
+
+            val introItemsList = mutableListOf<ScaleIntroItem>()
+            if (root.has("introItems") && root.get("introItems").isArray) {
+                for (itemNode in root.get("introItems")) {
+                    val icon = itemNode.get("icon")?.asText() ?: "assignment"
+                    val itemTitle = itemNode.get("title")?.asText() ?: ""
+                    val itemDesc = itemNode.get("description")?.asText() ?: ""
+                    if (itemTitle.isNotBlank()) {
+                        introItemsList.add(ScaleIntroItem(icon, itemTitle, itemDesc))
+                    }
+                }
+            }
+
+            if (introItemsList.isEmpty()) {
+                introItemsList.add(
+                    ScaleIntroItem(
+                        icon = "assignment",
+                        title = "评估内容",
+                        description = "本评估共包含 ${questionList.size} 道题目，预计用时约 $estimatedMinutes 分钟。$description"
+                    )
+                )
+                introItemsList.add(
+                    ScaleIntroItem(
+                        icon = "volunteer_activism",
+                        title = "客观作答",
+                        description = "所有问题的答案没有对错之分，您的第一反应往往最准确，请按照您的实际感受放心填写。"
+                    )
+                )
+                introItemsList.add(
+                    ScaleIntroItem(
+                        icon = "lock",
+                        title = "隐私保密",
+                        description = "您的个人信息及答题数据将被严格加密保密，仅用于高校新生心理健康筛查与支持，请您安心作答。"
+                    )
+                )
+            }
+
             scaleDetails[scaleCode] = ScaleDetail(
                 code = scaleCode,
                 title = title,
                 subtitle = subtitle,
                 description = description,
                 estimatedMinutes = estimatedMinutes,
+                instructions = instructions,
+                introItems = introItemsList,
                 questions = questionList
             )
         }

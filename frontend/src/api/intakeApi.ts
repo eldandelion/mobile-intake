@@ -55,12 +55,20 @@ export interface ScaleQuestion {
   options: ScaleOption[];
 }
 
+export interface ScaleIntroItem {
+  icon?: string;
+  title: string;
+  description: string;
+}
+
 export interface ScaleDetail {
   code: string;
   title: string;
   subtitle?: string;
   description: string;
   estimatedMinutes: number;
+  instructions?: string;
+  introItems?: ScaleIntroItem[];
   questions: ScaleQuestion[];
 }
 

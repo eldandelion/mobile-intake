@@ -2,7 +2,26 @@
   "code": "gad_7",
   "title": "焦虑状况评估 (GAD-7)",
   "subtitle": "GAD-7 广泛性焦虑障碍量表",
+  "estimatedMinutes": 3,
   "description": "在过去的两周里，您有多少时间受到以下问题的困扰？",
+  "instructions": "在过去的两周里，请仔细阅读每一项，根据符合您实际情况的频率进行选择。请按照近期的实际感受如实作答。",
+  "introItems": [
+    {
+      "icon": "assignment",
+      "title": "评估内容",
+      "description": "本量表共包含 7 道题目，预计用时约 3 分钟。主要用于了解您在过去两周里的放松状态与压力反应。"
+    },
+    {
+      "icon": "volunteer_activism",
+      "title": "客观作答",
+      "description": "请根据您近期面临日常学习、生活情境下的实际体验进行选择，无需顾虑他人眼光。"
+    },
+    {
+      "icon": "lock",
+      "title": "隐私保密",
+      "description": "答题记录受到严格保密并符合学生心理数据安全规范，仅用于新生入学心理建档与支持。"
+    }
+  ],
   "questions": [
     { "code": "gad7_1", "text": "感觉紧张，焦虑或急切", "orderNum": 1, "optionGroupName": "FOUR_POINT_FREQUENCY" },
     { "code": "gad7_2", "text": "不能够停止或控制担忧", "orderNum": 2, "optionGroupName": "FOUR_POINT_FREQUENCY" },

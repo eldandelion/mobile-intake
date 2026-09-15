@@ -2,7 +2,26 @@
   "code": "scl_90",
   "title": "症状自评量表 (SCL-90)",
   "subtitle": "SCL-90 症状自评量表",
+  "estimatedMinutes": 15,
   "description": "请根据最近一周内身体或心理出现的实际感受进行评定。",
+  "instructions": "以下表格列出了某些人可能会有的问题。请仔细阅读每一项，根据最近一周（包括今天）在多大程度上困扰您，选择最符合的一项。",
+  "introItems": [
+    {
+      "icon": "assignment",
+      "title": "评估内容",
+      "description": "本自评量表包含 90 道题目，涵盖身心综合状态，预计用时约 15 分钟。请按近一周的实际状况评定。"
+    },
+    {
+      "icon": "volunteer_activism",
+      "title": "客观作答",
+      "description": "题目涉及范围较广，反映的是您近期的真实感觉。请逐题按第一反应选择，无需反复斟酌。"
+    },
+    {
+      "icon": "lock",
+      "title": "隐私保密",
+      "description": "测评数据由系统严格加密处理，仅用于学校健康档案建档，不向外界泄露任何个人答卷内容。"
+    }
+  ],
   "questions": [
     { "code": "scl90_1", "text": "头痛", "orderNum": 1, "optionGroupName": "FIVE_POINT_SEVERITY" },
     { "code": "scl90_2", "text": "神经过敏，心中不踏实", "orderNum": 2, "optionGroupName": "FIVE_POINT_SEVERITY" },

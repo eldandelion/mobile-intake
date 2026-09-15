@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { intakeApi, ScaleDetail, ScaleQuestion } from '../api/intakeApi';
 import { PrimaryButton, OutlinedButton, TertiaryButton } from '../components/common/Buttons';
 import { QuestionGridSheet } from '../components/assessments/QuestionGridSheet';
+import { QuestionnaireIntroScaffold } from '../components/assessments/QuestionnaireIntroScaffold';
 import { setCenteredDialogAnimation } from '../utils/dialogAnimation';
 import type { MdDialog } from '@material/web/dialog/dialog';
 
@@ -33,6 +34,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
   const [isQuestionSheetOpen, setIsQuestionSheetOpen] = useState<boolean>(false);
+  const [showIntro, setShowIntro] = useState<boolean>(false);
 
   const autoAdvanceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const dialogRef = useRef<MdDialog>(null);
@@ -72,20 +74,30 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
 
         // Try restoring draft from localStorage
         const savedDraft = localStorage.getItem(draftKey);
+        let hasAnswers = false;
         if (savedDraft) {
           try {
             const parsed = JSON.parse(savedDraft);
             if (parsed && typeof parsed === 'object') {
-              setAnswers(parsed);
-              // Resume at first unanswered question if possible
-              const firstUnanswered = data.questions.findIndex((q) => parsed[q.id] === undefined);
-              if (firstUnanswered > 0) {
-                setCurrentIndex(firstUnanswered);
+              const validKeys = Object.keys(parsed).filter((k) => parsed[k] !== undefined && parsed[k] !== '');
+              if (validKeys.length > 0) {
+                hasAnswers = true;
+                setAnswers(parsed);
+                // Resume at first unanswered question if possible
+                const firstUnanswered = data.questions.findIndex((q) => parsed[q.id] === undefined);
+                if (firstUnanswered > 0) {
+                  setCurrentIndex(firstUnanswered);
+                }
               }
             }
           } catch (e) {
             console.warn('Failed to parse saved draft:', e);
           }
+        }
+
+        // Show intro page if starting for the first time without any existing answers
+        if (!hasAnswers) {
+          setShowIntro(true);
         }
         setLoading(false);
       })
@@ -205,74 +217,148 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
     }
   };
 
-  // Loading state
-  if (loading) {
-    const loadingContent = (
-      <div className="fixed inset-0 z-50 bg-[var(--md-sys-color-surface)] flex flex-col items-center justify-center p-6 text-center overflow-hidden overscroll-contain">
-        <md-circular-progress indeterminate></md-circular-progress>
-        <p className="mt-4 text-sm font-medium text-[var(--md-sys-color-on-surface-variant)]">
-          正在加载测评问卷...
-        </p>
-      </div>
-    );
-    return typeof document !== 'undefined' ? createPortal(loadingContent, document.body) : loadingContent;
-  }
+  const pageContent = (
+    <motion.div
+      key="player-shell"
+      initial={{ opacity: 0, y: 28 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 28 }}
+      transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
+      className="fixed inset-0 z-50 bg-[var(--md-sys-color-surface)] flex flex-col justify-between overflow-hidden overscroll-contain"
+    >
+      <AnimatePresence mode="wait">
+        {loading ? (
+          <motion.div
+            key="loading"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="w-full h-full flex flex-col justify-between overflow-hidden"
+          >
+            <header className="shrink-0 w-full bg-[var(--md-sys-color-surface-container-low)]">
+              <div className="w-full px-4 sm:px-8 py-2.5 flex items-center">
+                <div className="flex items-center gap-2 min-w-0">
+                  <md-icon-button onClick={() => onClose(false)} aria-label="返回测评列表">
+                    <md-icon>arrow_back</md-icon>
+                  </md-icon-button>
+                  <span className="text-sm font-semibold text-[var(--md-sys-color-on-surface-variant)] truncate">
+                    正在加载测评...
+                  </span>
+                </div>
+              </div>
+            </header>
 
-  // Error state
-  if (error || !scale) {
-    const errorContent = (
-      <div className="fixed inset-0 z-50 bg-[var(--md-sys-color-surface)] flex flex-col items-center justify-center p-6 text-center overflow-hidden overscroll-contain">
-        <div className="w-16 h-16 rounded-full bg-[var(--md-sys-color-error-container)] text-[var(--md-sys-color-on-error-container)] flex items-center justify-center mb-4">
-          <md-icon style={{ fontSize: '32px' }}>error</md-icon>
-        </div>
-        <h3 className="text-lg font-bold text-[var(--md-sys-color-on-surface)]">问卷加载失败</h3>
-        <p className="text-sm text-[var(--md-sys-color-on-surface-variant)] mt-1 max-w-xs">
-          {error || '无法获取测评数据'}
-        </p>
-        <div className="mt-6">
-          <PrimaryButton label="返回测评列表" icon="arrow_back" onClick={() => onClose(false)} />
-        </div>
-      </div>
-    );
-    return typeof document !== 'undefined' ? createPortal(errorContent, document.body) : errorContent;
-  }
+            <main className="flex-1 w-full flex flex-col items-center justify-center p-6 text-center">
+              <md-circular-progress indeterminate></md-circular-progress>
+              <p className="mt-4 text-sm font-medium text-[var(--md-sys-color-on-surface-variant)]">
+                正在加载测评问卷...
+              </p>
+            </main>
+          </motion.div>
+        ) : error || !scale ? (
+          <motion.div
+            key="error"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="w-full h-full flex flex-col justify-between overflow-hidden"
+          >
+            <header className="shrink-0 w-full bg-[var(--md-sys-color-surface-container-low)]">
+              <div className="w-full px-4 sm:px-8 py-2.5 flex items-center">
+                <div className="flex items-center gap-2 min-w-0">
+                  <md-icon-button onClick={() => onClose(false)} aria-label="返回测评列表">
+                    <md-icon>arrow_back</md-icon>
+                  </md-icon-button>
+                  <span className="text-sm font-semibold text-[var(--md-sys-color-on-surface-variant)] truncate">
+                    问卷加载失败
+                  </span>
+                </div>
+              </div>
+            </header>
 
-  // Completed outro screen
-  if (isCompleted) {
-    const completedContent = (
-      <div className="fixed inset-0 z-50 bg-[var(--md-sys-color-surface)] flex justify-center overflow-hidden overscroll-contain">
-        <div className="w-full max-w-md h-full bg-[var(--md-sys-color-surface)] flex flex-col p-6 items-center justify-center text-center overflow-hidden">
-          <div className="w-20 h-20 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] flex items-center justify-center mb-6 shadow-md animate-bounce">
-            <md-icon style={{ fontSize: '48px' }}>task_alt</md-icon>
-          </div>
+            <main className="flex-1 w-full flex flex-col items-center justify-center p-6 text-center">
+              <div className="w-16 h-16 rounded-full bg-[var(--md-sys-color-error-container)] text-[var(--md-sys-color-on-error-container)] flex items-center justify-center mb-4">
+                <md-icon style={{ fontSize: '32px' }}>error</md-icon>
+              </div>
+              <h3 className="text-lg font-bold text-[var(--md-sys-color-on-surface)]">问卷加载失败</h3>
+              <p className="text-sm text-[var(--md-sys-color-on-surface-variant)] mt-1 max-w-xs">
+                {error || '无法获取测评数据'}
+              </p>
+              <div className="mt-6">
+                <PrimaryButton label="返回测评列表" icon="arrow_back" onClick={() => onClose(false)} />
+              </div>
+            </main>
+          </motion.div>
+        ) : isCompleted ? (
+          <motion.div
+            key="completed"
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+            className="w-full h-full flex justify-center items-center overflow-hidden"
+          >
+            <div className="w-full max-w-md h-full bg-[var(--md-sys-color-surface)] flex flex-col p-6 items-center justify-center text-center overflow-hidden">
+              <div className="w-20 h-20 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] flex items-center justify-center mb-6 shadow-md animate-bounce">
+                <md-icon style={{ fontSize: '48px' }}>task_alt</md-icon>
+              </div>
 
-          <h2 className="text-2xl font-bold text-[var(--md-sys-color-on-surface)]">
-            作答已提交！
-          </h2>
-          <p className="text-sm font-medium text-[var(--md-sys-color-primary)] mt-1">
-            《{scale.title}》
-          </p>
+              <h2 className="text-2xl font-bold text-[var(--md-sys-color-on-surface)]">
+                作答已提交！
+              </h2>
+              <p className="text-sm font-medium text-[var(--md-sys-color-primary)] mt-1">
+                《{scale?.title || ''}》
+              </p>
 
-          <p className="text-sm text-[var(--md-sys-color-on-surface-variant)] mt-4 leading-relaxed max-w-xs">
-            您的测评数据已安全加密保存在数据库中，后续将由系统管理员导入学校心理健康管理中心进行综合评估。
-          </p>
+              <p className="text-sm text-[var(--md-sys-color-on-surface-variant)] mt-4 leading-relaxed max-w-xs">
+                您的测评数据已安全加密保存在数据库中，后续将由系统管理员导入学校心理健康管理中心进行综合评估。
+              </p>
 
-          <div className="w-full mt-10">
-            <PrimaryButton
-              label="返回测评列表"
-              icon="arrow_back"
-              className="w-full h-12 text-base"
-              onClick={() => onClose(true)}
+              <div className="w-full mt-10">
+                <PrimaryButton
+                  label="返回测评列表"
+                  icon="arrow_back"
+                  className="w-full h-12 text-base"
+                  onClick={() => onClose(true)}
+                />
+              </div>
+            </div>
+          </motion.div>
+        ) : showIntro ? (
+          <motion.div
+            key="intro"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="w-full h-full flex flex-col justify-between overflow-hidden"
+          >
+            <QuestionnaireIntroScaffold
+              scale={scale}
+              totalQuestions={totalQuestions}
+              hasExistingDraft={answeredCount > 0}
+              answeredCount={answeredCount}
+              onStart={() => setShowIntro(false)}
+              onClose={() => {
+                if (answeredCount > 0) {
+                  setShowIntro(false);
+                } else {
+                  onClose(false);
+                }
+              }}
             />
-          </div>
-        </div>
-      </div>
-    );
-    return typeof document !== 'undefined' ? createPortal(completedContent, document.body) : completedContent;
-  }
-
-  const playerContent = (
-    <div className="fixed inset-0 z-50 bg-[var(--md-sys-color-surface)] flex flex-col justify-between overflow-hidden overscroll-contain">
+          </motion.div>
+        ) : (
+          <motion.div
+            key="questionnaire"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="w-full h-full flex flex-col justify-between overflow-hidden"
+          >
       {/* Pinned Top Navigation Header - spans full width on wider screens */}
       <header className="shrink-0 w-full bg-[var(--md-sys-color-surface-container-low)]">
         <div className="w-full px-4 sm:px-8 py-2.5 flex items-center justify-between">
@@ -283,23 +369,34 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
             >
               <md-icon>arrow_back</md-icon>
             </md-icon-button>
-            <div className="truncate max-w-[220px] sm:max-w-xl">
+            <div className="truncate max-w-[180px] sm:max-w-xl">
               <h2 className="text-sm sm:text-base font-bold text-[var(--md-sys-color-on-surface)] truncate">
                 {scale.title}
               </h2>
             </div>
           </div>
 
-          {/* Question Counter Pill (Interactive Sheet Trigger) */}
-          <button
-            type="button"
-            onClick={() => setIsQuestionSheetOpen(true)}
-            aria-label="查看题目列表并快速跳转"
-            title="点击查看所有题目并快速跳转"
-            className="px-3 py-1 rounded-full bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-primary)] text-xs sm:text-sm font-semibold shrink-0 cursor-pointer active:scale-95 transition-all hover:bg-[var(--md-sys-color-surface-container-highest)] select-none focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)]"
-          >
-            <span>第 {currentIndex + 1} / {totalQuestions} 题</span>
-          </button>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {/* View Instructions Button */}
+            <md-icon-button
+              onClick={() => setShowIntro(true)}
+              aria-label="查看量表指导语与说明"
+              title="查看指导说明"
+            >
+              <md-icon>info</md-icon>
+            </md-icon-button>
+
+            {/* Question Counter Pill (Interactive Sheet Trigger) */}
+            <button
+              type="button"
+              onClick={() => setIsQuestionSheetOpen(true)}
+              aria-label="查看题目列表并快速跳转"
+              title="点击查看所有题目并快速跳转"
+              className="px-3 py-1 rounded-full bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-primary)] text-xs sm:text-sm font-semibold shrink-0 cursor-pointer active:scale-95 transition-all hover:bg-[var(--md-sys-color-surface-container-highest)] select-none focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)]"
+            >
+              <span>第 {currentIndex + 1} / {totalQuestions} 题</span>
+            </button>
+          </div>
         </div>
 
         {/* Linear Progress Bar */}
@@ -426,6 +523,9 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
           />
         )}
       </footer>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Exit Confirmation Dialog */}
       <md-dialog
@@ -465,15 +565,15 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
         totalQuestions={totalQuestions}
         currentIndex={currentIndex}
         answers={answers}
-        questions={scale.questions}
+        questions={questions}
         onSelectQuestion={(index) => {
           setCurrentIndex(index);
           setIsQuestionSheetOpen(false);
         }}
         onClose={() => setIsQuestionSheetOpen(false)}
       />
-    </div>
+    </motion.div>
   );
 
-  return typeof document !== 'undefined' ? createPortal(playerContent, document.body) : playerContent;
+  return typeof document !== 'undefined' ? createPortal(pageContent, document.body) : pageContent;
 };

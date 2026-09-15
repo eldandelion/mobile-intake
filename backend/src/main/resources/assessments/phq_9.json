@@ -2,7 +2,26 @@
   "code": "phq_9",
   "title": "情绪状况评估 (PHQ-9)",
   "subtitle": "PHQ-9 抑郁症筛查量表",
+  "estimatedMinutes": 3,
   "description": "在过去的两周里，您有多少时间受到以下问题的困扰？",
+  "instructions": "在过去的两周里，请仔细阅读每一项，根据符合您实际情况的频率进行选择。答案没有好坏对错之分，请如实作答。",
+  "introItems": [
+    {
+      "icon": "assignment",
+      "title": "评估内容",
+      "description": "本量表共包含 9 道题目，预计用时约 3 分钟。主要用于了解您在过去两周里的情绪状态与精力水平。"
+    },
+    {
+      "icon": "volunteer_activism",
+      "title": "客观作答",
+      "description": "所有选项没有好坏对错之分，您的第一反应通常最符合实际情况，请按近期的真实感受放心填写。"
+    },
+    {
+      "icon": "lock",
+      "title": "隐私保密",
+      "description": "答题数据由系统进行端到端加密与安全归档，仅供学校心理健康中心建档与提供关怀支持，严格保护隐私。"
+    }
+  ],
   "questions": [
     { "code": "phq9_1", "text": "做事时提不起劲或没有兴趣", "orderNum": 1, "optionGroupName": "FOUR_POINT_FREQUENCY" },
     { "code": "phq9_2", "text": "感到心情低落，沮丧或绝望", "orderNum": 2, "optionGroupName": "FOUR_POINT_FREQUENCY" },

@@ -30,7 +30,7 @@ function AppContent() {
   }
 
   return (
-    <div className="w-full min-h-[100dvh] bg-[var(--md-sys-color-surface)] flex flex-col items-center">
+    <div className="w-full h-[100dvh] min-h-[100dvh] bg-[var(--md-sys-color-surface)] flex flex-col items-center overflow-hidden">
       {/* MD3 Top Navigation Bar - spans full width on wider screens */}
       <header className="sticky top-0 inset-x-0 w-full bg-[var(--md-sys-color-surface-container-low)] z-20 shrink-0">
         <div className="w-full px-4 sm:px-8 py-3 flex items-center justify-between">

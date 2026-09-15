@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { AnimatePresence } from 'motion/react';
 import { intakeApi, ScaleSummaryDto } from '../api/intakeApi';
 import { AssessmentCard } from '../components/assessments/AssessmentCard';
 import { QuestionnairePlayerPage } from './QuestionnairePlayerPage';
@@ -87,13 +88,16 @@ export const AssessmentsPage: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* If taking a scale, render Questionnaire Player as takeover */}
-      {activeScaleCode && student && (
-        <QuestionnairePlayerPage
-          scaleCode={activeScaleCode}
-          studentNumber={student.studentNumber}
-          onClose={handlePlayerClose}
-        />
-      )}
+      <AnimatePresence>
+        {activeScaleCode && student && (
+          <QuestionnairePlayerPage
+            key={activeScaleCode}
+            scaleCode={activeScaleCode}
+            studentNumber={student.studentNumber}
+            onClose={handlePlayerClose}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Scales List */}
       {loading ? (

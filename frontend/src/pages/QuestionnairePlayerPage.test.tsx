@@ -9,7 +9,25 @@ describe('QuestionnairePlayerPage', () => {
     title: 'PHQ-9 抑郁健康问卷',
     subtitle: '情绪评估',
     description: '评估过去两周内的心理健康状况',
+    instructions: '请仔细阅读每一项，按实际感受如实作答。',
     estimatedMinutes: 2,
+    introItems: [
+      {
+        icon: 'assignment',
+        title: '评估内容',
+        description: '本评估共包含 2 道题目，预计用时约 2 分钟。',
+      },
+      {
+        icon: 'volunteer_activism',
+        title: '客观作答',
+        description: '所有问题的答案没有对错之分，请放心填写。',
+      },
+      {
+        icon: 'lock',
+        title: '隐私保密',
+        description: '您的个人信息及答题数据将被严格加密保密。',
+      },
+    ],
     questions: [
       {
         id: 'phq9_1',
@@ -52,6 +70,91 @@ describe('QuestionnairePlayerPage', () => {
     vi.restoreAllMocks();
   });
 
+  it('shows introductory page for first-time session, then transitions to questions on "开始作答"', async () => {
+    const handleClose = vi.fn();
+    render(
+      <QuestionnairePlayerPage
+        scaleCode="phq_9"
+        studentNumber="2026001"
+        onClose={handleClose}
+      />
+    );
+
+    // Wait for scale to load intro view
+    await waitFor(() => {
+      expect(screen.getByText('问卷前指导')).toBeDefined();
+    });
+
+    expect(screen.getByText('PHQ-9 抑郁健康问卷')).toBeDefined();
+    expect(screen.getByText('评估内容')).toBeDefined();
+    expect(screen.getByText('客观作答')).toBeDefined();
+    expect(screen.getByText('隐私保密')).toBeDefined();
+
+    // Click "开始作答"
+    const startBtn = screen.getByText('开始作答');
+    fireEvent.click(startBtn);
+
+    // Now question 1 should be visible
+    await waitFor(() => {
+      expect(screen.getByText('1. 做事提不起劲或没有兴趣')).toBeDefined();
+    });
+    expect(screen.getByText('第 1 / 2 题')).toBeDefined();
+  });
+
+  it('bypasses intro page and resumes directly at question when saved draft exists', async () => {
+    // Pre-seed draft with question 1 answered
+    localStorage.setItem('intake_draft_2026001_phq_9', JSON.stringify({ phq9_1: 1 }));
+
+    const handleClose = vi.fn();
+    render(
+      <QuestionnairePlayerPage
+        scaleCode="phq_9"
+        studentNumber="2026001"
+        onClose={handleClose}
+      />
+    );
+
+    // Should resume directly at unanswered question 2
+    await waitFor(() => {
+      expect(screen.getByText('2. 感到心情低落、沮丧或绝望')).toBeDefined();
+    });
+    expect(screen.getByText('第 2 / 2 题')).toBeDefined();
+  });
+
+  it('allows opening instructions from header info button and returning to question', async () => {
+    // Pre-seed draft to start in questionnaire
+    localStorage.setItem('intake_draft_2026001_phq_9', JSON.stringify({ phq9_1: 1 }));
+
+    const handleClose = vi.fn();
+    render(
+      <QuestionnairePlayerPage
+        scaleCode="phq_9"
+        studentNumber="2026001"
+        onClose={handleClose}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('2. 感到心情低落、沮丧或绝望')).toBeDefined();
+    });
+
+    // Click info button in header
+    const infoBtn = screen.getByLabelText('查看量表指导语与说明');
+    fireEvent.click(infoBtn);
+
+    // Intro scaffold is visible with "继续作答"
+    await waitFor(() => {
+      expect(screen.getByText('问卷前指导')).toBeDefined();
+    });
+    const continueBtn = screen.getByText('继续作答 (已完成 1/2 题)');
+    fireEvent.click(continueBtn);
+
+    // Returned to question 2
+    await waitFor(() => {
+      expect(screen.getByText('2. 感到心情低落、沮丧或绝望')).toBeDefined();
+    });
+  });
+
   it('loads scale questions, auto-advances after 200ms on option select, and completes survey', async () => {
     const handleClose = vi.fn();
     render(
@@ -62,7 +165,13 @@ describe('QuestionnairePlayerPage', () => {
       />
     );
 
-    // Wait for getScaleDetail to load
+    // Intro screen first
+    await waitFor(() => {
+      expect(screen.getByText('开始作答')).toBeDefined();
+    });
+    fireEvent.click(screen.getByText('开始作答'));
+
+    // Wait for question 1 to load
     await waitFor(() => {
       expect(screen.getByText('1. 做事提不起劲或没有兴趣')).toBeDefined();
     });
@@ -123,6 +232,12 @@ describe('QuestionnairePlayerPage', () => {
       />
     );
 
+    // Advance past intro
+    await waitFor(() => {
+      expect(screen.getByText('开始作答')).toBeDefined();
+    });
+    fireEvent.click(screen.getByText('开始作答'));
+
     await waitFor(() => {
       expect(screen.getByText('1. 做事提不起劲或没有兴趣')).toBeDefined();
     });
@@ -180,6 +295,12 @@ describe('QuestionnairePlayerPage', () => {
         onClose={handleClose}
       />
     );
+
+    // Advance past intro
+    await waitFor(() => {
+      expect(screen.getByText('开始作答')).toBeDefined();
+    });
+    fireEvent.click(screen.getByText('开始作答'));
 
     await waitFor(() => {
       expect(screen.getByText('1. 做事提不起劲或没有兴趣')).toBeDefined();
