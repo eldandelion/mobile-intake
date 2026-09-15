@@ -23,9 +23,21 @@ describe('ProfilePage', () => {
         status: 'COMPLETED',
       },
     ]);
+    vi.spyOn(intakeApi, 'getSubmission').mockResolvedValue({
+      scaleCode: 'demographics_survey',
+      status: 'COMPLETED',
+      completedAt: '2026-09-01T10:00:00',
+      answers: {
+        demo_gender: 1,
+        demo_id_card: '110101200102051234',
+        demo_email: 'student@csu.edu.cn',
+        demo_major: '软件工程',
+        demo_home_address: '湖南省长沙市岳麓区',
+      },
+    });
   });
 
-  it('renders student profile information and task checklist', async () => {
+  it('renders personal info list layout, statement card, and bottom logout button', async () => {
     render(
       <AuthProvider>
         <ProfilePage />
@@ -33,13 +45,33 @@ describe('ProfilePage', () => {
     );
 
     await waitFor(() => {
+      expect(screen.getByText('个人信息')).toBeDefined();
       expect(screen.getByText('李同学')).toBeDefined();
     });
 
+    // Check list headers and values
+    expect(screen.getByText('个人资料照片')).toBeDefined();
+    expect(screen.getByText('姓名')).toBeDefined();
+    expect(screen.getByText('学号')).toBeDefined();
     expect(screen.getByText('2026001')).toBeDefined();
+    expect(screen.getByText('性别')).toBeDefined();
+    expect(screen.getByText('男')).toBeDefined();
+    expect(screen.getByText('电话')).toBeDefined();
     expect(screen.getByText('13812345678')).toBeDefined();
-    expect(screen.getByText('普查任务清单')).toBeDefined();
-    expect(screen.getByText('退出登录')).toBeDefined();
+    expect(screen.getByText('邮箱')).toBeDefined();
+    expect(screen.getByText('student@csu.edu.cn')).toBeDefined();
+    expect(screen.getByText('生日')).toBeDefined();
+    expect(screen.getByText('2001年2月5日')).toBeDefined();
+    expect(screen.getByText('院系专业')).toBeDefined();
+    expect(screen.getByText('软件工程')).toBeDefined();
+    expect(screen.getByText('住址')).toBeDefined();
+    expect(screen.getByText('湖南省长沙市岳麓区')).toBeDefined();
+
+    // Checklist remains removed
+    expect(screen.queryByText('普查任务清单')).toBeNull();
+
+    // Info card and logout action
     expect(screen.getByText('医疗与数据安全须知')).toBeDefined();
+    expect(screen.getByText('退出登录')).toBeDefined();
   });
 });

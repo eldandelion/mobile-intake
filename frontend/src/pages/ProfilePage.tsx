@@ -1,15 +1,43 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { intakeApi, ScaleSummaryDto } from '../api/intakeApi';
+import { intakeApi } from '../api/intakeApi';
 import { OutlinedButton, PrimaryButton } from '../components/common/Buttons';
 import { setCenteredDialogAnimation } from '../utils/dialogAnimation';
 import type { MdDialog } from '@material/web/dialog/dialog';
 
+function parseBirthdayFromIdCard(idCard?: string): string {
+  if (!idCard) return '未填报';
+  const trimmed = String(idCard).trim();
+  const match = trimmed.match(/\d{6}(\d{4})(\d{2})(\d{2})/);
+  if (match) {
+    const year = match[1];
+    const month = parseInt(match[2], 10);
+    const day = parseInt(match[3], 10);
+    return `${year}年${month}月${day}日`;
+  }
+  return '未填报';
+}
+
+function getGenderText(gender?: any): string {
+  if (!gender) return '未填报';
+  const val = String(gender);
+  if (val === '1') return '男';
+  if (val === '2') return '女';
+  return val;
+}
+
+const getItemCornerRadius = (index: number, total: number): string => {
+  if (total <= 1) return 'rounded-[20px]';
+  if (index === 0) return 'rounded-t-[20px] rounded-b-[4px]';
+  if (index === total - 1) return 'rounded-t-[4px] rounded-b-[20px]';
+  return 'rounded-[4px]';
+};
+
 export const ProfilePage: React.FC = () => {
   const { student, logout } = useAuth();
-  const [scales, setScales] = useState<ScaleSummaryDto[]>([]);
-  const logoutDialogRef = React.useRef<MdDialog>(null);
+  const [demographics, setDemographics] = useState<Record<string, any> | null>(null);
+  const logoutDialogRef = useRef<MdDialog>(null);
   const setLogoutDialogRef = useCallback((node: MdDialog | null) => {
     (logoutDialogRef as React.MutableRefObject<MdDialog | null>).current = node;
     if (node) {
@@ -18,92 +46,128 @@ export const ProfilePage: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    let isMounted = true;
     intakeApi
-      .getScales()
-      .then((data) => setScales(data))
-      .catch((e) => console.warn('Failed to load scales for profile:', e));
+      .getSubmission('demographics_survey')
+      .then((data) => {
+        if (isMounted && data?.answers) {
+          setDemographics(data.answers);
+        }
+      })
+      .catch(() => {
+        // Demographics not yet submitted or unavailable
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (!student) return null;
 
   const firstLetter = student.fullName ? student.fullName.slice(0, 1) : '学';
-  const completedCount = scales.filter((s) => s.status === 'COMPLETED').length;
+
+  const infoRows = [
+    {
+      id: 'photo',
+      icon: 'photo_camera',
+      title: '个人资料照片',
+      trailing: (
+        <div className="w-10 h-10 rounded-full bg-[var(--md-sys-color-tertiary-container)] text-[var(--md-sys-color-on-tertiary-container)] flex items-center justify-center font-bold text-base shrink-0 shadow-xs">
+          {firstLetter}
+        </div>
+      ),
+    },
+    {
+      id: 'name',
+      icon: 'badge',
+      title: '姓名',
+      value: student.fullName,
+    },
+    {
+      id: 'studentNumber',
+      icon: 'tag',
+      title: '学号',
+      value: student.studentNumber,
+    },
+    {
+      id: 'gender',
+      icon: 'person',
+      title: '性别',
+      value: getGenderText(demographics?.demo_gender),
+    },
+    {
+      id: 'phone',
+      icon: 'call',
+      title: '电话',
+      value: student.phone,
+    },
+    {
+      id: 'email',
+      icon: 'mail',
+      title: '邮箱',
+      value: demographics?.demo_email || '未填报',
+    },
+    {
+      id: 'birthday',
+      icon: 'cake',
+      title: '生日',
+      value: parseBirthdayFromIdCard(demographics?.demo_id_card),
+    },
+    {
+      id: 'major',
+      icon: 'school',
+      title: '院系专业',
+      value: demographics?.demo_major || '未填报',
+    },
+    {
+      id: 'address',
+      icon: 'home',
+      title: '住址',
+      value: demographics?.demo_home_address || '未填报',
+    },
+  ];
 
   return (
     <div className="space-y-4">
-      {/* Student Profile Card */}
-      <div className="p-6 rounded-2xl bg-[var(--md-sys-color-surface-container)] border border-[var(--md-sys-color-outline-variant)] border-opacity-40 flex items-center gap-4">
-        <div className="w-14 h-14 rounded-full bg-[var(--md-sys-color-tertiary-container)] text-[var(--md-sys-color-on-tertiary-container)] flex items-center justify-center font-bold text-xl shadow-xs shrink-0">
-          {firstLetter}
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-bold text-[var(--md-sys-color-on-surface)] truncate">
-            {student.fullName}
-          </h3>
-          <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] mt-0.5">
-            学号：<span className="font-mono">{student.studentNumber}</span>
-          </p>
-          <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] mt-0.5">
-            手机：<span className="font-mono">{student.phone}</span>
-          </p>
-        </div>
-      </div>
+      {/* Page Title */}
+      <h2 className="text-2xl font-bold text-[var(--md-sys-color-on-surface)] px-1 pt-1">
+        个人信息
+      </h2>
 
-      {/* Completion Checklist */}
-      <div className="p-5 rounded-2xl bg-[var(--md-sys-color-surface-container-lowest)] border border-[var(--md-sys-color-outline-variant)] border-opacity-40">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-bold text-[var(--md-sys-color-on-surface)]">
-            普查任务清单
-          </h4>
-          <span className="text-xs font-semibold text-[var(--md-sys-color-primary)]">
-            已完成 {completedCount} / {scales.length || 4}
-          </span>
-        </div>
-
-        <div className="space-y-2.5">
-          {scales.map((s) => {
-            const isDone = s.status === 'COMPLETED';
-            return (
-              <div
-                key={s.code}
-                className="flex items-center justify-between p-3 rounded-xl bg-[var(--md-sys-color-surface-container-low)]"
+      {/* Personal Info List */}
+      <div className="flex flex-col gap-[2px]">
+        {infoRows.map((row, index) => {
+          const cornerRadius = getItemCornerRadius(index, infoRows.length);
+          return (
+            <div
+              key={row.id}
+              className={`px-4 py-3.5 flex items-center gap-4 min-h-[56px] bg-[var(--md-sys-color-surface-container-low)] ${cornerRadius}`}
+            >
+              <md-icon
+                className="text-[var(--md-sys-color-on-surface-variant)] shrink-0"
+                style={{ fontSize: '22px' }}
               >
-                <div className="flex items-center gap-2.5">
-                  <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
-                      isDone
-                        ? 'bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)]'
-                        : 'border border-[var(--md-sys-color-outline)] text-[var(--md-sys-color-outline)]'
-                    }`}
-                  >
-                    {isDone ? (
-                      <md-icon style={{ fontSize: '14px' }}>check</md-icon>
-                    ) : (
-                      <span className="text-[10px]">·</span>
-                    )}
-                  </div>
-                  <span className="text-xs font-medium text-[var(--md-sys-color-on-surface)]">
-                    {s.title}
-                  </span>
+                {row.icon}
+              </md-icon>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium text-[var(--md-sys-color-on-surface)] leading-snug">
+                  {row.title}
                 </div>
-
-                <span
-                  className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                    isDone
-                      ? 'bg-[var(--md-sys-color-tertiary-container)] text-[var(--md-sys-color-on-tertiary-container)]'
-                      : 'bg-[var(--md-sys-color-surface-variant)] text-[var(--md-sys-color-on-surface-variant)]'
-                  }`}
-                >
-                  {isDone ? '已完成' : '待作答'}
-                </span>
+                {row.value && (
+                  <div className="text-xs text-[var(--md-sys-color-on-surface-variant)] mt-0.5 truncate font-normal">
+                    {row.value}
+                  </div>
+                )}
               </div>
-            );
-          })}
-        </div>
+              {row.trailing}
+            </div>
+          );
+        })}
       </div>
 
       {/* Privacy & Medical Statement Card */}
-      <div className="p-5 rounded-2xl bg-[var(--md-sys-color-surface-container-low)] border border-[var(--md-sys-color-outline-variant)] border-opacity-30">
+      <div className="p-5 rounded-2xl bg-[var(--md-sys-color-surface-container-low)]">
         <div className="flex items-center gap-2 text-[var(--md-sys-color-primary)] mb-2">
           <md-icon style={{ fontSize: '18px' }}>shield</md-icon>
           <h4 className="text-xs font-bold uppercase tracking-wider">医疗与数据安全须知</h4>
@@ -115,8 +179,8 @@ export const ProfilePage: React.FC = () => {
         </p>
       </div>
 
-      {/* Logout Action */}
-      <div className="pt-2">
+      {/* Logout Action at Bottom */}
+      <div className="pt-2 pb-6">
         <OutlinedButton
           label="退出登录"
           icon="logout"
