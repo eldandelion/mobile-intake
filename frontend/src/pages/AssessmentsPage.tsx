@@ -115,7 +115,7 @@ export const AssessmentsPage: React.FC = () => {
 
       <div className="space-y-4">
         {/* Segmented Filter */}
-        <div className="sticky -top-[2px] z-10 -mx-4 sm:-mx-5 px-4 sm:px-5 py-3 bg-[var(--md-sys-color-surface)] flex justify-start">
+        <div className="sticky top-0 z-10 -mx-4 sm:-mx-5 px-4 sm:px-5 pt-5 sm:pt-6 pb-3 bg-[var(--md-sys-color-surface)] flex justify-start">
           <SegmentedButton
             items={FILTER_ITEMS}
             selectedValue={selectedFilter}
