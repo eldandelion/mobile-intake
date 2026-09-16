@@ -133,3 +133,64 @@ export function TertiaryButton({
 }
 
 export const TextButton = TertiaryButton;
+
+export interface SegmentedButtonItem {
+  label: string;
+  value: string;
+}
+
+export interface SegmentedButtonProps {
+  items: SegmentedButtonItem[];
+  selectedValue: string;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+  className?: string;
+}
+
+export function SegmentedButton({
+  items,
+  selectedValue,
+  onChange,
+  disabled,
+  className = '',
+}: SegmentedButtonProps) {
+  return (
+    <div
+      role="group"
+      className={`inline-flex h-10 border border-[var(--md-sys-color-outline)] rounded-full overflow-hidden bg-transparent ${className}`}
+    >
+      {items.map((item, index) => {
+        const isSelected = item.value === selectedValue;
+        const isLast = index === items.length - 1;
+
+        return (
+          <button
+            key={item.value}
+            type="button"
+            role="radio"
+            aria-checked={isSelected}
+            disabled={disabled}
+            onClick={() => onChange(item.value)}
+            className={`flex items-center justify-center px-4 sm:px-6 text-sm font-medium transition-all relative group select-none ${
+              disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+            } ${
+              isSelected
+                ? 'bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)] font-semibold'
+                : 'text-[var(--md-sys-color-on-surface)]'
+            } ${!isLast ? 'border-r border-[var(--md-sys-color-outline)]' : ''}`}
+          >
+            {/* MD3 State Layer */}
+            <div className="absolute inset-0 bg-current opacity-0 group-hover:opacity-[0.08] active:opacity-[0.12] transition-opacity pointer-events-none" />
+
+            <div className="relative flex items-center justify-center">
+              {isSelected && (
+                <span className="material-symbols-outlined text-[18px] mr-1.5 sm:mr-2">check</span>
+              )}
+              {item.label}
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+}

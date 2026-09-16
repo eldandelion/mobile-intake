@@ -5,12 +5,20 @@ import { intakeApi, ScaleSummaryDto } from '../api/intakeApi';
 import { AssessmentCard } from '../components/assessments/AssessmentCard';
 import { QuestionnairePlayerPage } from './QuestionnairePlayerPage';
 import { useAuth } from '../contexts/AuthContext';
-import { PrimaryButton, OutlinedButton } from '../components/common/Buttons';
+import { PrimaryButton, OutlinedButton, SegmentedButton, SegmentedButtonItem } from '../components/common/Buttons';
 import { setCenteredDialogAnimation } from '../utils/dialogAnimation';
 import type { MdDialog } from '@material/web/dialog/dialog';
 
 import { useContext } from 'react';
 import { AssessmentContext } from '../contexts/AssessmentContext';
+
+type FilterType = 'all' | 'unfinished' | 'completed';
+
+const FILTER_ITEMS: SegmentedButtonItem[] = [
+  { label: '全部', value: 'all' },
+  { label: '未完成', value: 'unfinished' },
+  { label: '已完成', value: 'completed' },
+];
 
 export const AssessmentsPage: React.FC = () => {
   const { student } = useAuth();
@@ -18,6 +26,7 @@ export const AssessmentsPage: React.FC = () => {
   const [localScales, setLocalScales] = useState<ScaleSummaryDto[]>([]);
   const [localLoading, setLocalLoading] = useState<boolean>(!context);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [selectedFilter, setSelectedFilter] = useState<FilterType>('all');
 
   // Active scale being taken in questionnaire player
   const [activeScaleCode, setActiveScaleCode] = useState<string | null>(null);
@@ -59,6 +68,13 @@ export const AssessmentsPage: React.FC = () => {
   const error = context ? context.error : localError;
   const fetchScales = context ? context.refreshScales : fetchLocalScales;
 
+  const filteredScales = scales.filter((scale) => {
+    if (selectedFilter === 'all') return true;
+    if (selectedFilter === 'unfinished') return scale.status !== 'COMPLETED';
+    if (selectedFilter === 'completed') return scale.status === 'COMPLETED';
+    return true;
+  });
+
   const handleStartScale = (code: string) => {
     setActiveScaleCode(code);
   };
@@ -84,7 +100,7 @@ export const AssessmentsPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <>
       {/* If taking a scale, render Questionnaire Player as takeover */}
       <AnimatePresence>
         {activeScaleCode && student && (
@@ -96,6 +112,16 @@ export const AssessmentsPage: React.FC = () => {
           />
         )}
       </AnimatePresence>
+
+      <div className="space-y-4">
+        {/* Segmented Filter */}
+        <div className="sticky -top-[2px] z-10 -mx-4 sm:-mx-5 px-4 sm:px-5 py-3 bg-[var(--md-sys-color-surface)] flex justify-start">
+          <SegmentedButton
+            items={FILTER_ITEMS}
+            selectedValue={selectedFilter}
+            onChange={(val) => setSelectedFilter(val as FilterType)}
+          />
+        </div>
 
       {/* Scales List */}
       {loading ? (
@@ -112,9 +138,22 @@ export const AssessmentsPage: React.FC = () => {
             <PrimaryButton label="重新加载" icon="refresh" onClick={fetchScales} />
           </div>
         </div>
+      ) : filteredScales.length === 0 ? (
+        <div className="py-12 flex flex-col items-center justify-center text-center text-[var(--md-sys-color-on-surface-variant)]">
+          <md-icon style={{ '--md-icon-size': '48px', fontSize: '48px', opacity: 0.5 } as React.CSSProperties}>
+            {selectedFilter === 'completed' ? 'task_alt' : 'assignment_turned_in'}
+          </md-icon>
+          <p className="text-sm mt-3">
+            {selectedFilter === 'unfinished'
+              ? '暂无未完成测评'
+              : selectedFilter === 'completed'
+              ? '暂无已完成测评'
+              : '暂无测评任务'}
+          </p>
+        </div>
       ) : (
         <div className="space-y-3.5">
-          {scales.map((scale) => (
+          {filteredScales.map((scale) => (
             <AssessmentCard
               key={scale.code}
               scale={scale}
@@ -178,6 +217,7 @@ export const AssessmentsPage: React.FC = () => {
           )
         : null}
 
-    </div>
+      </div>
+    </>
   );
 };

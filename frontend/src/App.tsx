@@ -77,7 +77,11 @@ function AppContent() {
       </header>
 
       {/* Main Body Content */}
-      <main className="w-full max-w-md flex-1 p-4 sm:p-5 pt-6 sm:pt-8 pb-24 overflow-y-auto">
+      <main
+        className={`w-full max-w-md flex-1 p-4 sm:p-5 pb-24 overflow-y-auto ${
+          activeTab === 0 ? 'pt-0 -mt-[2px]' : 'pt-6 sm:pt-8'
+        }`}
+      >
         {activeTab === 0 ? <AssessmentsPage /> : <ProfilePage />}
       </main>
 
