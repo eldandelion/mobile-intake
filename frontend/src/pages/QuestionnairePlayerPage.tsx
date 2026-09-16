@@ -269,8 +269,18 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
             </header>
 
             <main className="flex-1 w-full flex flex-col items-center justify-center p-6 text-center">
-              <div className="w-16 h-16 rounded-full bg-[var(--md-sys-color-error-container)] text-[var(--md-sys-color-on-error-container)] flex items-center justify-center mb-4">
-                <md-icon style={{ fontSize: '32px' }}>error</md-icon>
+              <div className="w-16 h-16 rounded-full bg-[var(--md-sys-color-error-container)] text-[var(--md-sys-color-on-error-container)] flex items-center justify-center mb-4 shadow-sm">
+                <md-icon
+                  style={{
+                    '--md-icon-size': '32px',
+                    fontSize: '32px',
+                    width: '32px',
+                    height: '32px',
+                    overflow: 'visible',
+                  } as React.CSSProperties}
+                >
+                  error
+                </md-icon>
               </div>
               <h3 className="text-lg font-bold text-[var(--md-sys-color-on-surface)]">问卷加载失败</h3>
               <p className="text-sm text-[var(--md-sys-color-on-surface-variant)] mt-1 max-w-xs">
@@ -292,7 +302,17 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
           >
             <div className="w-full max-w-md h-full bg-[var(--md-sys-color-surface)] flex flex-col p-6 items-center justify-center text-center overflow-hidden">
               <div className="w-20 h-20 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] flex items-center justify-center mb-6 shadow-md animate-bounce">
-                <md-icon style={{ fontSize: '48px' }}>task_alt</md-icon>
+                <md-icon
+                  style={{
+                    '--md-icon-size': '48px',
+                    fontSize: '48px',
+                    width: '48px',
+                    height: '48px',
+                    overflow: 'visible',
+                  } as React.CSSProperties}
+                >
+                  task_alt
+                </md-icon>
               </div>
 
               <h2 className="text-2xl font-bold text-[var(--md-sys-color-on-surface)]">
@@ -419,7 +439,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
                 <div className="mb-6">
                   {currentQuestion.sectionTitle && (
                     <div className="mb-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-primary)]">
-                      <md-icon style={{ fontSize: '14px' }}>category</md-icon>
+                      <md-icon style={{ '--md-icon-size': '14px', fontSize: '14px', width: '14px', height: '14px' } as React.CSSProperties}>category</md-icon>
                       <span>{currentQuestion.sectionTitle}</span>
                     </div>
                   )}

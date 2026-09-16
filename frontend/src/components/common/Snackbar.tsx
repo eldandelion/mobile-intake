@@ -47,7 +47,10 @@ export const Snackbar: React.FC<SnackbarProps> = ({
           >
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
               {icon && (
-                <md-icon className="text-lg text-[var(--md-sys-color-inverse-primary)] shrink-0">
+                <md-icon
+                  className="text-lg text-[var(--md-sys-color-inverse-primary)] shrink-0"
+                  style={{ '--md-icon-size': '1.125rem' } as React.CSSProperties}
+                >
                   {icon}
                 </md-icon>
               )}

@@ -81,12 +81,12 @@ export const QuestionnaireIntroScaffold: React.FC<QuestionnaireIntroScaffoldProp
             {/* Quick Metrics Text Line */}
             <div className="flex items-center gap-2 text-xs text-[var(--md-sys-color-on-surface-variant)] mt-2.5 flex-wrap">
               <span className="inline-flex items-center gap-1">
-                <md-icon style={{ fontSize: '14px' }}>schedule</md-icon>
+                <md-icon style={{ '--md-icon-size': '14px', fontSize: '14px', width: '14px', height: '14px' } as React.CSSProperties}>schedule</md-icon>
                 <span>约 {scale.estimatedMinutes || 3} 分钟</span>
               </span>
               <span>·</span>
               <span className="inline-flex items-center gap-1">
-                <md-icon style={{ fontSize: '14px' }}>quiz</md-icon>
+                <md-icon style={{ '--md-icon-size': '14px', fontSize: '14px', width: '14px', height: '14px' } as React.CSSProperties}>quiz</md-icon>
                 <span>共 {totalQuestions} 道题目</span>
               </span>
             </div>
@@ -100,7 +100,7 @@ export const QuestionnaireIntroScaffold: React.FC<QuestionnaireIntroScaffoldProp
                 className="bg-[var(--md-sys-color-surface-container-low)] p-4 sm:p-5 rounded-[22px] flex items-start gap-3.5"
               >
                 <div className="text-[var(--md-sys-color-primary)] shrink-0 mt-0.5">
-                  <md-icon style={{ fontSize: '18px' }}>
+                  <md-icon style={{ '--md-icon-size': '18px', fontSize: '18px', width: '18px', height: '18px' } as React.CSSProperties}>
                     {item.icon || 'assignment'}
                   </md-icon>
                 </div>

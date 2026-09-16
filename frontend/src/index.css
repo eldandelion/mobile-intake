@@ -31,6 +31,10 @@
     md-tooltip, md-snackbar) {
     all: revert-layer;
   }
+
+  md-icon {
+    overflow: visible;
+  }
 }
 
 body {

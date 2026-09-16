@@ -146,7 +146,7 @@ export const ProfilePage: React.FC = () => {
             >
               <md-icon
                 className="text-[var(--md-sys-color-on-surface-variant)] shrink-0"
-                style={{ fontSize: '22px' }}
+                style={{ '--md-icon-size': '22px', fontSize: '22px', width: '22px', height: '22px' } as React.CSSProperties}
               >
                 {row.icon}
               </md-icon>
@@ -169,7 +169,7 @@ export const ProfilePage: React.FC = () => {
       {/* Privacy & Medical Statement Card */}
       <div className="p-5 rounded-2xl bg-[var(--md-sys-color-surface-container-low)]">
         <div className="flex items-center gap-2 text-[var(--md-sys-color-primary)] mb-2">
-          <md-icon style={{ fontSize: '18px' }}>shield</md-icon>
+          <md-icon style={{ '--md-icon-size': '18px', fontSize: '18px', width: '18px', height: '18px' } as React.CSSProperties}>shield</md-icon>
           <h4 className="text-xs font-bold uppercase tracking-wider">医疗与数据安全须知</h4>
         </div>
         <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] leading-relaxed">
