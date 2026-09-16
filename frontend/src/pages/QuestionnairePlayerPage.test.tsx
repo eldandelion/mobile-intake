@@ -328,7 +328,7 @@ describe('QuestionnairePlayerPage', () => {
     expect(screen.getByText('第 2 / 2 题')).toBeDefined();
   });
 
-  it('displays sectionTitle badge when present on current question', async () => {
+  it('displays category in top bar subtitle and updates dynamically across sections', async () => {
     vi.spyOn(intakeApi, 'getScaleDetail').mockResolvedValue({
       ...mockScaleDetail,
       questions: [
@@ -336,6 +336,11 @@ describe('QuestionnairePlayerPage', () => {
           ...mockScaleDetail.questions[0],
           sectionCode: 'phq_9',
           sectionTitle: 'PHQ-9 抑郁症筛查',
+        },
+        {
+          ...mockScaleDetail.questions[1],
+          sectionCode: 'gad_7',
+          sectionTitle: 'GAD-7 焦虑症筛查',
         },
       ],
     });
@@ -353,8 +358,21 @@ describe('QuestionnairePlayerPage', () => {
     });
     fireEvent.click(screen.getByText('开始作答'));
 
+    // Question 1: top bar subtitle shows PHQ-9 section
     await waitFor(() => {
       expect(screen.getByText('PHQ-9 抑郁症筛查')).toBeDefined();
+    });
+    // Category pill icon is no longer rendered above the question
+    expect(screen.queryByText('category')).toBeNull();
+
+    // Select option and advance to Question 2
+    fireEvent.click(screen.getByText('好几天'));
+    const nextBtn = screen.getByText('下一题');
+    fireEvent.click(nextBtn);
+
+    // Question 2: top bar subtitle dynamically updates to GAD-7 section
+    await waitFor(() => {
+      expect(screen.getByText('GAD-7 焦虑症筛查')).toBeDefined();
     });
   });
 
@@ -379,5 +397,56 @@ describe('QuestionnairePlayerPage', () => {
     });
 
     expect(screen.queryByText('问卷前指导')).toBeNull();
+  });
+
+  it('shows Material Design dialog instead of browser alert when submitting with unanswered questions', async () => {
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    vi.spyOn(intakeApi, 'getScaleDetail').mockResolvedValue(mockScaleDetail);
+
+    render(
+      <QuestionnairePlayerPage
+        scaleCode="phq_9"
+        studentNumber="2026001"
+        onClose={vi.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('开始作答')).toBeDefined();
+    });
+    fireEvent.click(screen.getByText('开始作答'));
+
+    // Currently on Question 1 (unanswered). Open Question Grid Sheet to jump to Question 2 (last question)
+    const counterBtn = await screen.findByLabelText('查看题目列表并快速跳转');
+    fireEvent.click(counterBtn);
+
+    // In sheet, click question 2 button to jump to Question 2
+    const q2Btn = await screen.findByLabelText(/跳转至第 2 题/);
+    fireEvent.click(q2Btn);
+
+    // Now on Question 2 (last question), answer Question 2
+    await waitFor(() => {
+      expect(screen.getByText('2. 感到心情低落、沮丧或绝望')).toBeDefined();
+    });
+    fireEvent.click(screen.getByText('好几天'));
+
+    // Question 2 is answered, so "完成并提交" is enabled, but Question 1 is unanswered
+    const submitBtn = await screen.findByText('完成并提交');
+    fireEvent.click(submitBtn);
+
+    // Material Design dialog shows up
+    await waitFor(() => {
+      expect(screen.getByText('还有题目尚未作答')).toBeDefined();
+    });
+    expect(alertSpy).not.toHaveBeenCalled();
+
+    // Click 前往作答 button in the dialog
+    fireEvent.click(screen.getByText('前往作答'));
+
+    // Jumps back to unanswered Question 1
+    await waitFor(() => {
+      expect(screen.getByText('1. 做事提不起劲或没有兴趣')).toBeDefined();
+    });
+    alertSpy.mockRestore();
   });
 });

@@ -46,6 +46,19 @@ function elevateDialogScrim(dialog: MdDialog): void {
 export function setCenteredDialogAnimation(dialog: MdDialog | null | undefined): void {
   if (!dialog) return;
 
+  if (typeof (dialog as any).show !== 'function') {
+    (dialog as any).show = () => {
+      (dialog as any).open = true;
+      return Promise.resolve();
+    };
+  }
+  if (typeof (dialog as any).close !== 'function') {
+    (dialog as any).close = () => {
+      (dialog as any).open = false;
+      return Promise.resolve();
+    };
+  }
+
   elevateDialogScrim(dialog);
 
   dialog.getOpenAnimation = () => ({

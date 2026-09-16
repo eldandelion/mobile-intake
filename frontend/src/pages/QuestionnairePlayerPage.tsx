@@ -7,6 +7,7 @@ import { QuestionGridSheet } from '../components/assessments/QuestionGridSheet';
 import { QuestionnaireIntroScaffold } from '../components/assessments/QuestionnaireIntroScaffold';
 import { setCenteredDialogAnimation } from '../utils/dialogAnimation';
 import { useAssessmentDraft } from '../hooks/useAssessmentDraft';
+import { useSnackbar } from '../contexts/SnackbarContext';
 import type { MdDialog } from '@material/web/dialog/dialog';
 
 interface QuestionnairePlayerPageProps {
@@ -44,6 +45,19 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
       setCenteredDialogAnimation(node);
     }
   }, []);
+
+  const incompleteDialogRef = useRef<MdDialog>(null);
+  const setIncompleteDialogRef = useCallback((node: MdDialog | null) => {
+    (incompleteDialogRef as React.MutableRefObject<MdDialog | null>).current = node;
+    if (node) {
+      setCenteredDialogAnimation(node);
+    }
+  }, []);
+
+  const [unansweredCount, setUnansweredCount] = useState<number>(0);
+  const [firstUnansweredIndex, setFirstUnansweredIndex] = useState<number>(0);
+
+  const { showSnackbar } = useSnackbar();
 
   // Offline-first dual-tier draft synchronization
   const {
@@ -121,6 +135,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
   const totalQuestions = questions.length;
   const currentQuestion: ScaleQuestion | undefined = questions[currentIndex];
   const currentAnswer = currentQuestion ? answers[currentQuestion.id] : undefined;
+  const currentCategory = currentQuestion?.sectionTitle || scale?.subtitle;
 
   // Calculate answered count
   const answeredCount = Object.keys(answers).filter((k) =>
@@ -177,10 +192,9 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
     const missing = questions.filter((q) => answers[q.id] === undefined || answers[q.id] === '');
     if (missing.length > 0) {
       const firstMissingIdx = questions.findIndex((q) => q.id === missing[0].id);
-      if (firstMissingIdx !== -1) {
-        setCurrentIndex(firstMissingIdx);
-      }
-      alert(`还有 ${missing.length} 道题目尚未作答，已为您跳转至未作答题目。`);
+      setUnansweredCount(missing.length);
+      setFirstUnansweredIndex(firstMissingIdx !== -1 ? firstMissingIdx : 0);
+      incompleteDialogRef.current?.show();
       return;
     }
 
@@ -192,7 +206,10 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
       setIsCompleted(true);
     } catch (err: any) {
       console.error('Submit error:', err);
-      alert(err.message || '提交测评问卷失败，请重试');
+      showSnackbar({
+        message: err.message || '提交测评问卷失败，请重试',
+        icon: 'error',
+      });
     } finally {
       setSubmitting(false);
     }
@@ -379,10 +396,21 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
             >
               <md-icon>arrow_back</md-icon>
             </md-icon-button>
-            <div className="truncate max-w-[180px] sm:max-w-xl">
-              <h2 className="text-sm sm:text-base font-bold text-[var(--md-sys-color-on-surface)] truncate">
+            <div className="flex flex-col min-w-0 max-w-[180px] sm:max-w-xl">
+              <h2 className="text-sm sm:text-base font-bold text-[var(--md-sys-color-on-surface)] truncate leading-tight">
                 {scale.title}
               </h2>
+              {currentCategory && (
+                <motion.span
+                  key={currentCategory}
+                  initial={{ opacity: 0, y: -2 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="text-[11px] sm:text-xs font-medium text-[var(--md-sys-color-primary)] truncate mt-0.5 leading-tight block"
+                >
+                  {currentCategory}
+                </motion.span>
+              )}
             </div>
           </div>
 
@@ -437,12 +465,6 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
               >
                 {/* Question text */}
                 <div className="mb-6">
-                  {currentQuestion.sectionTitle && (
-                    <div className="mb-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-primary)]">
-                      <md-icon style={{ '--md-icon-size': '14px', fontSize: '14px', width: '14px', height: '14px' } as React.CSSProperties}>category</md-icon>
-                      <span>{currentQuestion.sectionTitle}</span>
-                    </div>
-                  )}
                   <h3 className="text-lg sm:text-xl font-semibold text-[var(--md-sys-color-on-surface)] leading-relaxed">
                     {currentQuestion.text}
                   </h3>
@@ -462,7 +484,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
                           className={`w-full min-h-[56px] px-5 py-4 text-left flex items-center justify-between transition-colors duration-150 cursor-pointer select-none relative overflow-hidden ${cornerRadius} ${
                             isSelected
                               ? 'bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)]'
-                              : 'bg-[var(--md-sys-color-surface-container-high)] hover:bg-[var(--md-sys-color-surface-container-highest)] text-[var(--md-sys-color-on-surface)]'
+                              : 'bg-[var(--md-sys-color-surface-container-low)] hover:bg-[var(--md-sys-color-surface-container)] text-[var(--md-sys-color-on-surface)]'
                           }`}
                         >
                           <md-ripple></md-ripple>
@@ -507,40 +529,41 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
         </div>
       </main>
 
-      {/* Pinned Bottom Action Footer - spans full width on wider screens with zero bottom gap */}
+      {/* Pinned Bottom Action Footer - transparent action bar */}
       <footer
-        className="shrink-0 w-full bg-[var(--md-sys-color-surface-container)] px-4 sm:px-8 py-3.5 flex items-center justify-between gap-3 z-10"
+        className="shrink-0 w-full bg-transparent px-4 sm:px-8 py-3.5 flex justify-center z-10"
         style={{
-          marginBottom: '-2px',
-          paddingBottom: 'calc(0.875rem + 2px)',
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.875rem)',
         }}
       >
-        <TertiaryButton
-          label="上一题"
-          icon="chevron_left"
-          className="h-11 px-4"
-          disabled={currentIndex === 0}
-          onClick={handlePrev}
-        />
+        <div className="w-full max-w-md flex items-center justify-between gap-3">
+          <TertiaryButton
+            label="上一题"
+            icon="chevron_left"
+            className="h-11 px-4"
+            disabled={currentIndex === 0}
+            onClick={handlePrev}
+          />
 
-        {currentIndex === totalQuestions - 1 ? (
-          <PrimaryButton
-            label={submitting ? '提交中...' : '完成并提交'}
-            icon="check"
-            className="h-11 min-w-[140px]"
-            disabled={submitting || !isCurrentAnswered}
-            onClick={handleSubmit}
-          />
-        ) : (
-          <PrimaryButton
-            label="下一题"
-            icon="chevron_right"
-            trailingIcon
-            className="h-11 min-w-[120px]"
-            disabled={!isCurrentAnswered}
-            onClick={handleNext}
-          />
-        )}
+          {currentIndex === totalQuestions - 1 ? (
+            <PrimaryButton
+              label={submitting ? '提交中...' : '完成并提交'}
+              icon="check"
+              className="h-11 min-w-[140px]"
+              disabled={submitting || !isCurrentAnswered}
+              onClick={handleSubmit}
+            />
+          ) : (
+            <PrimaryButton
+              label="下一题"
+              icon="chevron_right"
+              trailingIcon
+              className="h-11 min-w-[120px]"
+              disabled={!isCurrentAnswered}
+              onClick={handleNext}
+            />
+          )}
+        </div>
       </footer>
           </motion.div>
         )}
@@ -574,6 +597,40 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
             label="继续作答"
             className="h-10 min-h-[40px] px-5 text-sm"
             onClick={() => dialogRef.current?.close()}
+          />
+        </div>
+      </md-dialog>
+
+      {/* Incomplete / Unanswered Questions Dialog */}
+      <md-dialog
+        ref={setIncompleteDialogRef}
+        style={{
+          maxWidth: 'min(420px, calc(100vw - 32px))',
+          minWidth: '300px',
+          '--md-dialog-container-shape': '28px',
+        } as React.CSSProperties}
+      >
+        <div slot="headline" className="px-6 pt-6 pb-2 text-xl font-bold text-[var(--md-sys-color-on-surface)]">
+          还有题目尚未作答
+        </div>
+        <div slot="content" className="px-6 py-2 text-sm leading-relaxed text-[var(--md-sys-color-on-surface-variant)]">
+          当前问卷共有 <span className="font-semibold text-[var(--md-sys-color-on-surface)] font-mono">{totalQuestions}</span> 道题目，您还有 <span className="font-semibold text-[var(--md-sys-color-error)] font-mono">{unansweredCount}</span> 道题目尚未作答。请完整回答所有题目后再提交。
+        </div>
+        <div slot="actions" className="px-6 pb-6 pt-3 flex items-center justify-end gap-3">
+          <OutlinedButton
+            label="取消"
+            className="h-10 min-h-[40px] px-5 text-sm"
+            onClick={() => incompleteDialogRef.current?.close()}
+          />
+          <PrimaryButton
+            label="前往作答"
+            className="h-10 min-h-[40px] px-5 text-sm"
+            onClick={() => {
+              incompleteDialogRef.current?.close();
+              if (firstUnansweredIndex >= 0) {
+                setCurrentIndex(firstUnansweredIndex);
+              }
+            }}
           />
         </div>
       </md-dialog>
