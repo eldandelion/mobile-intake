@@ -17,11 +17,13 @@ import org.mockito.kotlin.whenever
 class ScaleSubmissionServiceTest {
 
     private val submissionRepository: ScaleSubmissionRepository = mock()
+    private val scaleDraftService: ScaleDraftService = mock()
     private val scaleCatalogService: ScaleCatalogService = mock()
     private val objectMapper = ObjectMapper()
 
     private val scaleSubmissionService = ScaleSubmissionService(
         submissionRepository = submissionRepository,
+        scaleDraftService = scaleDraftService,
         scaleCatalogService = scaleCatalogService,
         objectMapper = objectMapper
     )
@@ -74,6 +76,7 @@ class ScaleSubmissionServiceTest {
         assertEquals("phq_9", response.scaleCode)
         assertEquals("COMPLETED", response.status)
         assertNotNull(response.completedAt)
+        org.mockito.kotlin.verify(scaleDraftService).purgeDraft(studentNumber, "phq_9")
     }
 
     @Test

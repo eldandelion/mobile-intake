@@ -31,11 +31,15 @@ class IntakeApplicationTests {
     @Autowired
     private lateinit var submissionRepository: com.medicalsystem.intake.repository.ScaleSubmissionRepository
 
+    @Autowired
+    private lateinit var draftRepository: com.medicalsystem.intake.repository.ScaleDraftRepository
+
     private lateinit var mockMvc: MockMvc
 
     @BeforeEach
     fun setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build()
+        draftRepository.deleteAll()
         submissionRepository.deleteAll()
         studentRepository.deleteAll()
     }
@@ -307,5 +311,105 @@ class IntakeApplicationTests {
         assertTrue(assessCsvString.contains("demographics_survey,demo_gender,1"))
         // Must NOT output the composite battery code SLEEP_ASSESSMENT in scale_code column
         assertFalse(assessCsvString.contains("SLEEP_ASSESSMENT"))
+    }
+
+    @Test
+    fun `test draft save, retrieve, status IN_PROGRESS, and purge on completion`() {
+        val studentNumber = "2026088"
+        val registerReq = RegisterRequest(
+            studentNumber = studentNumber,
+            fullName = "李寻欢",
+            phone = "13800889900",
+            password = "securePassword123"
+        )
+        val registerResult = mockMvc.perform(
+            post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(registerReq))
+        )
+            .andExpect(status().isOk)
+            .andReturn()
+
+        val token = objectMapper.readTree(registerResult.response.contentAsString).get("token").asText()
+
+        // 1. Initial draft should be empty (204 No Content)
+        mockMvc.perform(
+            get("/api/scales/demographics_survey/draft")
+                .header("Authorization", "Bearer $token")
+        )
+            .andExpect(status().isNoContent)
+
+        // 2. Save partial draft
+        val draftAnswers = mapOf(
+            "demo_gender" to 1,
+            "demo_ethnicity" to 1
+        )
+        val draftReq = com.medicalsystem.intake.dto.SaveDraftRequest(
+            answers = draftAnswers,
+            updatedAt = 1000L
+        )
+        mockMvc.perform(
+            put("/api/scales/demographics_survey/draft")
+                .header("Authorization", "Bearer $token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(draftReq))
+        )
+            .andExpect(status().isNoContent)
+
+        // 3. Retrieve draft
+        mockMvc.perform(
+            get("/api/scales/demographics_survey/draft")
+                .header("Authorization", "Bearer $token")
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.scaleCode").value("demographics_survey"))
+            .andExpect(jsonPath("$.updatedAt").value(1000L))
+            .andExpect(jsonPath("$.answers.demo_gender").value(1))
+            .andExpect(jsonPath("$.answers.demo_ethnicity").value(1))
+
+        // 4. Check scale list: demographics_survey should now have status "IN_PROGRESS" with progress counts
+        mockMvc.perform(
+            get("/api/scales")
+                .header("Authorization", "Bearer $token")
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$[?(@.code == 'demographics_survey')].status").value("IN_PROGRESS"))
+            .andExpect(jsonPath("$[?(@.code == 'demographics_survey')].answeredCount").value(2))
+            .andExpect(jsonPath("$[?(@.code == 'demographics_survey')].completionPercentage").value(25))
+
+        // 5. Complete and submit demographics_survey
+        val fullAnswers = mapOf(
+            "demo_gender" to 1,
+            "demo_ethnicity" to 1,
+            "demo_id_card" to "110101200001011234",
+            "demo_major" to "计算机学院 软件工程",
+            "demo_email" to "$studentNumber@univ.edu.cn",
+            "demo_home_address" to "北京市海淀区",
+            "demo_emergency_contact" to "李父",
+            "demo_emergency_phone" to "13900008888"
+        )
+        mockMvc.perform(
+            post("/api/scales/demographics_survey/submit")
+                .header("Authorization", "Bearer $token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(SubmitScaleRequest(fullAnswers)))
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.status").value("COMPLETED"))
+
+        // 6. Draft must now be purged (204 No Content) and status COMPLETED with 100% completion
+        mockMvc.perform(
+            get("/api/scales/demographics_survey/draft")
+                .header("Authorization", "Bearer $token")
+        )
+            .andExpect(status().isNoContent)
+
+        mockMvc.perform(
+            get("/api/scales")
+                .header("Authorization", "Bearer $token")
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$[?(@.code == 'demographics_survey')].status").value("COMPLETED"))
+            .andExpect(jsonPath("$[?(@.code == 'demographics_survey')].completionPercentage").value(100))
     }
 }

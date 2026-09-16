@@ -63,11 +63,9 @@ export const AssessmentsPage: React.FC = () => {
     setActiveScaleCode(code);
   };
 
-  const handlePlayerClose = (completed: boolean) => {
+  const handlePlayerClose = (_completed: boolean) => {
     setActiveScaleCode(null);
-    if (completed) {
-      fetchScales();
-    }
+    fetchScales();
   };
 
   const handleViewSubmission = async (code: string) => {

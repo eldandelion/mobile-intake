@@ -14,6 +14,7 @@ import java.time.LocalDateTime
 @Service
 class ScaleSubmissionService(
     private val submissionRepository: ScaleSubmissionRepository,
+    private val scaleDraftService: ScaleDraftService,
     private val scaleCatalogService: ScaleCatalogService,
     private val objectMapper: ObjectMapper
 ) {
@@ -50,6 +51,9 @@ class ScaleSubmissionService(
             completedAt = LocalDateTime.now()
         )
         val saved = submissionRepository.save(submission)
+
+        // Atomically purge draft upon successful final submission
+        scaleDraftService.purgeDraft(studentNumber, scaleCode)
 
         return SubmitScaleResponse(
             scaleCode = saved.scaleCode,

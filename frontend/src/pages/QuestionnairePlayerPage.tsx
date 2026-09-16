@@ -6,6 +6,7 @@ import { PrimaryButton, OutlinedButton, TertiaryButton } from '../components/com
 import { QuestionGridSheet } from '../components/assessments/QuestionGridSheet';
 import { QuestionnaireIntroScaffold } from '../components/assessments/QuestionnaireIntroScaffold';
 import { setCenteredDialogAnimation } from '../utils/dialogAnimation';
+import { useAssessmentDraft } from '../hooks/useAssessmentDraft';
 import type { MdDialog } from '@material/web/dialog/dialog';
 
 interface QuestionnairePlayerPageProps {
@@ -27,10 +28,9 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
   onClose,
 }) => {
   const [scale, setScale] = useState<ScaleDetail | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isReady, setIsReady] = useState<boolean>(false);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
-  const [answers, setAnswers] = useState<Record<string, any>>({});
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
   const [isQuestionSheetOpen, setIsQuestionSheetOpen] = useState<boolean>(false);
@@ -45,7 +45,17 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
     }
   }, []);
 
-  const draftKey = `intake_draft_${studentNumber}_${scaleCode}`;
+  // Offline-first dual-tier draft synchronization
+  const {
+    answers,
+    recordAnswer,
+    flushDraft,
+    clearDraft,
+    isInitialized,
+  } = useAssessmentDraft({
+    scaleCode,
+    studentNumber,
+  });
 
   // Prevent background scrolling while questionnaire session is active
   useEffect(() => {
@@ -60,10 +70,9 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
     };
   }, []);
 
-  // Fetch scale details and load local draft
+  // Fetch scale details
   useEffect(() => {
     let isMounted = true;
-    setLoading(true);
     setError(null);
 
     intakeApi
@@ -71,40 +80,11 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
       .then((data) => {
         if (!isMounted) return;
         setScale(data);
-
-        // Try restoring draft from localStorage
-        const savedDraft = localStorage.getItem(draftKey);
-        let hasAnswers = false;
-        if (savedDraft) {
-          try {
-            const parsed = JSON.parse(savedDraft);
-            if (parsed && typeof parsed === 'object') {
-              const validKeys = Object.keys(parsed).filter((k) => parsed[k] !== undefined && parsed[k] !== '');
-              if (validKeys.length > 0) {
-                hasAnswers = true;
-                setAnswers(parsed);
-                // Resume at first unanswered question if possible
-                const firstUnanswered = data.questions.findIndex((q) => parsed[q.id] === undefined);
-                if (firstUnanswered > 0) {
-                  setCurrentIndex(firstUnanswered);
-                }
-              }
-            }
-          } catch (e) {
-            console.warn('Failed to parse saved draft:', e);
-          }
-        }
-
-        // Show intro page if starting for the first time without any existing answers
-        if (!hasAnswers) {
-          setShowIntro(true);
-        }
-        setLoading(false);
       })
       .catch((err) => {
         if (!isMounted) return;
         setError(err.message || '加载问卷失败');
-        setLoading(false);
+        setIsReady(true);
       });
 
     return () => {
@@ -113,16 +93,29 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
         clearTimeout(autoAdvanceTimerRef.current);
       }
     };
-  }, [scaleCode, draftKey]);
+  }, [scaleCode]);
 
-  // Sync answers to localStorage draft
-  const persistAnswers = useCallback((newAnswers: Record<string, any>) => {
-    try {
-      localStorage.setItem(draftKey, JSON.stringify(newAnswers));
-    } catch (e) {
-      console.warn('Failed to persist draft:', e);
+  // Atomically transition from loading to ready once BOTH scale and draft are initialized
+  useEffect(() => {
+    if (scale && isInitialized && !isReady) {
+      const hasAnswers = Object.keys(answers).some(
+        (k) => answers[k] !== undefined && answers[k] !== ''
+      );
+      if (hasAnswers) {
+        const firstUnanswered = scale.questions.findIndex(
+          (q) => answers[q.id] === undefined || answers[q.id] === ''
+        );
+        if (firstUnanswered > 0) {
+          setCurrentIndex(firstUnanswered);
+        }
+      } else {
+        setShowIntro(true);
+      }
+      setIsReady(true);
     }
-  }, [draftKey]);
+  }, [scale, isInitialized, isReady, answers]);
+
+  const loading = !isReady;
 
   const questions: ScaleQuestion[] = scale?.questions || [];
   const totalQuestions = questions.length;
@@ -139,9 +132,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
   const handleSelectOption = (value: any) => {
     if (!currentQuestion) return;
 
-    const newAnswers = { ...answers, [currentQuestion.id]: value };
-    setAnswers(newAnswers);
-    persistAnswers(newAnswers);
+    recordAnswer(currentQuestion.id, value);
 
     // Cancel pending auto-advance
     if (autoAdvanceTimerRef.current) {
@@ -158,9 +149,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
 
   const handleTextInput = (val: string) => {
     if (!currentQuestion) return;
-    const newAnswers = { ...answers, [currentQuestion.id]: val };
-    setAnswers(newAnswers);
-    persistAnswers(newAnswers);
+    recordAnswer(currentQuestion.id, val);
   };
 
   const handlePrev = () => {
@@ -199,7 +188,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
     try {
       await intakeApi.submitScale(scaleCode, answers);
       // Clear draft on successful submission
-      localStorage.removeItem(draftKey);
+      clearDraft();
       setIsCompleted(true);
     } catch (err: any) {
       console.error('Submit error:', err);
@@ -210,6 +199,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
   };
 
   const handleAttemptClose = () => {
+    flushDraft();
     if (isCompleted || answeredCount === 0) {
       onClose(isCompleted);
     } else {
@@ -389,7 +379,10 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
             {/* Question Counter Pill (Interactive Sheet Trigger) */}
             <button
               type="button"
-              onClick={() => setIsQuestionSheetOpen(true)}
+              onClick={() => {
+                flushDraft();
+                setIsQuestionSheetOpen(true);
+              }}
               aria-label="查看题目列表并快速跳转"
               title="点击查看所有题目并快速跳转"
               className="px-3 py-1 rounded-full bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-primary)] text-xs sm:text-sm font-semibold shrink-0 cursor-pointer active:scale-95 transition-all hover:bg-[var(--md-sys-color-surface-container-highest)] select-none focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)]"

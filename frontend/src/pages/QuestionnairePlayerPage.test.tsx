@@ -59,6 +59,9 @@ describe('QuestionnairePlayerPage', () => {
   beforeEach(() => {
     localStorage.clear();
     vi.spyOn(intakeApi, 'getScaleDetail').mockResolvedValue(mockScaleDetail);
+    vi.spyOn(intakeApi, 'getDraft').mockResolvedValue(null);
+    vi.spyOn(intakeApi, 'saveDraft').mockResolvedValue();
+    vi.spyOn(intakeApi, 'deleteDraft').mockResolvedValue();
     vi.spyOn(intakeApi, 'submitScale').mockResolvedValue({
       scaleCode: 'phq_9',
       status: 'COMPLETED',
@@ -353,5 +356,28 @@ describe('QuestionnairePlayerPage', () => {
     await waitFor(() => {
       expect(screen.getByText('PHQ-9 抑郁症筛查')).toBeDefined();
     });
+  });
+
+  it('hydrates server draft, skips intro, and positions at first unanswered question', async () => {
+    vi.spyOn(intakeApi, 'getDraft').mockResolvedValue({
+      scaleCode: 'phq_9',
+      answers: { phq9_1: 1 },
+      updatedAt: Date.now(),
+    });
+
+    render(
+      <QuestionnairePlayerPage
+        scaleCode="phq_9"
+        studentNumber="2026001"
+        onClose={vi.fn()}
+      />
+    );
+
+    // Should skip intro and directly show question 2 (first unanswered)
+    await waitFor(() => {
+      expect(screen.getByText('2. 感到心情低落、沮丧或绝望')).toBeDefined();
+    });
+
+    expect(screen.queryByText('问卷前指导')).toBeNull();
   });
 });

@@ -38,7 +38,15 @@ export interface ScaleSummaryDto {
   description: string;
   questionCount: number;
   estimatedMinutes: number;
-  status: 'NOT_STARTED' | 'COMPLETED';
+  status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED';
+  answeredCount?: number;
+  completionPercentage?: number;
+}
+
+export interface ScaleDraftDto {
+  scaleCode: string;
+  answers: Record<string, any>;
+  updatedAt: number;
 }
 
 export interface ScaleOption {
@@ -110,6 +118,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(path, {
     ...options,
     headers,
+    keepalive: options.keepalive,
   });
 
   if (!res.ok) {
@@ -123,7 +132,20 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     throw new Error(errorMsg);
   }
 
-  return res.json() as Promise<T>;
+  if (res.status === 204) {
+    return null as unknown as T;
+  }
+
+  const text = await res.text();
+  if (!text) {
+    return null as unknown as T;
+  }
+
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return text as unknown as T;
+  }
 }
 
 export const intakeApi = {
@@ -175,4 +197,20 @@ export const intakeApi = {
     request<{ scaleCode: string; status: string; completedAt: string; answers: Record<string, any> }>(
       `/api/scales/${code}/submission`
     ),
+
+  // In-session drafts
+  getDraft: (code: string) =>
+    request<ScaleDraftDto | null>(`/api/scales/${code}/draft`),
+
+  saveDraft: (code: string, data: { answers: Record<string, any>; updatedAt: number }, keepalive?: boolean) =>
+    request<void>(`/api/scales/${code}/draft`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      keepalive,
+    }),
+
+  deleteDraft: (code: string) =>
+    request<void>(`/api/scales/${code}/draft`, {
+      method: 'DELETE',
+    }),
 };

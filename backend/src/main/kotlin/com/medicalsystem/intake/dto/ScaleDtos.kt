@@ -10,7 +10,20 @@ data class ScaleSummaryDto(
     val description: String,
     val questionCount: Int,
     val estimatedMinutes: Int,
-    val status: String // "NOT_STARTED" or "COMPLETED"
+    val status: String, // "NOT_STARTED", "IN_PROGRESS", or "COMPLETED"
+    val answeredCount: Int = 0,
+    val completionPercentage: Int = 0
+)
+
+data class SaveDraftRequest(
+    val answers: Map<String, Any>,
+    val updatedAt: Long
+)
+
+data class ScaleDraftDto(
+    val scaleCode: String,
+    val answers: Map<String, Any>,
+    val updatedAt: Long
 )
 
 data class SubmitScaleRequest(
