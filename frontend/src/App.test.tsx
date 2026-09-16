@@ -56,7 +56,7 @@ describe('App Top Bar & Navigation', () => {
     });
   });
 
-  it('renders progress bar at the bottom of the top bar and no separation line (border-b)', async () => {
+  it('renders progress bar at the top of the top bar and no separation line (border-b)', async () => {
     const { container } = render(<App />);
 
     await waitFor(() => {
@@ -71,9 +71,10 @@ describe('App Top Bar & Navigation', () => {
     // Verify leading icon at start of top bar is removed
     expect(header?.querySelector('md-icon')?.textContent).not.toBe('psychology');
 
-    // Verify md-linear-progress exists in header
+    // Verify md-linear-progress exists at top of header
     const progressBar = header?.querySelector('md-linear-progress');
     expect(progressBar).not.toBeNull();
+    expect(header?.firstElementChild).toBe(progressBar);
     expect(progressBar?.getAttribute('value')).toBe('1');
     expect(progressBar?.getAttribute('max')).toBe('3');
   });

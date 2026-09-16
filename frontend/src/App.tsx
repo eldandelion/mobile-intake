@@ -32,7 +32,19 @@ function AppContent() {
   return (
     <div className="w-full h-[100dvh] min-h-[100dvh] bg-[var(--md-sys-color-surface)] flex flex-col items-center overflow-hidden">
       {/* MD3 Top Navigation Bar - spans full width on wider screens */}
-      <header className="sticky top-0 inset-x-0 w-full bg-[var(--md-sys-color-surface-container-low)] z-20 shrink-0">
+      <header className="sticky top-0 inset-x-0 w-full bg-[var(--md-sys-color-surface)] z-20 shrink-0">
+        {/* Progress bar placed at the top of the top bar with no separation line */}
+        <md-linear-progress
+          value={completedCount}
+          max={totalCount || 1}
+          style={{
+            width: '100%',
+            '--md-linear-progress-track-height': '3px',
+            '--md-linear-progress-active-indicator-height': '3px',
+            display: 'block',
+          } as any}
+        />
+
         <div className="w-full px-4 sm:px-8 py-3 flex items-center justify-between">
           <div>
             <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--md-sys-color-primary)] block">
@@ -62,18 +74,6 @@ function AppContent() {
             </div>
           )}
         </div>
-
-        {/* Progress bar placed at the bottom of the top bar with no separation line */}
-        <md-linear-progress
-          value={completedCount}
-          max={totalCount || 1}
-          style={{
-            width: '100%',
-            '--md-linear-progress-track-height': '3px',
-            '--md-linear-progress-active-indicator-height': '3px',
-            display: 'block',
-          } as any}
-        />
       </header>
 
       {/* Main Body Content */}
