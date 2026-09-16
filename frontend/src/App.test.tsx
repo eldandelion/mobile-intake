@@ -110,4 +110,81 @@ describe('App Top Bar & Navigation', () => {
     expect(document.documentElement.classList.contains('dark')).toBe(false);
     expect(localStorage.getItem('app-theme')).toBe('light');
   });
+
+  it('replaces header text with segmented button when scrolling down, and restores text when scrolling back to top', async () => {
+    const { container } = render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { level: 1, name: '还有 2 项任务待完成' })).toBeDefined();
+    });
+
+    const header = container.querySelector('header');
+    const main = container.querySelector('main');
+    expect(header).not.toBeNull();
+    expect(main).not.toBeNull();
+
+    // At top: header has the title text, not the segmented button
+    expect(header?.querySelector('h1')).not.toBeNull();
+    expect(header?.querySelector('[role="group"]')).toBeNull();
+
+    // Scroll down past threshold (scrollTop > 35)
+    fireEvent.scroll(main!, { target: { scrollTop: 50 } });
+
+    // Header should now show segmented button
+    await waitFor(() => {
+      expect(header?.querySelector('[role="group"]')).not.toBeNull();
+    });
+    expect(header?.querySelector('h1')).toBeNull();
+
+    // The segmented button in header should contain filter options
+    const headerSegmentedGroup = header?.querySelector('[role="group"]');
+    expect(headerSegmentedGroup?.textContent).toContain('全部');
+    expect(headerSegmentedGroup?.textContent).toContain('未完成');
+    expect(headerSegmentedGroup?.textContent).toContain('已完成');
+
+    // Click '未完成' inside header segmented button
+    const unfinishedBtn = Array.from(headerSegmentedGroup!.querySelectorAll('button')).find(
+      (btn) => btn.textContent?.includes('未完成')
+    );
+    expect(unfinishedBtn).toBeDefined();
+    fireEvent.click(unfinishedBtn!);
+
+    // Card list should reflect the filtered state (PHQ-9 is completed, so should be filtered out)
+    expect(screen.queryByText('PHQ-9 抑郁健康问卷')).toBeNull();
+    expect(screen.getByText('个人基本信息核对')).toBeDefined();
+
+    // Scroll back all the way to top (scrollTop <= 10)
+    fireEvent.scroll(main!, { target: { scrollTop: 0 } });
+
+    // Header text should be restored, pushing the segmented button back into place
+    await waitFor(() => {
+      expect(header?.querySelector('h1')).not.toBeNull();
+    });
+    expect(header?.querySelector('[role="group"]')).toBeNull();
+    expect(screen.getByRole('heading', { level: 1, name: '还有 2 项任务待完成' })).toBeDefined();
+  });
+
+  it('does not replace header text with segmented button when scrolling on the Profile tab', async () => {
+    const { container } = render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { level: 1, name: '还有 2 项任务待完成' })).toBeDefined();
+    });
+
+    // Switch to Tab 1 (个人中心)
+    const navTabs = container.querySelectorAll('md-navigation-tab');
+    expect(navTabs.length).toBe(2);
+    const profileTab = navTabs[1];
+    fireEvent.click(profileTab);
+
+    const header = container.querySelector('header');
+    const main = container.querySelector('main');
+
+    // Scroll down on profile tab
+    fireEvent.scroll(main!, { target: { scrollTop: 100 } });
+
+    // Header should still have heading, never the segmented button
+    expect(header?.querySelector('h1')).not.toBeNull();
+    expect(header?.querySelector('[role="group"]')).toBeNull();
+  });
 });

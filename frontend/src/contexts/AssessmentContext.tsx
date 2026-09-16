@@ -2,6 +2,14 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { intakeApi, ScaleSummaryDto } from '../api/intakeApi';
 import { useAuth } from './AuthContext';
 
+export type AssessmentFilterType = 'all' | 'unfinished' | 'completed';
+
+export const ASSESSMENT_FILTER_ITEMS: { label: string; value: AssessmentFilterType }[] = [
+  { label: '全部', value: 'all' },
+  { label: '未完成', value: 'unfinished' },
+  { label: '已完成', value: 'completed' },
+];
+
 export interface AssessmentContextType {
   scales: ScaleSummaryDto[];
   loading: boolean;
@@ -11,6 +19,10 @@ export interface AssessmentContextType {
   remainingCount: number;
   isAllCompleted: boolean;
   refreshScales: () => Promise<void>;
+  filter: AssessmentFilterType;
+  setFilter: (filter: AssessmentFilterType) => void;
+  isScrolled: boolean;
+  setIsScrolled: (scrolled: boolean) => void;
 }
 
 export const AssessmentContext = createContext<AssessmentContextType | undefined>(undefined);
@@ -20,6 +32,9 @@ export const AssessmentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [scales, setScales] = useState<ScaleSummaryDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [filter, setFilter] = useState<AssessmentFilterType>('all');
+  const [isScrolled, setIsScrolled] = useState<boolean>(false);
 
   const refreshScales = useCallback(async () => {
     if (!student) {
@@ -60,6 +75,10 @@ export const AssessmentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         remainingCount,
         isAllCompleted,
         refreshScales,
+        filter,
+        setFilter,
+        isScrolled,
+        setIsScrolled,
       }}
     >
       {children}
@@ -79,6 +98,10 @@ export const useAssessments = (): AssessmentContextType => {
       remainingCount: 0,
       isAllCompleted: false,
       refreshScales: async () => {},
+      filter: 'all',
+      setFilter: () => {},
+      isScrolled: false,
+      setIsScrolled: () => {},
     };
   }
   return context;

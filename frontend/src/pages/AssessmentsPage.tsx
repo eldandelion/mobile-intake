@@ -5,20 +5,16 @@ import { intakeApi, ScaleSummaryDto } from '../api/intakeApi';
 import { AssessmentCard } from '../components/assessments/AssessmentCard';
 import { QuestionnairePlayerPage } from './QuestionnairePlayerPage';
 import { useAuth } from '../contexts/AuthContext';
-import { PrimaryButton, OutlinedButton, SegmentedButton, SegmentedButtonItem } from '../components/common/Buttons';
+import { PrimaryButton, OutlinedButton, SegmentedButton } from '../components/common/Buttons';
 import { setCenteredDialogAnimation } from '../utils/dialogAnimation';
 import type { MdDialog } from '@material/web/dialog/dialog';
 
 import { useContext } from 'react';
-import { AssessmentContext } from '../contexts/AssessmentContext';
-
-type FilterType = 'all' | 'unfinished' | 'completed';
-
-const FILTER_ITEMS: SegmentedButtonItem[] = [
-  { label: '全部', value: 'all' },
-  { label: '未完成', value: 'unfinished' },
-  { label: '已完成', value: 'completed' },
-];
+import {
+  AssessmentContext,
+  AssessmentFilterType,
+  ASSESSMENT_FILTER_ITEMS,
+} from '../contexts/AssessmentContext';
 
 export const AssessmentsPage: React.FC = () => {
   const { student } = useAuth();
@@ -26,7 +22,11 @@ export const AssessmentsPage: React.FC = () => {
   const [localScales, setLocalScales] = useState<ScaleSummaryDto[]>([]);
   const [localLoading, setLocalLoading] = useState<boolean>(!context);
   const [localError, setLocalError] = useState<string | null>(null);
-  const [selectedFilter, setSelectedFilter] = useState<FilterType>('all');
+  const [localFilter, setLocalFilter] = useState<AssessmentFilterType>('all');
+
+  const selectedFilter = context ? context.filter : localFilter;
+  const setSelectedFilter = context ? context.setFilter : setLocalFilter;
+  const isScrolled = context ? context.isScrolled : false;
 
   // Active scale being taken in questionnaire player
   const [activeScaleCode, setActiveScaleCode] = useState<string | null>(null);
@@ -115,11 +115,15 @@ export const AssessmentsPage: React.FC = () => {
 
       <div className="space-y-4">
         {/* Segmented Filter */}
-        <div className="sticky top-0 z-10 -mx-4 sm:-mx-5 px-4 sm:px-5 pt-5 sm:pt-6 pb-3 bg-[var(--md-sys-color-surface)] flex justify-start">
+        <div
+          className={`-mx-4 sm:-mx-5 px-4 sm:px-5 pt-5 sm:pt-6 pb-3 bg-[var(--md-sys-color-surface)] flex justify-start transition-opacity duration-200 ${
+            isScrolled ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          }`}
+        >
           <SegmentedButton
-            items={FILTER_ITEMS}
+            items={ASSESSMENT_FILTER_ITEMS}
             selectedValue={selectedFilter}
-            onChange={(val) => setSelectedFilter(val as FilterType)}
+            onChange={(val) => setSelectedFilter(val as AssessmentFilterType)}
           />
         </div>
 

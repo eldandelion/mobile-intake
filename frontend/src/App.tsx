@@ -1,8 +1,15 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
-import { AssessmentProvider, useAssessments } from './contexts/AssessmentContext';
+import {
+  AssessmentProvider,
+  useAssessments,
+  ASSESSMENT_FILTER_ITEMS,
+  AssessmentFilterType,
+} from './contexts/AssessmentContext';
 import { SnackbarProvider } from './contexts/SnackbarContext';
+import { SegmentedButton } from './components/common/Buttons';
 import { AuthPage } from './pages/AuthPage';
 import { AssessmentsPage } from './pages/AssessmentsPage';
 import { ProfilePage } from './pages/ProfilePage';
@@ -10,9 +17,34 @@ import './utils/navigationTabStyles';
 
 function AppContent() {
   const { student, loading } = useAuth();
-  const { totalCount, completedCount, remainingCount, isAllCompleted, loading: scalesLoading } = useAssessments();
+  const {
+    totalCount,
+    completedCount,
+    remainingCount,
+    isAllCompleted,
+    loading: scalesLoading,
+    filter,
+    setFilter,
+    isScrolled,
+    setIsScrolled,
+  } = useAssessments();
   const { isDark, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState(0);
+  const mainRef = useRef<HTMLElement>(null);
+
+  const handleTabChange = (tab: number) => {
+    setActiveTab(tab);
+    setIsScrolled(false);
+    if (mainRef.current) {
+      if (typeof mainRef.current.scrollTo === 'function') {
+        mainRef.current.scrollTo({ top: 0 });
+      } else {
+        mainRef.current.scrollTop = 0;
+      }
+    }
+  };
+
+  const showHeaderFilter = activeTab === 0 && isScrolled;
 
   if (loading) {
     return (
@@ -46,20 +78,48 @@ function AppContent() {
         />
 
         <div className="w-full px-4 sm:px-8 py-3 flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--md-sys-color-primary)] block">
-              中南大学 · 心理普查
-            </span>
-            <h1 className="text-base sm:text-lg font-bold text-[var(--md-sys-color-on-surface)] leading-none mt-0.5">
-              {scalesLoading
-                ? '正在获取测评任务...'
-                : isAllCompleted
-                  ? '全部测评任务已完成'
-                  : `还有 ${remainingCount} 项任务待完成`}
-            </h1>
+          <div className="flex-1 min-w-0 pr-2 overflow-hidden h-10 flex items-center">
+            <AnimatePresence mode="wait" initial={false}>
+              {showHeaderFilter ? (
+                <motion.div
+                  key="header-filter"
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: 20, opacity: 0 }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                  className="flex items-center"
+                >
+                  <SegmentedButton
+                    items={ASSESSMENT_FILTER_ITEMS}
+                    selectedValue={filter}
+                    onChange={(val) => setFilter(val as AssessmentFilterType)}
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="header-text"
+                  initial={{ y: -20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -20, opacity: 0 }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                  className="flex flex-col justify-center"
+                >
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--md-sys-color-primary)] block leading-tight">
+                    中南大学 · 心理普查
+                  </span>
+                  <h1 className="text-base sm:text-lg font-bold text-[var(--md-sys-color-on-surface)] leading-none mt-0.5 truncate">
+                    {scalesLoading
+                      ? '正在获取测评任务...'
+                      : isAllCompleted
+                        ? '全部测评任务已完成'
+                        : `还有 ${remainingCount} 项任务待完成`}
+                  </h1>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
           {student && (
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 shrink-0">
               <span className="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] hidden sm:inline">
                 {student.fullName} ({student.studentNumber})
               </span>
@@ -78,9 +138,20 @@ function AppContent() {
 
       {/* Main Body Content */}
       <main
+        ref={mainRef}
         className={`w-full max-w-md flex-1 p-4 sm:p-5 pb-24 overflow-y-auto ${
           activeTab === 0 ? 'pt-0 -mt-[2px]' : 'pt-6 sm:pt-8'
         }`}
+        onScroll={(e) => {
+          if (activeTab === 0) {
+            const top = e.currentTarget.scrollTop;
+            if (!isScrolled && top > 35) {
+              setIsScrolled(true);
+            } else if (isScrolled && top <= 10) {
+              setIsScrolled(false);
+            }
+          }
+        }}
       >
         {activeTab === 0 ? <AssessmentsPage /> : <ProfilePage />}
       </main>
@@ -104,14 +175,14 @@ function AppContent() {
         >
           <md-navigation-tab
             label="问卷测评"
-            onClick={() => setActiveTab(0)}
+            onClick={() => handleTabChange(0)}
           >
             <md-icon slot="active-icon">assignment</md-icon>
             <md-icon slot="inactive-icon">assignment</md-icon>
           </md-navigation-tab>
           <md-navigation-tab
             label="个人中心"
-            onClick={() => setActiveTab(1)}
+            onClick={() => handleTabChange(1)}
           >
             <md-icon slot="active-icon">account_circle</md-icon>
             <md-icon slot="inactive-icon">account_circle</md-icon>
