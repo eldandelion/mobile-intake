@@ -10,6 +10,7 @@ import { useAssessmentDraft } from '../hooks/useAssessmentDraft';
 import { useSnackbar } from '../contexts/SnackbarContext';
 import { useOptionalAuth } from '../contexts/AuthContext';
 import type { MdDialog } from '@material/web/dialog/dialog';
+import type { MdMenu } from '@material/web/menu/menu';
 
 interface QuestionnairePlayerPageProps {
   scaleCode: string;
@@ -57,6 +58,47 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
 
   const [unansweredCount, setUnansweredCount] = useState<number>(0);
   const [firstUnansweredIndex, setFirstUnansweredIndex] = useState<number>(0);
+
+  const menuRef = useRef<MdMenu | null>(null);
+  const menuAnchorRef = useRef<HTMLElement | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+
+  const handleToggleMenu = () => {
+    setIsMenuOpen((prev) => {
+      const next = !prev;
+      if (menuRef.current) {
+        if (menuAnchorRef.current) {
+          menuRef.current.anchorElement = menuAnchorRef.current;
+        }
+        if (next) {
+          if (typeof menuRef.current.show === 'function') {
+            menuRef.current.show();
+          } else {
+            menuRef.current.open = true;
+          }
+        } else {
+          if (typeof menuRef.current.close === 'function') {
+            menuRef.current.close();
+          } else {
+            menuRef.current.open = false;
+          }
+        }
+      }
+      return next;
+    });
+  };
+
+  const handleOpenAboutTest = () => {
+    if (menuRef.current) {
+      if (typeof menuRef.current.close === 'function') {
+        menuRef.current.close();
+      } else {
+        menuRef.current.open = false;
+      }
+    }
+    setIsMenuOpen(false);
+    setShowIntro(true);
+  };
 
   const { showSnackbar } = useSnackbar();
 
@@ -345,7 +387,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
             transition={{ duration: 0.15 }}
             className="w-full h-full flex flex-col justify-between overflow-hidden"
           >
-            <header className="shrink-0 w-full bg-[var(--md-sys-color-surface-container-low)]">
+            <header className="shrink-0 w-full bg-[var(--md-sys-color-surface)]">
               <div className="w-full px-4 sm:px-8 py-2.5 flex items-center">
                 <div className="flex items-center gap-2 min-w-0">
                   <md-icon-button onClick={() => onClose(false)} aria-label="返回测评列表">
@@ -374,7 +416,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
             transition={{ duration: 0.15 }}
             className="w-full h-full flex flex-col justify-between overflow-hidden"
           >
-            <header className="shrink-0 w-full bg-[var(--md-sys-color-surface-container-low)]">
+            <header className="shrink-0 w-full bg-[var(--md-sys-color-surface)]">
               <div className="w-full px-4 sm:px-8 py-2.5 flex items-center">
                 <div className="flex items-center gap-2 min-w-0">
                   <md-icon-button onClick={() => onClose(false)} aria-label="返回测评列表">
@@ -489,7 +531,18 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
             className="w-full h-full flex flex-col justify-between overflow-hidden"
           >
       {/* Pinned Top Navigation Header - spans full width on wider screens */}
-      <header className="shrink-0 w-full bg-[var(--md-sys-color-surface-container-low)]">
+      <header className="shrink-0 w-full bg-[var(--md-sys-color-surface)]">
+        {/* Linear Progress Bar placed above the top bar */}
+        <md-linear-progress
+          value={answeredCount}
+          max={totalQuestions}
+          style={{
+            width: '100%',
+            '--md-linear-progress-track-height': '4px',
+            display: 'block',
+          } as any}
+        ></md-linear-progress>
+
         <div className="w-full px-4 sm:px-8 py-2.5 flex items-center justify-between">
           <div className="flex items-center gap-1 sm:gap-2 min-w-0">
             <md-icon-button
@@ -516,16 +569,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
-            {/* View Instructions Button */}
-            <md-icon-button
-              onClick={() => setShowIntro(true)}
-              aria-label="查看量表指导语与说明"
-              title="查看指导说明"
-            >
-              <md-icon>info</md-icon>
-            </md-icon-button>
-
+          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
             {/* Question Counter Pill (Interactive Sheet Trigger) */}
             <button
               type="button"
@@ -539,16 +583,39 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
             >
               <span>第 {currentIndex + 1} / {totalQuestions} 题</span>
             </button>
-          </div>
-        </div>
 
-        {/* Linear Progress Bar */}
-        <div className="w-full">
-          <md-linear-progress
-            value={answeredCount}
-            max={totalQuestions}
-            style={{ width: '100%', '--md-linear-progress-track-height': '4px' } as any}
-          ></md-linear-progress>
+            {/* Vertical Three-Dot Menu */}
+            <div className="relative flex items-center">
+              <md-icon-button
+                ref={menuAnchorRef}
+                id="player-menu-anchor"
+                onClick={handleToggleMenu}
+                aria-label="更多选项"
+                title="更多选项"
+              >
+                <md-icon>more_vert</md-icon>
+              </md-icon-button>
+
+              <md-menu
+                ref={menuRef}
+                id="player-menu"
+                anchor="player-menu-anchor"
+                open={isMenuOpen}
+                anchor-corner="end-end"
+                menu-corner="start-end"
+                onClosed={() => setIsMenuOpen(false)}
+                style={{
+                  minWidth: '160px',
+                  '--md-menu-container-shape': '12px',
+                } as React.CSSProperties}
+              >
+                <md-menu-item onClick={handleOpenAboutTest}>
+                  <md-icon slot="start">info</md-icon>
+                  <div slot="headline">关于测评</div>
+                </md-menu-item>
+              </md-menu>
+            </div>
+          </div>
         </div>
       </header>
 

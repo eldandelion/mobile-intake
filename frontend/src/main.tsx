@@ -36,6 +36,8 @@ import '@material/web/checkbox/checkbox.js';
 import '@material/web/ripple/ripple.js';
 import '@material/web/divider/divider.js';
 import '@material/web/slider/slider.js';
+import '@material/web/menu/menu.js';
+import '@material/web/menu/menu-item.js';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

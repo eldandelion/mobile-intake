@@ -124,7 +124,7 @@ describe('QuestionnairePlayerPage', () => {
     expect(screen.getByText('第 2 / 2 题')).toBeDefined();
   });
 
-  it('allows opening instructions from header info button and returning to question', async () => {
+  it('allows opening instructions from header three-dot menu and returning to question', async () => {
     // Pre-seed draft to start in questionnaire
     localStorage.setItem('intake_draft_2026001_phq_9', JSON.stringify({ phq9_1: 1 }));
 
@@ -141,9 +141,13 @@ describe('QuestionnairePlayerPage', () => {
       expect(screen.getByText('2. 感到心情低落、沮丧或绝望')).toBeDefined();
     });
 
-    // Click info button in header
-    const infoBtn = screen.getByLabelText('查看量表指导语与说明');
-    fireEvent.click(infoBtn);
+    // Click three-dot menu button in header
+    const moreBtn = screen.getByLabelText('更多选项');
+    fireEvent.click(moreBtn);
+
+    // Click "关于测评" menu item
+    const aboutMenuItem = screen.getByText('关于测评');
+    fireEvent.click(aboutMenuItem);
 
     // Intro scaffold is visible with "继续作答"
     await waitFor(() => {

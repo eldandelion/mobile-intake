@@ -133,6 +133,38 @@ declare global {
         onInput?: (e: any) => void;
         onChange?: (e: any) => void;
       }, HTMLElement>;
+      'md-menu': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+        anchor?: string;
+        open?: boolean;
+        quick?: boolean;
+        positioning?: 'absolute' | 'fixed' | 'document' | 'popover';
+        'has-overflow'?: boolean;
+        'x-offset'?: number;
+        'y-offset'?: number;
+        'anchor-corner'?: string;
+        'menu-corner'?: string;
+        'stay-open-on-outside-click'?: boolean;
+        'stay-open-on-focusout'?: boolean;
+        'skip-restore-focus'?: boolean;
+        'default-focus'?: string;
+        onClosed?: (e: any) => void;
+        onOpened?: (e: any) => void;
+      }, HTMLElement>;
+      'md-menu-item': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+        disabled?: boolean;
+        type?: string;
+        href?: string;
+        target?: string;
+        'keep-open'?: boolean;
+        selected?: boolean;
+        onClick?: (e: any) => void;
+      }, HTMLElement>;
+      'md-sub-menu': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+        'anchor-corner'?: string;
+        'menu-corner'?: string;
+        'hover-open-delay'?: number;
+        'hover-close-delay'?: number;
+      }, HTMLElement>;
     }
   }
 }
