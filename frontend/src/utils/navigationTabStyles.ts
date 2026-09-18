@@ -20,6 +20,10 @@ const navTabRipplePillStyle = css`
     border-radius: var(--_active-indicator-shape, var(--md-sys-shape-corner-full, 9999px));
     overflow: hidden;
   }
+
+  .md3-navigation-tab__icon--active ::slotted(*) {
+    font-variation-settings: 'FILL' 1;
+  }
 `;
 
 let configured = false;

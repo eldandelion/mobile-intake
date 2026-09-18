@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { intakeApi, ScaleDetail, ScaleQuestion } from '../api/intakeApi';
+import { intakeApi, ScaleDetail, ScaleQuestion, ScaleOption } from '../api/intakeApi';
 import { PrimaryButton, OutlinedButton, TertiaryButton } from '../components/common/Buttons';
-import { QuestionGridSheet } from '../components/assessments/QuestionGridSheet';
+import { QuestionGridSheet, isQuestionAnswered } from '../components/assessments/QuestionGridSheet';
 import { QuestionnaireIntroScaffold } from '../components/assessments/QuestionnaireIntroScaffold';
 import { setCenteredDialogAnimation } from '../utils/dialogAnimation';
 import { useAssessmentDraft } from '../hooks/useAssessmentDraft';
 import { useSnackbar } from '../contexts/SnackbarContext';
+import { useOptionalAuth } from '../contexts/AuthContext';
 import type { MdDialog } from '@material/web/dialog/dialog';
 
 interface QuestionnairePlayerPageProps {
@@ -71,6 +72,24 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
     studentNumber,
   });
 
+  const auth = useOptionalAuth();
+  const student = auth?.student;
+
+  // Automatically pre-fill basic info fields in demographics_survey from authenticated student profile
+  useEffect(() => {
+    if (scaleCode === 'demographics_survey' && student && isInitialized) {
+      if ((answers['demo_name'] === undefined || answers['demo_name'] === '') && student.fullName) {
+        recordAnswer('demo_name', student.fullName);
+      }
+      if ((answers['demo_phone'] === undefined || answers['demo_phone'] === '') && student.phone) {
+        recordAnswer('demo_phone', student.phone);
+      }
+      if ((answers['demo_student_number'] === undefined || answers['demo_student_number'] === '') && student.studentNumber) {
+        recordAnswer('demo_student_number', student.studentNumber);
+      }
+    }
+  }, [scaleCode, student, isInitialized, answers, recordAnswer]);
+
   // Prevent background scrolling while questionnaire session is active
   useEffect(() => {
     const originalBodyOverflow = document.body.style.overflow;
@@ -113,11 +132,11 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
   useEffect(() => {
     if (scale && isInitialized && !isReady) {
       const hasAnswers = Object.keys(answers).some(
-        (k) => answers[k] !== undefined && answers[k] !== ''
+        (k) => isQuestionAnswered(answers[k])
       );
       if (hasAnswers) {
         const firstUnanswered = scale.questions.findIndex(
-          (q) => answers[q.id] === undefined || answers[q.id] === ''
+          (q) => !isQuestionAnswered(answers[q.id])
         );
         if (firstUnanswered > 0) {
           setCurrentIndex(firstUnanswered);
@@ -138,16 +157,30 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
   const currentCategory = currentQuestion?.sectionTitle || scale?.subtitle;
 
   // Calculate answered count
-  const answeredCount = Object.keys(answers).filter((k) =>
-    questions.some((q) => q.id === k && answers[k] !== undefined && answers[k] !== '')
+  const answeredCount = questions.filter((q) =>
+    isQuestionAnswered(answers[q.id])
   ).length;
 
-  const isCurrentAnswered = currentAnswer !== undefined && currentAnswer !== '';
+  const isCurrentAnswered = currentQuestion ? isQuestionAnswered(currentAnswer) : false;
 
-  const handleSelectOption = (value: any) => {
+  const handleSelectOption = (opt: ScaleOption) => {
     if (!currentQuestion) return;
 
-    recordAnswer(currentQuestion.id, value);
+    if (opt.hasTextInput) {
+      const existingText =
+        typeof currentAnswer === 'object' && !Array.isArray(currentAnswer) && currentAnswer.value === opt.value
+          ? currentAnswer.text || ''
+          : '';
+      recordAnswer(currentQuestion.id, { value: opt.value, text: existingText });
+
+      // Inhibit auto-advance so student can enter explanation in the blank
+      if (autoAdvanceTimerRef.current) {
+        clearTimeout(autoAdvanceTimerRef.current);
+      }
+      return;
+    }
+
+    recordAnswer(currentQuestion.id, opt.value);
 
     // Cancel pending auto-advance
     if (autoAdvanceTimerRef.current) {
@@ -159,6 +192,75 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
       autoAdvanceTimerRef.current = setTimeout(() => {
         setCurrentIndex((prev) => prev + 1);
       }, 200);
+    }
+  };
+
+  const handleOptionTextInput = (opt: ScaleOption, text: string) => {
+    if (!currentQuestion) return;
+    recordAnswer(currentQuestion.id, { value: opt.value, text });
+  };
+
+  const isMultiOptionSelected = (opt: ScaleOption): boolean => {
+    if (!Array.isArray(currentAnswer)) return false;
+    return currentAnswer.some((item) => {
+      const val = item && typeof item === 'object' ? item.value : item;
+      return val === opt.value;
+    });
+  };
+
+  const getMultiOptionText = (opt: ScaleOption): string => {
+    if (!Array.isArray(currentAnswer)) return '';
+    const found = currentAnswer.find((item) => item && typeof item === 'object' && item.value === opt.value);
+    return found ? found.text || '' : '';
+  };
+
+  const handleToggleMultipleChoice = (opt: ScaleOption) => {
+    if (!currentQuestion) return;
+    const currentList: any[] = Array.isArray(currentAnswer) ? [...currentAnswer] : [];
+    const existingIdx = currentList.findIndex((item) => {
+      const val = item && typeof item === 'object' ? item.value : item;
+      return val === opt.value;
+    });
+
+    if (existingIdx >= 0) {
+      currentList.splice(existingIdx, 1);
+    } else {
+      if (opt.hasTextInput) {
+        currentList.push({ value: opt.value, text: '' });
+      } else {
+        currentList.push(opt.value);
+      }
+    }
+    recordAnswer(currentQuestion.id, currentList);
+  };
+
+  const handleMultiOptionTextInput = (opt: ScaleOption, text: string) => {
+    if (!currentQuestion) return;
+    const currentList: any[] = Array.isArray(currentAnswer) ? [...currentAnswer] : [];
+    const existingIdx = currentList.findIndex((item) => {
+      const val = item && typeof item === 'object' ? item.value : item;
+      return val === opt.value;
+    });
+    if (existingIdx >= 0) {
+      currentList[existingIdx] = { value: opt.value, text };
+    } else {
+      currentList.push({ value: opt.value, text });
+    }
+    recordAnswer(currentQuestion.id, currentList);
+  };
+
+  const handleSliderChange = (val: number) => {
+    if (!currentQuestion) return;
+    recordAnswer(currentQuestion.id, val);
+  };
+
+  const handleNumberInput = (val: string) => {
+    if (!currentQuestion) return;
+    if (val === '') {
+      recordAnswer(currentQuestion.id, '');
+    } else {
+      const num = Number(val);
+      recordAnswer(currentQuestion.id, isNaN(num) ? val : num);
     }
   };
 
@@ -189,7 +291,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
     if (submitting) return;
 
     // Check if any questions are unanswered
-    const missing = questions.filter((q) => answers[q.id] === undefined || answers[q.id] === '');
+    const missing = questions.filter((q) => !isQuestionAnswered(answers[q.id]));
     if (missing.length > 0) {
       const firstMissingIdx = questions.findIndex((q) => q.id === missing[0].id);
       setUnansweredCount(missing.length);
@@ -471,58 +573,261 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
                 </div>
 
                 {/* Option / Input list */}
-                {currentQuestion.type === 'single_choice' ? (
+                {currentQuestion.type === 'single_choice' && (
                   <div className="flex flex-col gap-[2px]">
                     {currentQuestion.options.map((opt, optIndex) => {
-                      const isSelected = currentAnswer === opt.value;
+                      const selectedVal =
+                        currentAnswer !== null && typeof currentAnswer === 'object' && !Array.isArray(currentAnswer)
+                          ? currentAnswer.value
+                          : currentAnswer;
+                      const isSelected = selectedVal === opt.value;
                       const cornerRadius = getOptionCornerRadius(optIndex, currentQuestion.options.length);
                       return (
-                        <button
+                        <div
                           key={String(opt.value)}
-                          type="button"
-                          onClick={() => handleSelectOption(opt.value)}
-                          className={`w-full min-h-[56px] px-5 py-4 text-left flex items-center justify-between transition-colors duration-150 cursor-pointer select-none relative overflow-hidden ${cornerRadius} ${
+                          className={`w-full transition-colors duration-150 relative overflow-hidden ${cornerRadius} ${
                             isSelected
                               ? 'bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)]'
                               : 'bg-[var(--md-sys-color-surface-container-low)] hover:bg-[var(--md-sys-color-surface-container)] text-[var(--md-sys-color-on-surface)]'
                           }`}
                         >
-                          <md-ripple></md-ripple>
-                          <span className={`text-base leading-snug pr-4 ${isSelected ? 'font-semibold' : 'font-medium'}`}>
-                            {opt.label}
-                          </span>
+                          <div
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => handleSelectOption(opt)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                handleSelectOption(opt);
+                              }
+                            }}
+                            className="w-full min-h-[56px] px-5 py-4 text-left flex items-center justify-between cursor-pointer select-none relative"
+                          >
+                            <md-ripple></md-ripple>
+                            <span className={`text-base leading-snug pr-4 ${isSelected ? 'font-semibold' : 'font-medium'}`}>
+                              {opt.label}
+                            </span>
 
-                          <md-radio
-                            checked={isSelected}
-                            name={`question_${currentQuestion.id}`}
-                            value={String(opt.value)}
-                            tabIndex={-1}
-                            className="pointer-events-none shrink-0"
-                          ></md-radio>
-                        </button>
+                            <md-radio
+                              checked={isSelected}
+                              name={`question_${currentQuestion.id}`}
+                              value={String(opt.value)}
+                              tabIndex={-1}
+                              className="pointer-events-none shrink-0"
+                            ></md-radio>
+                          </div>
+
+                          {isSelected && opt.hasTextInput && (
+                            <div className="px-5 pb-4 pt-1" onClick={(e) => e.stopPropagation()}>
+                              <md-outlined-text-field
+                                label={opt.textInputLabel || '请详细说明'}
+                                placeholder={opt.textInputPlaceholder || '请输入补充内容...'}
+                                value={typeof currentAnswer === 'object' && !Array.isArray(currentAnswer) ? currentAnswer.text || '' : ''}
+                                className="w-full bg-[var(--md-sys-color-surface)] rounded-xl"
+                                onInput={(e: any) => handleOptionTextInput(opt, e.target.value)}
+                                onKeyDown={(e: any) => {
+                                  if (e.key === 'Enter' && isCurrentAnswered) {
+                                    handleNext();
+                                  }
+                                }}
+                              >
+                                <md-icon slot="leading-icon">edit</md-icon>
+                              </md-outlined-text-field>
+                            </div>
+                          )}
+                        </div>
                       );
                     })}
                   </div>
-                ) : (
-                  /* Text Input Question with MD3 outlined text field */
+                )}
+
+                {currentQuestion.type === 'multiple_choice' && (
+                  <div className="flex flex-col gap-[2px]">
+                    <div className="mb-2 px-1 text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] flex items-center gap-1.5">
+                      <md-icon style={{ fontSize: '16px', width: '16px', height: '16px' } as any}>check_box</md-icon>
+                      <span>本题为多选题，可选择多项（完成后点击下方“下一题”）</span>
+                    </div>
+                    {currentQuestion.options.map((opt, optIndex) => {
+                      const isSelected = isMultiOptionSelected(opt);
+                      const cornerRadius = getOptionCornerRadius(optIndex, currentQuestion.options.length);
+                      return (
+                        <div
+                          key={String(opt.value)}
+                          className={`w-full transition-colors duration-150 relative overflow-hidden ${cornerRadius} ${
+                            isSelected
+                              ? 'bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)]'
+                              : 'bg-[var(--md-sys-color-surface-container-low)] hover:bg-[var(--md-sys-color-surface-container)] text-[var(--md-sys-color-on-surface)]'
+                          }`}
+                        >
+                          <div
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => handleToggleMultipleChoice(opt)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                handleToggleMultipleChoice(opt);
+                              }
+                            }}
+                            className="w-full min-h-[56px] px-5 py-4 text-left flex items-center justify-between cursor-pointer select-none relative"
+                          >
+                            <md-ripple></md-ripple>
+                            <span className={`text-base leading-snug pr-4 ${isSelected ? 'font-semibold' : 'font-medium'}`}>
+                              {opt.label}
+                            </span>
+
+                            <md-checkbox
+                              checked={isSelected}
+                              tabIndex={-1}
+                              className="pointer-events-none shrink-0"
+                            ></md-checkbox>
+                          </div>
+
+                          {isSelected && opt.hasTextInput && (
+                            <div className="px-5 pb-4 pt-1" onClick={(e) => e.stopPropagation()}>
+                              <md-outlined-text-field
+                                label={opt.textInputLabel || '请详细说明'}
+                                placeholder={opt.textInputPlaceholder || '请输入补充内容...'}
+                                value={getMultiOptionText(opt)}
+                                className="w-full bg-[var(--md-sys-color-surface)] rounded-xl"
+                                onInput={(e: any) => handleMultiOptionTextInput(opt, e.target.value)}
+                              >
+                                <md-icon slot="leading-icon">edit</md-icon>
+                              </md-outlined-text-field>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {currentQuestion.type === 'slider' && (
+                  <div className="space-y-6 pt-2">
+                    {/* Score display card */}
+                    <div className="flex flex-col items-center justify-center p-6 bg-[var(--md-sys-color-surface-container-low)] rounded-3xl">
+                      <div className="flex items-baseline gap-1.5 my-1">
+                        <span className="text-5xl font-extrabold text-[var(--md-sys-color-tertiary)] font-mono">
+                          {typeof currentAnswer === 'number' ? currentAnswer : (currentQuestion.min ?? 0)}
+                        </span>
+                        <span className="text-base font-semibold text-[var(--md-sys-color-on-surface-variant)]">
+                          / {currentQuestion.max ?? 10} 分
+                        </span>
+                      </div>
+                      <span className="text-xs font-semibold text-[var(--md-sys-color-on-surface-variant)] mt-1">
+                        当前选择分值
+                      </span>
+                    </div>
+
+                    {/* Seek bar control */}
+                    <div className="px-2 py-2 bg-transparent flex flex-col gap-3">
+                      <md-slider
+                        min={currentQuestion.min ?? 0}
+                        max={currentQuestion.max ?? 10}
+                        step={currentQuestion.step ?? 1}
+                        value={typeof currentAnswer === 'number' ? currentAnswer : (currentQuestion.min ?? 0)}
+                        labeled
+                        ticks
+                        className="w-full"
+                        style={{
+                          width: '100%',
+                          '--md-sys-color-primary': 'var(--md-sys-color-tertiary)',
+                          '--md-sys-color-on-primary': 'var(--md-sys-color-on-tertiary)',
+                          '--md-slider-active-track-color': 'var(--md-sys-color-tertiary)',
+                          '--md-slider-handle-color': 'var(--md-sys-color-tertiary)',
+                          '--md-slider-focus-handle-color': 'var(--md-sys-color-tertiary)',
+                          '--md-slider-hover-handle-color': 'var(--md-sys-color-tertiary)',
+                          '--md-slider-pressed-handle-color': 'var(--md-sys-color-tertiary)',
+                          '--md-slider-hover-state-layer-color': 'var(--md-sys-color-tertiary)',
+                          '--md-slider-pressed-state-layer-color': 'var(--md-sys-color-tertiary)',
+                          '--md-slider-label-container-color': 'var(--md-sys-color-tertiary)',
+                          '--md-slider-label-text-color': 'var(--md-sys-color-on-tertiary)',
+                          '--md-slider-with-tick-marks-active-container-color': 'var(--md-sys-color-on-tertiary)',
+                        } as React.CSSProperties}
+                        onInput={(e: any) => {
+                          const val = Number(e.target.value);
+                          if (!isNaN(val)) {
+                            handleSliderChange(val);
+                          }
+                        }}
+                        onChange={(e: any) => {
+                          const val = Number(e.target.value);
+                          if (!isNaN(val)) {
+                            handleSliderChange(val);
+                          }
+                        }}
+                      ></md-slider>
+
+                      {/* Boundary labels */}
+                      <div className="flex justify-between items-center px-1 text-xs font-medium text-[var(--md-sys-color-on-surface-variant)]">
+                        <span className="max-w-[45%] truncate">{currentQuestion.minLabel || `${currentQuestion.min ?? 0} 分`}</span>
+                        <span className="max-w-[45%] truncate text-right">{currentQuestion.maxLabel || `${currentQuestion.max ?? 10} 分`}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {currentQuestion.type === 'number' && (
                   <div className="space-y-4 pt-2">
                     <md-outlined-text-field
-                      label="填写回答"
-                      value={currentAnswer || ''}
-                      placeholder={currentQuestion.placeholder || '请输入...'}
+                      type="number"
+                      label="数值"
+                      value={currentAnswer !== undefined ? String(currentAnswer) : ''}
+                      placeholder={currentQuestion.placeholder || '请输入数值'}
+                      min={currentQuestion.min}
+                      max={currentQuestion.max}
+                      step={currentQuestion.step ?? 1}
+                      inputmode={currentQuestion.step && currentQuestion.step < 1 ? 'decimal' : 'numeric'}
                       className="w-full"
-                      supporting-text="输入完成后点击下方“下一题”即可继续作答"
-                      onInput={(e: any) => handleTextInput(e.target.value)}
+                      supporting-text={
+                        currentQuestion.min !== undefined && currentQuestion.max !== undefined
+                          ? `有效范围：${currentQuestion.min} ~ ${currentQuestion.max} ${currentQuestion.unit || ''}`
+                          : currentQuestion.placeholder || '请输入数值'
+                      }
+                      onInput={(e: any) => handleNumberInput(e.target.value)}
                       onKeyDown={(e: any) => {
                         if (e.key === 'Enter' && isCurrentAnswered) {
                           handleNext();
                         }
                       }}
                     >
-                      <md-icon slot="leading-icon">edit_note</md-icon>
+                      <md-icon slot="leading-icon">pin</md-icon>
+                      {currentQuestion.unit && (
+                        <span
+                          slot="trailing-icon"
+                          className="text-xs font-semibold text-[var(--md-sys-color-on-surface-variant)] pr-3 select-none"
+                        >
+                          {currentQuestion.unit}
+                        </span>
+                      )}
                     </md-outlined-text-field>
                   </div>
                 )}
+
+                {/* Text Question (Fallback for text and any other types) */}
+                {currentQuestion.type !== 'single_choice' &&
+                  currentQuestion.type !== 'multiple_choice' &&
+                  currentQuestion.type !== 'slider' &&
+                  currentQuestion.type !== 'number' && (
+                    <div className="space-y-4 pt-2">
+                      <md-outlined-text-field
+                        type="text"
+                        label="填写回答"
+                        value={currentAnswer || ''}
+                        placeholder={currentQuestion.placeholder || '请输入...'}
+                        className="w-full"
+                        supporting-text="输入完成后点击下方“下一题”即可继续作答"
+                        onInput={(e: any) => handleTextInput(e.target.value)}
+                        onKeyDown={(e: any) => {
+                          if (e.key === 'Enter' && isCurrentAnswered) {
+                            handleNext();
+                          }
+                        }}
+                      >
+                        <md-icon slot="leading-icon">edit_note</md-icon>
+                      </md-outlined-text-field>
+                    </div>
+                  )}
               </motion.div>
             )}
           </AnimatePresence>

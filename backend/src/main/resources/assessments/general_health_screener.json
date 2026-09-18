@@ -1,0 +1,312 @@
+{
+  "id": "general_health_screener",
+  "title": "心理健康状况综合筛查",
+  "subtitle": "GHQ-12 与身心既往史核对",
+  "estimatedMinutes": 5,
+  "description": "本问卷旨在了解您在最近几周内总的健康状况及既往身心健康经历，请根据您的实际感受与经历如实填写。",
+  "instructions": "本表我们想知道您在最近几周内总的健康状况，请在以下问题的答案中选出最适合您的选项。切记：我们想要知道的是现在和最近的健康状况，而不是过去的健康状况。谢谢您的合作！",
+  "introItems": [
+    {
+      "icon": "health_and_safety",
+      "title": "当前健康状态",
+      "description": "包含 GHQ-12 一般健康问卷（12 题），评估近期睡眠、情绪及应对压力状况。"
+    },
+    {
+      "icon": "history",
+      "title": "既往身心经历",
+      "description": "包含既往求助、就医及身心健康史（12 题），为学校心理健康服务提供参考依据。"
+    },
+    {
+      "icon": "lock",
+      "title": "严格保密",
+      "description": "作答内容严格按照国家及高校健康档案保密管理规范受控存储，仅用于健康监护。"
+    }
+  ],
+  "sections": [
+    {
+      "id": "ghq_12_section",
+      "title": "第一部分：GHQ-12 一般健康问卷",
+      "questions": [
+        {
+          "id": "ghq_1",
+          "text": "1. 您最近几周是否：因担忧而失眠？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "完全没有" },
+            { "value": 1, "label": "与平时一样" },
+            { "value": 2, "label": "比平时多一些" },
+            { "value": 3, "label": "比平时多很多" }
+          ]
+        },
+        {
+          "id": "ghq_2",
+          "text": "2. 您最近几周是否：总是感到有压力？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "完全没有" },
+            { "value": 1, "label": "与平时一样" },
+            { "value": 2, "label": "比平时多一些" },
+            { "value": 3, "label": "比平时多很多" }
+          ]
+        },
+        {
+          "id": "ghq_3",
+          "text": "3. 您最近几周是否：做事时能集中注意力？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "比平时好" },
+            { "value": 1, "label": "与平时一样" },
+            { "value": 2, "label": "比平时差一些" },
+            { "value": 3, "label": "比平时差很多" }
+          ]
+        },
+        {
+          "id": "ghq_4",
+          "text": "4. 您最近几周是否：觉得在生活中是个有用的人？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "有用感比平时好" },
+            { "value": 1, "label": "有用感与平时一样" },
+            { "value": 2, "label": "有用感比平时少一些" },
+            { "value": 3, "label": "有用感比平时少很多" }
+          ]
+        },
+        {
+          "id": "ghq_5",
+          "text": "5. 您最近几周是否：能够面对您的问题？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "比平时好" },
+            { "value": 1, "label": "与平时一样" },
+            { "value": 2, "label": "比平时差一些" },
+            { "value": 3, "label": "比平时差很多" }
+          ]
+        },
+        {
+          "id": "ghq_6",
+          "text": "6. 您最近几周是否：觉得对需要决策的事情能做出决定？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "比平时好" },
+            { "value": 1, "label": "与平时一样" },
+            { "value": 2, "label": "比平时差一些" },
+            { "value": 3, "label": "比平时差很多" }
+          ]
+        },
+        {
+          "id": "ghq_7",
+          "text": "7. 您最近几周是否：觉得不能克服困难？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "完全没有" },
+            { "value": 1, "label": "与平时一样" },
+            { "value": 2, "label": "比平时多一些" },
+            { "value": 3, "label": "比平时多很多" }
+          ]
+        },
+        {
+          "id": "ghq_8",
+          "text": "8. 您最近几周是否：总的来说心情还是愉快的？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "比平时多" },
+            { "value": 1, "label": "与平时一样" },
+            { "value": 2, "label": "比平时少一些" },
+            { "value": 3, "label": "比平时少很多" }
+          ]
+        },
+        {
+          "id": "ghq_9",
+          "text": "9. 您最近几周是否：能够享受日常的生活？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "比平时多" },
+            { "value": 1, "label": "与平时一样" },
+            { "value": 2, "label": "比平时少一些" },
+            { "value": 3, "label": "比平时少很多" }
+          ]
+        },
+        {
+          "id": "ghq_10",
+          "text": "10. 您最近几周是否：觉得心情不愉快和情绪低落？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "完全没有" },
+            { "value": 1, "label": "与平时一样" },
+            { "value": 2, "label": "比平时多一些" },
+            { "value": 3, "label": "比平时多很多" }
+          ]
+        },
+        {
+          "id": "ghq_11",
+          "text": "11. 您最近几周是否：对自己失去信心？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "完全没有" },
+            { "value": 1, "label": "与平时一样" },
+            { "value": 2, "label": "比平时多一些" },
+            { "value": 3, "label": "比平时多很多" }
+          ]
+        },
+        {
+          "id": "ghq_12",
+          "text": "12. 您最近几周是否：想到自己是一个没有价值的人？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "完全没有" },
+            { "value": 1, "label": "与平时一样" },
+            { "value": 2, "label": "比平时多一些" },
+            { "value": 3, "label": "比平时多很多" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "clinical_referral_section",
+      "title": "第二部分：心理健康状况与既往史",
+      "questions": [
+        {
+          "id": "ghq_13",
+          "text": "13. 近一个月您认为您的躯体健康状况：",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "优秀" },
+            { "value": 2, "label": "良好" },
+            { "value": 3, "label": "好" },
+            { "value": 4, "label": "一般" },
+            { "value": 5, "label": "差" }
+          ]
+        },
+        {
+          "id": "ghq_14",
+          "text": "14. 近一个月您认为您的心理健康状况：",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "优秀" },
+            { "value": 2, "label": "良好" },
+            { "value": 3, "label": "好" },
+            { "value": 4, "label": "一般" },
+            { "value": 5, "label": "差" }
+          ]
+        },
+        {
+          "id": "ghq_15",
+          "text": "15. 近一个月您忍不住反反复复做或想一件事情：",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "从无" },
+            { "value": 1, "label": "极少" },
+            { "value": 2, "label": "有时" },
+            { "value": 3, "label": "经常" }
+          ]
+        },
+        {
+          "id": "ghq_16",
+          "text": "16. 近一个月您因特别害怕某件事情而限制活动：",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "从无" },
+            { "value": 1, "label": "极少" },
+            { "value": 2, "label": "有时" },
+            { "value": 3, "label": "经常" }
+          ]
+        },
+        {
+          "id": "ghq_17",
+          "text": "17. 近六个月您感到特别紧张或焦虑：",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "从无" },
+            { "value": 1, "label": "极少" },
+            { "value": 2, "label": "有时" },
+            { "value": 3, "label": "经常" }
+          ]
+        },
+        {
+          "id": "ghq_18",
+          "text": "18. 近一年您是否因喝酒而遇到麻烦？",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "是" },
+            { "value": 0, "label": "否" }
+          ]
+        },
+        {
+          "id": "ghq_19",
+          "text": "19. 您是否有过连续两个星期心情低落、兴趣减退？",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "是" },
+            { "value": 0, "label": "否" }
+          ]
+        },
+        {
+          "id": "ghq_20",
+          "text": "20. 过去任何时候您因精神或心理问题向哪些人寻求过帮助？（可多选）",
+          "type": "multiple_choice",
+          "options": [
+            { "value": "none", "label": "从未求助过" },
+            { "value": "relatives", "label": "亲属" },
+            { "value": "friends", "label": "朋友 / 同事" },
+            { "value": "tcm", "label": "中医" },
+            { "value": "western_doctor", "label": "普通西医" },
+            { "value": "psychiatrist", "label": "精神科大夫" },
+            { "value": "witch_doctor", "label": "巫医" },
+            {
+              "value": "other",
+              "label": "其它",
+              "hasTextInput": true,
+              "textInputPlaceholder": "请具体描述向谁寻求过帮助..."
+            }
+          ]
+        },
+        {
+          "id": "ghq_21",
+          "text": "21. 过去任何时候您因精神或心理问题住过院吗？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "否" },
+            {
+              "value": 1,
+              "label": "是",
+              "hasTextInput": true,
+              "textInputPlaceholder": "请填写最近一次住院的时间和诊断（如：2024年3月，抑郁症）"
+            }
+          ]
+        },
+        {
+          "id": "ghq_22",
+          "text": "22. 过去任何时候您是否有过喝药、割腕等自伤或自杀行为？",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "是" },
+            { "value": 0, "label": "否" }
+          ]
+        },
+        {
+          "id": "ghq_23",
+          "text": "23. 过去任何时候您是否想过自杀或故意伤害自己，不论当时您是否会真的去做？",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "是" },
+            { "value": 0, "label": "否" }
+          ]
+        },
+        {
+          "id": "ghq_24",
+          "text": "24. 您的家族中是否有成员患有精神心理方面的疾病？如抑郁症等。",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "否" },
+            {
+              "value": 1,
+              "label": "是",
+              "hasTextInput": true,
+              "textInputPlaceholder": "请描述您与该成员的关系及诊断（如：母亲，抑郁症）"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -20,15 +20,17 @@ class AssessmentCatalogLoaderTest {
     }
 
     @Test
-    fun `testLoadCatalog creates exactly 9 milestones with demographics pinned first`() {
+    fun `testLoadCatalog creates exactly 10 milestones with demographics and general health screener pinned first`() {
         val details = catalogLoader.getScaleDetails()
-        assertEquals(9, details.size, "Should contain exactly 9 milestone scales (1 demographic + 8 batteries)")
+        assertEquals(10, details.size, "Should contain exactly 10 milestone scales (2 standalone surveys + 8 batteries)")
 
         val codes = catalogLoader.getScaleCodes()
         assertEquals("demographics_survey", codes[0], "Card 0 must be demographics_survey")
+        assertEquals("general_health_screener", codes[1], "Card 1 must be general_health_screener")
 
         val expectedBatteries = listOf(
             "demographics_survey",
+            "general_health_screener",
             "MENTAL_HEALTH_ASSESSMENT",
             "SLEEP_ASSESSMENT",
             "DIGITAL_HABITS_DAILY_BEHAVIORS_ASSESSMENT",
@@ -110,7 +112,9 @@ class AssessmentCatalogLoaderTest {
         assertEquals("scl_90", catalogLoader.lookupScaleCodeForQuestion("scl90_1"))
         assertEquals("sleep_disorder", catalogLoader.lookupScaleCodeForQuestion("sleep_1"))
         assertEquals("psqi", catalogLoader.lookupScaleCodeForQuestion("psqi_1"))
-        assertEquals("demographics_survey", catalogLoader.lookupScaleCodeForQuestion("demo_gender"))
+        assertEquals("demographics_survey", catalogLoader.lookupScaleCodeForQuestion("G1"))
+        assertEquals("general_health_screener", catalogLoader.lookupScaleCodeForQuestion("ghq_1"))
+        assertEquals("general_health_screener", catalogLoader.lookupScaleCodeForQuestion("ghq_22"))
         assertNull(catalogLoader.lookupScaleCodeForQuestion("non_existent_question"))
     }
 
@@ -127,15 +131,51 @@ class AssessmentCatalogLoaderTest {
     }
 
     @Test
-    fun `testDemographicsDetail has sections and intro items from JSON`() {
+    fun `testDemographicsDetail has 3 sections and rich attributes from JSON`() {
         val demo = catalogLoader.getScaleDetail("demographics_survey")
         assertNotNull(demo)
         demo!!
 
-        assertEquals(8, demo.questions.size)
-        assertEquals(1, demo.sections.size)
-        assertEquals("demographics_section", demo.sections[0].code)
+        assertEquals(3, demo.sections.size, "Demographics has 3 sections (Basic info, General status, Lifestyle)")
+        assertEquals("demo_basic_info", demo.sections[0].code)
+        assertEquals("demo_general_status", demo.sections[1].code)
+        assertEquals("demo_lifestyle_habits", demo.sections[2].code)
         assertEquals(3, demo.introItems.size, "Demographics has 3 intro items in JSON")
+
+        // Test slider question G14_1
+        val g14 = demo.questions.first { it.id == "G14_1" }
+        assertEquals("slider", g14.type)
+        assertEquals(1.0, g14.min)
+        assertEquals(10.0, g14.max)
+
+        // Test numeric question G1b_height
+        val height = demo.questions.first { it.id == "G1b_height" }
+        assertEquals("number", height.type)
+        assertEquals("cm", height.unit)
+
+        // Test option with text input
+        val religion = demo.questions.first { it.id == "G7" }
+        val otherOpt = religion.options.first { it.value == "other" }
+        assertTrue(otherOpt.hasTextInput)
+    }
+
+    @Test
+    fun `testGeneralHealthScreenerDetail has 2 sections with GHQ12 and clinical referral items`() {
+        val ghq = catalogLoader.getScaleDetail("general_health_screener")
+        assertNotNull(ghq)
+        ghq!!
+
+        assertEquals(2, ghq.sections.size, "GHQ Screener has 2 sections")
+        assertEquals("ghq_12_section", ghq.sections[0].code)
+        assertEquals(12, ghq.sections[0].questionCount)
+        assertEquals("clinical_referral_section", ghq.sections[1].code)
+        assertEquals(12, ghq.sections[1].questionCount)
+        assertEquals(24, ghq.questions.size)
+
+        // Test high-risk suicide item ghq_22
+        val suicideItem = ghq.questions.first { it.id == "ghq_22" }
+        assertEquals("single_choice", suicideItem.type)
+        assertEquals(2, suicideItem.options.size)
     }
 
     @Test

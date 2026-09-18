@@ -16,4 +16,17 @@ describe('navigationTabStyles', () => {
     });
     expect(hasPillStyle).toBe(true);
   });
+
+  it('injects filled style for active-icon into MdNavigationTab', () => {
+    configureNavigationTabStyles();
+    const tabClass = MdNavigationTab as any;
+    const styles = tabClass.elementStyles || tabClass.styles;
+    expect(styles).toBeDefined();
+
+    const hasFilledActiveStyle = styles.some((s: any) => {
+      const text = s?.cssText || s?.toString?.() || '';
+      return text.includes('.md3-navigation-tab__icon--active') && text.includes("'FILL' 1");
+    });
+    expect(hasFilledActiveStyle).toBe(true);
+  });
 });

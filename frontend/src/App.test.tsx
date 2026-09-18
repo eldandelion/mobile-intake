@@ -187,4 +187,30 @@ describe('App Top Bar & Navigation', () => {
     expect(header?.querySelector('h1')).not.toBeNull();
     expect(header?.querySelector('[role="group"]')).toBeNull();
   });
+
+  it('renders bottom navigation tabs with filled active icons and outlined inactive icons', async () => {
+    const { container } = render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { level: 1, name: '还有 2 项任务待完成' })).toBeDefined();
+    });
+
+    const navTabs = container.querySelectorAll('md-navigation-tab');
+    expect(navTabs.length).toBe(2);
+
+    navTabs.forEach((tab) => {
+      const activeIcon = tab.querySelector('md-icon[slot="active-icon"]');
+      const inactiveIcon = tab.querySelector('md-icon[slot="inactive-icon"]');
+
+      expect(activeIcon).not.toBeNull();
+      expect(inactiveIcon).not.toBeNull();
+
+      // Active icon must have filled attribute and font-variation-settings for 'FILL' 1
+      expect(activeIcon?.hasAttribute('filled')).toBe(true);
+      expect((activeIcon as HTMLElement).style.fontVariationSettings).toContain("'FILL' 1");
+
+      // Inactive icon must NOT have filled attribute
+      expect(inactiveIcon?.hasAttribute('filled')).toBe(false);
+    });
+  });
 });

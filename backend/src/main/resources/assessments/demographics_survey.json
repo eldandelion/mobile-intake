@@ -1,36 +1,65 @@
 {
   "id": "demographics_survey",
   "title": "个人基本信息核对",
-  "subtitle": "新生入学档案与健康信息登记",
-  "estimatedMinutes": 3,
-  "description": "请认真核对并如实填写您的个人基本档案与紧急联系人信息，该信息仅用于校方档案与心理健康监护备案。",
-  "instructions": "请仔细核对并如实填报您的个人身份信息、家庭住址与紧急联系人电话。所填信息将记入学生入学健康档案。",
+  "subtitle": "新生入学健康与背景档案登记",
+  "estimatedMinutes": 8,
+  "description": "本问卷包括个人基本资料、一般成长情况及生活健康习惯，请按照您自己的实际情况认真填写。",
+  "instructions": "该问卷包括一般资料及一些与心理健康有关的问题。请按照您自己对这些问题的实际看法和经历认真填写。所有问题的答案没有对错之分，您不必有任何顾虑。如果您对某个问题的答案无法确定，请您选择最接近的答案。谢谢合作！",
   "introItems": [
     {
       "icon": "badge",
-      "title": "登记内容",
-      "description": "包含个人基础档案（性别、民族、身份证号、家庭住址）及直系亲属紧急联系人核对，共 6 项。"
+      "title": "基本信息与就读情况",
+      "description": "确认学生基本身份、班级学号与在校联络档案。"
     },
     {
-      "icon": "verified",
-      "title": "如实核对",
-      "description": "所填信息将作为您在校期间的重要健康档案基础及突发紧急状况时的联络途径，请务必准确填写。"
+      "icon": "home",
+      "title": "成长与家庭背景",
+      "description": "涵盖家庭结构、常住地区、父母教育及成长经历。"
     },
     {
-      "icon": "lock",
-      "title": "隐私保密",
-      "description": "所有身份及联络信息均按照高校学生档案管理规定严格受控加密存储，绝不外泄。"
+      "icon": "vital_signs",
+      "title": "健康生活与身心习惯",
+      "description": "涉及运动、睡眠、作息、慢性疾病及既往健康服务体验。"
     }
   ],
   "sections": [
     {
-      "id": "demographics_section",
-      "title": "基本信息",
+      "id": "demo_basic_info",
+      "title": "第一部分：基本信息",
       "questions": [
         {
-          "id": "demo_gender",
-          "field": "gender",
-          "text": "1. 您的性别是？",
+          "id": "demo_name",
+          "text": "1. 您的姓名：",
+          "type": "text",
+          "placeholder": "请输入真实姓名"
+        },
+        {
+          "id": "demo_phone",
+          "text": "2. 联系电话：",
+          "type": "text",
+          "placeholder": "11位手机号码"
+        },
+        {
+          "id": "demo_class",
+          "text": "3. 所在班级与专业：",
+          "type": "text",
+          "placeholder": "例如：计算机学院 软工2601班"
+        },
+        {
+          "id": "demo_student_number",
+          "text": "4. 学号：",
+          "type": "text",
+          "placeholder": "请输入学生学号"
+        }
+      ]
+    },
+    {
+      "id": "demo_general_status",
+      "title": "第二部分：一般情况",
+      "questions": [
+        {
+          "id": "G1",
+          "text": "G1. 你出生时的生理性别是：",
           "type": "single_choice",
           "options": [
             { "value": 1, "label": "男" },
@@ -38,61 +67,610 @@
           ]
         },
         {
-          "id": "demo_ethnicity",
-          "field": "ethnicity",
-          "text": "2. 您的民族是？",
+          "id": "G1a",
+          "text": "G1a. 你认为你自己的性别是：",
           "type": "single_choice",
           "options": [
-            { "value": 1, "label": "汉族" },
-            { "value": 2, "label": "回族" },
-            { "value": 3, "label": "满族" },
-            { "value": 4, "label": "维吾尔族" },
-            { "value": 5, "label": "壮族" },
-            { "value": 6, "label": "蒙古族" },
-            { "value": 7, "label": "其他少数民族" }
+            { "value": 1, "label": "男" },
+            { "value": 2, "label": "女" },
+            { "value": 3, "label": "都不是" },
+            { "value": 4, "label": "不确定" }
           ]
         },
         {
-          "id": "demo_id_card",
-          "field": "idCardNumber",
-          "text": "3. 请输入您的居民身份证号（18位）：",
-          "type": "text",
-          "placeholder": "请输入18位身份证号码"
+          "id": "G1b_height",
+          "text": "G1b. 你的身高（厘米）：",
+          "type": "number",
+          "min": 50,
+          "max": 250,
+          "step": 1,
+          "unit": "cm",
+          "placeholder": "例如：175"
         },
         {
-          "id": "demo_major",
-          "field": "major",
-          "text": "4. 您所就读的院系与专业名称：",
-          "type": "text",
-          "placeholder": "例如：计算机学院 软件工程"
+          "id": "G1b_weight",
+          "text": "G1b. 你的体重（公斤）：",
+          "type": "number",
+          "min": 20,
+          "max": 300,
+          "step": 0.5,
+          "unit": "kg",
+          "placeholder": "例如：65"
         },
         {
-          "id": "demo_email",
-          "field": "email",
-          "text": "5. 您的常用电子邮箱：",
-          "type": "text",
-          "placeholder": "例如：student@univ.edu.cn"
+          "id": "G2",
+          "text": "G2. 你的年龄（周岁）：",
+          "type": "number",
+          "min": 10,
+          "max": 100,
+          "step": 1,
+          "unit": "岁",
+          "placeholder": "例如：18"
         },
         {
-          "id": "demo_home_address",
-          "field": "homeAddress",
-          "text": "6. 您的家庭常住地址：",
-          "type": "text",
-          "placeholder": "省、市、区（县）及详细居住地址"
+          "id": "G3",
+          "text": "G3. 目前就读年级：",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "初中（1、2、3年级）" },
+            { "value": 2, "label": "高中（1、2、3年级）" },
+            { "value": 3, "label": "本科（1、2、3、4、5年级）" },
+            { "value": 4, "label": "研究生及以上" }
+          ]
         },
         {
-          "id": "demo_emergency_contact",
-          "field": "emergencyContactName",
-          "text": "7. 紧急联系人姓名：",
-          "type": "text",
-          "placeholder": "例如：父亲/母亲姓名"
+          "id": "G4",
+          "text": "G4. 你的民族：",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "汉族" },
+            { "value": 2, "label": "少数民族" }
+          ]
         },
         {
-          "id": "demo_emergency_phone",
-          "field": "emergencyContactPhone",
-          "text": "8. 紧急联系人联系电话：",
+          "id": "G5",
+          "text": "G5. 你属于哪一类：",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "独生子女" },
+            { "value": 2, "label": "有兄弟姐妹" },
+            { "value": 3, "label": "双胞胎" }
+          ]
+        },
+        {
+          "id": "G6",
+          "text": "G6. 你的常住地区：",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "城市" },
+            { "value": 2, "label": "农村" },
+            { "value": 3, "label": "城乡结合部" }
+          ]
+        },
+        {
+          "id": "G7",
+          "text": "G7. 你的宗教信仰：",
+          "type": "single_choice",
+          "options": [
+            { "value": "none", "label": "无" },
+            { "value": "buddhism", "label": "佛教" },
+            { "value": "christianity", "label": "基督教" },
+            { "value": "islam", "label": "伊斯兰教" },
+            { "value": "catholicism", "label": "天主教" },
+            {
+              "value": "other",
+              "label": "其他",
+              "hasTextInput": true,
+              "textInputPlaceholder": "请说明具体宗教信仰..."
+            }
+          ]
+        },
+        {
+          "id": "G8",
+          "text": "G8. 你目前的居住方式是：",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "独居" },
+            { "value": 2, "label": "住处经常变动，多数时间和陌生人住在一起" },
+            { "value": 3, "label": "和同学、同事或朋友住在一起" },
+            { "value": 4, "label": "和家人住在一起" }
+          ]
+        },
+        {
+          "id": "G9",
+          "text": "G9. 你的家庭结构是：",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "大家庭（三代一起居住）" },
+            { "value": 2, "label": "核心家庭（父母、子女居住）" },
+            { "value": 3, "label": "单亲家庭（离婚父母、子女）" },
+            { "value": 4, "label": "留守家庭（祖孙居住）" },
+            { "value": 5, "label": "残缺家庭（丧偶父母、子女）" },
+            {
+              "value": "other",
+              "label": "其他",
+              "hasTextInput": true,
+              "textInputPlaceholder": "请具体说明家庭结构..."
+            }
+          ]
+        },
+        {
+          "id": "G10",
+          "text": "G10. 你父亲的最高文化程度：",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "小学未毕业" },
+            { "value": 2, "label": "小学" },
+            { "value": 3, "label": "初中" },
+            { "value": 4, "label": "高中/职高/中专" },
+            { "value": 5, "label": "大专/本科" },
+            { "value": 6, "label": "硕士及以上" }
+          ]
+        },
+        {
+          "id": "G11",
+          "text": "G11. 你母亲的受教育程度：",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "小学未毕业" },
+            { "value": 2, "label": "小学" },
+            { "value": 3, "label": "初中" },
+            { "value": 4, "label": "高中/职高/中专" },
+            { "value": 5, "label": "大专/本科" },
+            { "value": 6, "label": "硕士及以上" }
+          ]
+        },
+        {
+          "id": "G12",
+          "text": "G12. 你父母的婚姻状况：",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "关系和睦" },
+            { "value": 2, "label": "关系不和（吵架、家庭暴力等）" },
+            { "value": 3, "label": "分居" },
+            { "value": 4, "label": "离异" },
+            { "value": 5, "label": "丧偶" },
+            { "value": 6, "label": "再婚" }
+          ]
+        },
+        {
+          "id": "G13",
+          "text": "G13. 你的家族中有无精神疾病患者？（包括父母、兄弟姐妹、祖父母等）",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "有" },
+            { "value": 0, "label": "没有" }
+          ]
+        },
+        {
+          "id": "G14_1",
+          "text": "G14.1 请根据所在省份社会经济情况，判断家庭经济地位处于何种位置（1-10分）：",
+          "type": "slider",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "minLabel": "1分 最差 / 极困难",
+          "maxLabel": "10分 最好 / 最优越"
+        },
+        {
+          "id": "G14_2",
+          "text": "G14.2 与学校同学比较，评价自己的地位在下面尺度何种位置（1-10分）：",
+          "type": "slider",
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "minLabel": "成绩差",
+          "maxLabel": "受人尊敬"
+        },
+        {
+          "id": "G15",
+          "text": "G15. 你目前或既往被别的同学或其他人欺负过吗？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "没有" },
+            { "value": 1, "label": "有 1、2 次" },
+            { "value": 2, "label": "有几次" },
+            { "value": 3, "label": "大约每周一次" },
+            { "value": 4, "label": "大约每周数次" }
+          ]
+        },
+        {
+          "id": "G16",
+          "text": "G16. 你目前或既往是否欺负过或参与欺负过别的同学？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "没有" },
+            { "value": 1, "label": "有 1、2 次" },
+            { "value": 2, "label": "有几次" },
+            { "value": 3, "label": "大约每周一次" },
+            { "value": 4, "label": "大约每周数次" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "demo_lifestyle_habits",
+      "title": "第三部分：生活习惯",
+      "questions": [
+        {
+          "id": "G17",
+          "text": "G17. 过去一年，你喝酒的频率如何？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "一次都没喝" },
+            { "value": 1, "label": "只喝过几次" },
+            { "value": 2, "label": "平均每个月喝酒 2-3 次" },
+            { "value": 3, "label": "几乎天天喝" }
+          ]
+        },
+        {
+          "id": "G17a",
+          "text": "G17a. 你从多少岁开始每星期喝酒的？（若不喝酒请填 0）：",
+          "type": "number",
+          "min": 0,
+          "max": 80,
+          "step": 1,
+          "unit": "岁",
+          "placeholder": "例如：16"
+        },
+        {
+          "id": "G17b",
+          "text": "G17b. 过去一年中，你一个星期通常有几天会喝酒？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "从不饮酒" },
+            { "value": 1, "label": "1-2 天/星期" },
+            { "value": 2, "label": "3-5 天/星期" },
+            { "value": 3, "label": "几乎每天喝酒" }
+          ]
+        },
+        {
+          "id": "G17c",
+          "text": "G17c. 你是否有过每星期至少喝酒一次，连续喝了超过一年的情况？",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "有" },
+            { "value": 0, "label": "没有" }
+          ]
+        },
+        {
+          "id": "G18",
+          "text": "G18. 你现在的吸烟状态属于下列哪种情况？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "从来不吸" },
+            { "value": 1, "label": "以前吸烟，现在戒了" },
+            { "value": 2, "label": "偶尔吸（平均每周不超过 1 次）" },
+            { "value": 3, "label": "每天吸烟" }
+          ]
+        },
+        {
+          "id": "G18_cigs",
+          "text": "G18. 每天平均抽烟多少根？（从来不吸请填 0）：",
+          "type": "number",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "根",
+          "placeholder": "0"
+        },
+        {
+          "id": "G18_years",
+          "text": "G18. 抽烟已持续多少年？（从来不吸请填 0）：",
+          "type": "number",
+          "min": 0,
+          "max": 60,
+          "step": 1,
+          "unit": "年",
+          "placeholder": "0"
+        },
+        {
+          "id": "G18a",
+          "text": "G18a. 你母亲是否吸烟？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "不吸" },
+            { "value": 1, "label": "吸" }
+          ]
+        },
+        {
+          "id": "G_somatic_illness",
+          "text": "新增：你是否有躯体方面的疾病，如糖尿病、心血管、肝肾或身体其他部位的疾病？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "没有" },
+            {
+              "value": 1,
+              "label": "有",
+              "hasTextInput": true,
+              "textInputPlaceholder": "请具体列出疾病名称..."
+            }
+          ]
+        },
+        {
+          "id": "G_longterm_meds",
+          "text": "新增：您是否有长期服用药物？如果是，请列举出药物名称及服药周期。",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "没有" },
+            {
+              "value": 1,
+              "label": "有",
+              "hasTextInput": true,
+              "textInputPlaceholder": "例如：氟西汀 2024年1月至2024年10月"
+            }
+          ]
+        },
+        {
+          "id": "G19",
+          "text": "G19. 你有没有吸食或注射过毒品？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "没有" },
+            { "value": 1, "label": "有" }
+          ]
+        },
+        {
+          "id": "G20",
+          "text": "G20. 周末，你每天平均使用手机、电脑、平板等电子产品多长时间？",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "1 个小时以下" },
+            { "value": 2, "label": "1-3 个小时" },
+            { "value": 3, "label": "3-5 小时" },
+            { "value": 4, "label": "5-8 小时" },
+            { "value": 5, "label": "8 小时以上" }
+          ]
+        },
+        {
+          "id": "G21",
+          "text": "G21. 周一至周五，你每天平均使用手机、电脑、平板等电子产品多长时间？",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "1 个小时以下" },
+            { "value": 2, "label": "1-3 个小时" },
+            { "value": 3, "label": "3-5 小时" },
+            { "value": 4, "label": "5-8 小时" },
+            { "value": 5, "label": "8 小时以上" }
+          ]
+        },
+        {
+          "id": "G22",
+          "text": "G22. 你有锻炼身体的习惯吗？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "从不锻炼" },
+            { "value": 1, "label": "1-3 次/月" },
+            { "value": 2, "label": "1-2 次/周" },
+            { "value": 3, "label": "3-5 次/周" },
+            { "value": 4, "label": "几乎每天" }
+          ]
+        },
+        {
+          "id": "G23",
+          "text": "G23. 你主要的锻炼方式是？（可多选）",
+          "type": "multiple_choice",
+          "options": [
+            { "value": "taichi", "label": "打太极" },
+            { "value": "running", "label": "跑步" },
+            { "value": "ball_sports", "label": "球类运动（乒乓球、篮球等）" },
+            { "value": "walking", "label": "走路 / 散步" },
+            { "value": "swimming", "label": "游泳" },
+            {
+              "value": "other",
+              "label": "其他",
+              "hasTextInput": true,
+              "textInputPlaceholder": "请说明主要锻炼项目..."
+            }
+          ]
+        },
+        {
+          "id": "G24_1",
+          "text": "G24.1 最近一个星期，你锻炼的时间总共大约多少小时？",
+          "type": "number",
+          "min": 0,
+          "max": 100,
+          "step": 0.5,
+          "unit": "小时",
+          "placeholder": "例如：3.5"
+        },
+        {
+          "id": "G_sedentary",
+          "text": "新增：最近一周，您花在坐姿状态（包括学习、伏案工作、坐姿闲聊等）的时间总共大约多少小时？",
+          "type": "number",
+          "min": 0,
+          "max": 168,
+          "step": 1,
+          "unit": "小时",
+          "placeholder": "例如：40"
+        },
+        {
+          "id": "G25",
+          "text": "G25. 你在写字、拿筷子吃饭等活动时通常使用哪只手？",
+          "type": "single_choice",
+          "options": [
+            { "value": "right", "label": "右手" },
+            { "value": "left", "label": "左手" }
+          ]
+        },
+        {
+          "id": "G26",
+          "text": "G26. 你平常吃饭会点外卖吗？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "从不点外卖" },
+            { "value": 1, "label": "1-3 次/月" },
+            { "value": 2, "label": "1-2 次/周" },
+            { "value": 3, "label": "3-5 次/周" },
+            { "value": 4, "label": "几乎每天" }
+          ]
+        },
+        {
+          "id": "G27",
+          "text": "G27. 请问你现在存在身体某部位的疼痛吗？（0为无痛，10为剧痛）：",
+          "type": "slider",
+          "min": 0,
+          "max": 10,
+          "step": 1,
+          "minLabel": "0分 无痛",
+          "maxLabel": "10分 剧痛"
+        },
+        {
+          "id": "G28",
+          "text": "G28. 你主要由谁抚养长大？（单选）",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "母亲和父亲" },
+            { "value": 2, "label": "父亲或母亲" },
+            { "value": 3, "label": "爷爷奶奶 / 外公外婆" },
+            { "value": 4, "label": "其他人" }
+          ]
+        },
+        {
+          "id": "G29",
+          "text": "G29. 你的童年时期，你的父母是否分居或离婚？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "否" },
+            { "value": 1, "label": "7 岁前父母分居 / 离婚" },
+            { "value": 2, "label": "7-18 岁前父母分居 / 离婚" }
+          ]
+        },
+        {
+          "id": "G30",
+          "text": "G30. 你觉得自己的童年幸福吗？",
+          "type": "single_choice",
+          "options": [
+            { "value": 5, "label": "非常幸福" },
+            { "value": 4, "label": "幸福" },
+            { "value": 3, "label": "一般" },
+            { "value": 2, "label": "不幸福" },
+            { "value": 1, "label": "非常不幸福" }
+          ]
+        },
+        {
+          "id": "G31",
+          "text": "G31. 你有没有因为压力、睡眠、情绪等问题看过精神心理门诊或心理咨询师？",
+          "type": "single_choice",
+          "options": [
+            { "value": 0, "label": "没有" },
+            { "value": 1, "label": "有" }
+          ]
+        },
+        {
+          "id": "G31a",
+          "text": "G31a. 你因为什么问题去看精神心理门诊或心理咨询师？（可多选）",
+          "type": "multiple_choice",
+          "options": [
+            { "value": "sleep", "label": "睡眠不好" },
+            { "value": "emotion", "label": "情绪问题 / 压力大" },
+            { "value": "school_avoidance", "label": "厌学" },
+            { "value": "sensation", "label": "感觉异常" },
+            { "value": "others_advice", "label": "他人建议" },
+            {
+              "value": "other",
+              "label": "其他",
+              "hasTextInput": true,
+              "textInputPlaceholder": "请说明具体原因..."
+            }
+          ]
+        },
+        {
+          "id": "G31b",
+          "text": "G31b. 你去寻求精神卫生服务的机构是？",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "综合医院精神科" },
+            { "value": 2, "label": "私立医院 / 诊所" },
+            { "value": 3, "label": "社区医院" },
+            { "value": 4, "label": "精神专科医院" },
+            { "value": 5, "label": "心理咨询机构" },
+            { "value": 6, "label": "电话 / 网络咨询" }
+          ]
+        },
+        {
+          "id": "G31c",
+          "text": "G31c. 最近一次看门诊是什么时间？",
           "type": "text",
-          "placeholder": "11位手机号码"
+          "placeholder": "例如：2024年10月（如未曾就诊可填“无”）"
+        },
+        {
+          "id": "G31d",
+          "text": "G31d. 具体诊断是：",
+          "type": "single_choice",
+          "options": [
+            { "value": "none", "label": "无 / 未做确诊" },
+            { "value": "depression", "label": "抑郁症" },
+            { "value": "bipolar", "label": "双相情感障碍" },
+            { "value": "ocd", "label": "强迫症" },
+            { "value": "anxiety", "label": "焦虑症" },
+            { "value": "schizophrenia", "label": "精神分裂症" },
+            { "value": "unknown", "label": "不详" },
+            {
+              "value": "other",
+              "label": "其他",
+              "hasTextInput": true,
+              "textInputPlaceholder": "请写出具体诊断..."
+            }
+          ]
+        },
+        {
+          "id": "G31e",
+          "text": "G31e. 是否接受过以下治疗？（可多选）",
+          "type": "multiple_choice",
+          "options": [
+            { "value": "none", "label": "未接受过治疗" },
+            { "value": "medication", "label": "药物治疗" },
+            { "value": "psychotherapy", "label": "心理治疗" },
+            { "value": "physical_therapy", "label": "物理治疗" },
+            { "value": "tcm", "label": "中医药治疗" },
+            {
+              "value": "other",
+              "label": "其他",
+              "hasTextInput": true,
+              "textInputPlaceholder": "请列举其他治疗手段..."
+            }
+          ]
+        },
+        {
+          "id": "G32",
+          "text": "G32. 你认为自己当前是否需要精神心理卫生服务？",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "需要" },
+            { "value": 0, "label": "不需要" }
+          ]
+        },
+        {
+          "id": "G33",
+          "text": "G33. 如果你目前或未来察觉到自己有精神心理方面的问题，是否会寻求专业人员的帮助？",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "会" },
+            { "value": 2, "label": "不太确定" },
+            { "value": 0, "label": "不会" }
+          ]
+        },
+        {
+          "id": "G34_age",
+          "text": "G34. （女性回答）第一次来月经的年龄是多大（周岁）？（若至今未来月经填99，男性填0）：",
+          "type": "number",
+          "min": 0,
+          "max": 99,
+          "step": 1,
+          "unit": "岁",
+          "placeholder": "若未来月经填99，男性填0"
+        },
+        {
+          "id": "G34_timing",
+          "text": "G34. 你认为首次月经的时间：",
+          "type": "single_choice",
+          "options": [
+            { "value": 1, "label": "比同龄人早" },
+            { "value": 2, "label": "和同龄人差不多" },
+            { "value": 3, "label": "比同龄人晚" },
+            { "value": 0, "label": "不适用（男性）" }
+          ]
         }
       ]
     }

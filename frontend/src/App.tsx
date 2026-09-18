@@ -177,14 +177,14 @@ function AppContent() {
             label="问卷测评"
             onClick={() => handleTabChange(0)}
           >
-            <md-icon slot="active-icon">assignment</md-icon>
+            <md-icon slot="active-icon" filled style={{ fontVariationSettings: "'FILL' 1" } as any}>assignment</md-icon>
             <md-icon slot="inactive-icon">assignment</md-icon>
           </md-navigation-tab>
           <md-navigation-tab
             label="个人中心"
             onClick={() => handleTabChange(1)}
           >
-            <md-icon slot="active-icon">account_circle</md-icon>
+            <md-icon slot="active-icon" filled style={{ fontVariationSettings: "'FILL' 1" } as any}>account_circle</md-icon>
             <md-icon slot="inactive-icon">account_circle</md-icon>
           </md-navigation-tab>
         </md-navigation-bar>

@@ -56,14 +56,14 @@ class CsvExportService(
                 emptyMap()
             }
 
-            val genderRaw = answers["demo_gender"] ?: answers["gender"]
+            val genderRaw = answers["G1"] ?: answers["demo_gender"] ?: answers["gender"]
             val gender = when (genderRaw?.toString()) {
                 "1", "男" -> "男"
                 "2", "女" -> "女"
                 else -> ""
             }
 
-            val ethRaw = answers["demo_ethnicity"] ?: answers["ethnicity"]
+            val ethRaw = answers["G4"] ?: answers["demo_ethnicity"] ?: answers["ethnicity"]
             val ethnicity = when {
                 ethRaw is Number -> ethnicityMap[ethRaw.toInt()] ?: "汉族"
                 ethRaw != null && ethRaw.toString().toIntOrNull() != null -> ethnicityMap[ethRaw.toString().toInt()] ?: "汉族"
@@ -71,7 +71,7 @@ class CsvExportService(
                 else -> "汉族"
             }
 
-            val major = answers["demo_major"] ?: answers["major"] ?: "待确认专业"
+            val major = answers["demo_class"] ?: answers["demo_major"] ?: answers["major"] ?: "待确认专业"
             val enrollmentDate = "2026-09-01"
             val idCardNumber = answers["demo_id_card"] ?: answers["idCardNumber"] ?: ""
             val email = answers["demo_email"] ?: answers["email"] ?: "${s.studentNumber}@univ.edu.cn"

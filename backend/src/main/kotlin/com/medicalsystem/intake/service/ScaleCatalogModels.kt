@@ -2,7 +2,10 @@ package com.medicalsystem.intake.service
 
 data class ScaleOption(
     val value: Any,
-    val label: String
+    val label: String,
+    val hasTextInput: Boolean = false,
+    val textInputPlaceholder: String? = null,
+    val textInputLabel: String? = null
 )
 
 data class ScaleQuestion(
@@ -11,6 +14,12 @@ data class ScaleQuestion(
     val orderNum: Int,
     val type: String = "single_choice",
     val placeholder: String? = null,
+    val min: Double? = null,
+    val max: Double? = null,
+    val step: Double? = null,
+    val unit: String? = null,
+    val minLabel: String? = null,
+    val maxLabel: String? = null,
     val options: List<ScaleOption> = emptyList(),
     val sectionCode: String? = null,
     val sectionTitle: String? = null

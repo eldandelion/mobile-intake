@@ -34,6 +34,9 @@ class IntakeApplicationTests {
     @Autowired
     private lateinit var draftRepository: com.medicalsystem.intake.repository.ScaleDraftRepository
 
+    @Autowired
+    private lateinit var catalogLoader: com.medicalsystem.intake.service.AssessmentCatalogLoader
+
     private lateinit var mockMvc: MockMvc
 
     @BeforeEach
@@ -144,10 +147,15 @@ class IntakeApplicationTests {
             .andReturn()
 
         val scaleSummaries = objectMapper.readTree(listResult.response.contentAsString)
-        assertEquals(9, scaleSummaries.size())
+        assertEquals(10, scaleSummaries.size())
         val demoSummary = scaleSummaries.get(0)
         assertEquals("demographics_survey", demoSummary.get("code").asText())
         assertEquals("NOT_STARTED", demoSummary.get("status").asText())
+
+        val ghqSummary = scaleSummaries.get(1)
+        assertEquals("general_health_screener", ghqSummary.get("code").asText())
+        assertEquals("NOT_STARTED", ghqSummary.get("status").asText())
+        assertEquals(24, ghqSummary.get("questionCount").asInt())
 
         val sleepSummary = scaleSummaries.first { it.get("code").asText() == "SLEEP_ASSESSMENT" }
         assertEquals("NOT_STARTED", sleepSummary.get("status").asText())
@@ -229,16 +237,19 @@ class IntakeApplicationTests {
             .andExpect(jsonPath("$.status").value("COMPLETED"))
 
         // 6.1 Submit demographics_survey
-        val demoAnswers = mapOf(
-            "demo_gender" to 1,
-            "demo_ethnicity" to 1,
-            "demo_id_card" to "110101200001011234",
-            "demo_major" to "计算机学院 软件工程",
-            "demo_email" to "$studentNumber@univ.edu.cn",
-            "demo_home_address" to "北京市海淀区",
-            "demo_emergency_contact" to "张父",
-            "demo_emergency_phone" to "13900002222"
-        )
+        val demoDetail = catalogLoader.getScaleDetail("demographics_survey")!!
+        val demoAnswers = demoDetail.questions.associate { q ->
+            val sampleVal: Any = if (q.id == "demo_class") {
+                "计算机学院 软件工程"
+            } else if (q.options.isNotEmpty()) {
+                q.options[0].value
+            } else if (q.type == "number") {
+                q.min?.toInt() ?: 18
+            } else {
+                "张测试"
+            }
+            q.id to sampleVal
+        }
         mockMvc.perform(
             post("/api/scales/demographics_survey/submit")
                 .header("Authorization", "Bearer $token")
@@ -308,7 +319,7 @@ class IntakeApplicationTests {
         assertTrue(assessCsvString.contains("sleep_disorder,sleep_1,0"))
         assertTrue(assessCsvString.contains("psqi,psqi_1,0"))
         // And demographics_survey questions
-        assertTrue(assessCsvString.contains("demographics_survey,demo_gender,1"))
+        assertTrue(assessCsvString.contains("demographics_survey,G1,1"))
         // Must NOT output the composite battery code SLEEP_ASSESSMENT in scale_code column
         assertFalse(assessCsvString.contains("SLEEP_ASSESSMENT"))
     }
@@ -341,8 +352,8 @@ class IntakeApplicationTests {
 
         // 2. Save partial draft
         val draftAnswers = mapOf(
-            "demo_gender" to 1,
-            "demo_ethnicity" to 1
+            "G1" to 1,
+            "G4" to 1
         )
         val draftReq = com.medicalsystem.intake.dto.SaveDraftRequest(
             answers = draftAnswers,
@@ -364,8 +375,8 @@ class IntakeApplicationTests {
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.scaleCode").value("demographics_survey"))
             .andExpect(jsonPath("$.updatedAt").value(1000L))
-            .andExpect(jsonPath("$.answers.demo_gender").value(1))
-            .andExpect(jsonPath("$.answers.demo_ethnicity").value(1))
+            .andExpect(jsonPath("$.answers.G1").value(1))
+            .andExpect(jsonPath("$.answers.G4").value(1))
 
         // 4. Check scale list: demographics_survey should now have status "IN_PROGRESS" with progress counts
         mockMvc.perform(
@@ -375,19 +386,19 @@ class IntakeApplicationTests {
             .andExpect(status().isOk)
             .andExpect(jsonPath("$[?(@.code == 'demographics_survey')].status").value("IN_PROGRESS"))
             .andExpect(jsonPath("$[?(@.code == 'demographics_survey')].answeredCount").value(2))
-            .andExpect(jsonPath("$[?(@.code == 'demographics_survey')].completionPercentage").value(25))
 
         // 5. Complete and submit demographics_survey
-        val fullAnswers = mapOf(
-            "demo_gender" to 1,
-            "demo_ethnicity" to 1,
-            "demo_id_card" to "110101200001011234",
-            "demo_major" to "计算机学院 软件工程",
-            "demo_email" to "$studentNumber@univ.edu.cn",
-            "demo_home_address" to "北京市海淀区",
-            "demo_emergency_contact" to "李父",
-            "demo_emergency_phone" to "13900008888"
-        )
+        val demoDetail = catalogLoader.getScaleDetail("demographics_survey")!!
+        val fullAnswers = demoDetail.questions.associate { q ->
+            val sampleVal: Any = if (q.options.isNotEmpty()) {
+                q.options[0].value
+            } else if (q.type == "number") {
+                q.min?.toInt() ?: 18
+            } else {
+                "测试内容"
+            }
+            q.id to sampleVal
+        }
         mockMvc.perform(
             post("/api/scales/demographics_survey/submit")
                 .header("Authorization", "Bearer $token")

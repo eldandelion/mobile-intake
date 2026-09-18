@@ -17,7 +17,10 @@ declare global {
         elevated?: boolean;
         disabled?: boolean;
       }, HTMLElement>;
-      'md-icon': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+      'md-icon': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+        filled?: boolean;
+        slot?: string;
+      }, HTMLElement>;
       'md-icon-button': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
         disabled?: boolean;
         href?: string;
@@ -62,11 +65,16 @@ declare global {
         rows?: number;
         label?: string;
         placeholder?: string;
-        value?: string;
+        value?: string | number;
+        min?: number | string;
+        max?: number | string;
+        step?: number | string;
         disabled?: boolean;
         required?: boolean;
         'supporting-text'?: string;
         supportingText?: string;
+        'suffix-text'?: string;
+        suffixText?: string;
         maxLength?: number;
         error?: boolean;
         'error-text'?: string;
@@ -77,6 +85,7 @@ declare global {
         inputmode?: string;
         onInput?: (e: any) => void;
         onChange?: (e: any) => void;
+        onKeyDown?: (e: any) => void;
       }, HTMLElement>;
       'md-navigation-bar': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
         'active-index'?: number;
@@ -113,6 +122,17 @@ declare global {
       }, HTMLElement>;
       'md-ripple': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
       'md-divider': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+      'md-slider': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+        min?: number;
+        max?: number;
+        step?: number;
+        value?: number;
+        labeled?: boolean;
+        ticks?: boolean;
+        disabled?: boolean;
+        onInput?: (e: any) => void;
+        onChange?: (e: any) => void;
+      }, HTMLElement>;
     }
   }
 }

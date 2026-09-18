@@ -35,6 +35,13 @@
   md-icon {
     overflow: visible;
   }
+
+  md-icon[filled],
+  md-icon.filled,
+  md-navigation-tab [slot="active-icon"],
+  md-navigation-tab md-icon[slot="active-icon"] {
+    font-variation-settings: 'FILL' 1;
+  }
 }
 
 body {

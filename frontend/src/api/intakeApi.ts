@@ -52,14 +52,23 @@ export interface ScaleDraftDto {
 export interface ScaleOption {
   value: any;
   label: string;
+  hasTextInput?: boolean;
+  textInputPlaceholder?: string;
+  textInputLabel?: string;
 }
 
 export interface ScaleQuestion {
   id: string;
   text: string;
   orderNum: number;
-  type: string; // 'single_choice' | 'text' | 'select'
+  type: string; // 'single_choice' | 'multiple_choice' | 'number' | 'slider' | 'text' | 'select'
   placeholder?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  unit?: string;
+  minLabel?: string;
+  maxLabel?: string;
   options: ScaleOption[];
   sectionCode?: string;
   sectionTitle?: string;

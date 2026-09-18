@@ -36,8 +36,29 @@ class ScaleSubmissionService(
             }
             if (q.options.isNotEmpty()) {
                 val allowedValues = q.options.map { it.value.toString() }.toSet()
-                if (!allowedValues.contains(rawAnswer.toString())) {
-                    throw ValidationException("Invalid option value '$rawAnswer' for question: ${q.id}")
+                when (rawAnswer) {
+                    is Collection<*> -> {
+                        if (rawAnswer.isEmpty()) {
+                            throw ValidationException("At least one option must be selected for question: ${q.id}")
+                        }
+                        for (item in rawAnswer) {
+                            val itemVal = if (item is Map<*, *>) item["value"] else item
+                            if (!allowedValues.contains(itemVal?.toString())) {
+                                throw ValidationException("Invalid option value '$itemVal' for question: ${q.id}")
+                            }
+                        }
+                    }
+                    is Map<*, *> -> {
+                        val valPart = rawAnswer["value"]?.toString() ?: rawAnswer.toString()
+                        if (!allowedValues.contains(valPart)) {
+                            throw ValidationException("Invalid option value '$valPart' for question: ${q.id}")
+                        }
+                    }
+                    else -> {
+                        if (!allowedValues.contains(rawAnswer.toString())) {
+                            throw ValidationException("Invalid option value '$rawAnswer' for question: ${q.id}")
+                        }
+                    }
                 }
             }
         }

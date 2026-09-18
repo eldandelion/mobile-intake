@@ -449,4 +449,276 @@ describe('QuestionnairePlayerPage', () => {
     });
     alertSpy.mockRestore();
   });
+
+  it('renders slider seek bar with min/max labels, score display card, and records score', async () => {
+    const mockSliderScale = {
+      code: 'slider_test',
+      title: '健康评估',
+      subtitle: '生理状况',
+      description: '评估疼痛及社会经济地位',
+      instructions: '按实际情况作答',
+      estimatedMinutes: 1,
+      questions: [
+        {
+          id: 'G27',
+          text: 'G27. 请问你现在存在身体某部位的疼痛吗？（0为无痛，10为剧痛）',
+          orderNum: 1,
+          type: 'slider',
+          min: 0,
+          max: 10,
+          step: 1,
+          minLabel: '0分 无痛',
+          maxLabel: '10分 剧痛',
+          options: [],
+        },
+      ],
+    };
+
+    vi.spyOn(intakeApi, 'getScaleDetail').mockResolvedValue(mockSliderScale as any);
+
+    render(
+      <QuestionnairePlayerPage
+        scaleCode="slider_test"
+        studentNumber="2026001"
+        onClose={vi.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('开始作答')).toBeDefined();
+    });
+    fireEvent.click(screen.getByText('开始作答'));
+
+    await waitFor(() => {
+      expect(screen.getByText(/G27. 请问你现在存在身体某部位的疼痛吗/)).toBeDefined();
+    });
+
+    // Check boundary labels and score display
+    expect(screen.getByText('0分 无痛')).toBeDefined();
+    expect(screen.getByText('10分 剧痛')).toBeDefined();
+    expect(screen.getByText('当前选择分值')).toBeDefined();
+    expect(screen.getByText('/ 10 分')).toBeDefined();
+
+    // Find md-slider and simulate slider input
+    const slider = document.querySelector('md-slider');
+    expect(slider).toBeDefined();
+    if (slider) {
+      (slider as any).value = 7;
+      fireEvent(slider, new Event('input', { bubbles: true, composed: true }));
+    }
+
+    // After setting slider score to 7, score display updates to 7
+    await waitFor(() => {
+      expect(screen.getByText('7')).toBeDefined();
+    });
+
+    // Verify "完成并提交" is enabled
+    const submitBtn = await screen.findByText('完成并提交');
+    expect(submitBtn.closest('md-filled-button')?.hasAttribute('disabled')).toBe(false);
+  });
+
+  it('renders number input field with unit badge, min, max, and handles digit entry', async () => {
+    const mockNumberScale = {
+      code: 'number_test',
+      title: '生活习惯评估',
+      subtitle: '运动时间',
+      description: '评估运动时长',
+      instructions: '按实际情况作答',
+      estimatedMinutes: 1,
+      questions: [
+        {
+          id: 'G24_1',
+          text: 'G24.1 最近一个星期，你锻炼的时间总共大约多少小时？',
+          orderNum: 1,
+          type: 'number',
+          min: 0,
+          max: 100,
+          step: 0.5,
+          unit: '小时',
+          placeholder: '例如：3.5',
+          options: [],
+        },
+      ],
+    };
+
+    vi.spyOn(intakeApi, 'getScaleDetail').mockResolvedValue(mockNumberScale as any);
+
+    render(
+      <QuestionnairePlayerPage
+        scaleCode="number_test"
+        studentNumber="2026001"
+        onClose={vi.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('开始作答')).toBeDefined();
+    });
+    fireEvent.click(screen.getByText('开始作答'));
+
+    await waitFor(() => {
+      expect(screen.getByText(/G24.1 最近一个星期/)).toBeDefined();
+    });
+
+    // Verify unit badge is rendered
+    expect(screen.getByText('小时')).toBeDefined();
+
+    // Find md-outlined-text-field and enter number
+    const numField = document.querySelector('md-outlined-text-field[type="number"]');
+    expect(numField).toBeDefined();
+    if (numField) {
+      (numField as any).value = '4.5';
+      fireEvent(numField, new Event('input', { bubbles: true, composed: true }));
+    }
+
+    // Submit button should become enabled
+    const submitBtn = await screen.findByText('完成并提交');
+    await waitFor(() => {
+      expect(submitBtn.closest('md-filled-button')?.hasAttribute('disabled')).toBe(false);
+    });
+  });
+
+  it('renders single-choice option with hasTextInput, expands text field, and suppresses auto-advance', async () => {
+    const mockTextInputScale = {
+      code: 'text_input_test',
+      title: '医疗求助调查',
+      subtitle: '既往史',
+      description: '调查就诊及咨询情况',
+      instructions: '按实际情况作答',
+      estimatedMinutes: 1,
+      questions: [
+        {
+          id: 'ghq_22',
+          text: '22. 过去任何时候您服过抗精神病药或抗抑郁药吗？',
+          orderNum: 1,
+          type: 'single_choice',
+          options: [
+            { value: 0, label: '否' },
+            {
+              value: 1,
+              label: '是',
+              hasTextInput: true,
+              textInputPlaceholder: '请具体描述服用的药物名称或类型...',
+              textInputLabel: '药物名称',
+            },
+          ],
+        },
+        {
+          id: 'ghq_23',
+          text: '23. 后续问题',
+          orderNum: 2,
+          type: 'single_choice',
+          options: [
+            { value: 0, label: '否' },
+            { value: 1, label: '是' },
+          ],
+        },
+      ],
+    };
+
+    vi.spyOn(intakeApi, 'getScaleDetail').mockResolvedValue(mockTextInputScale as any);
+
+    render(
+      <QuestionnairePlayerPage
+        scaleCode="text_input_test"
+        studentNumber="2026001"
+        onClose={vi.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('开始作答')).toBeDefined();
+    });
+    fireEvent.click(screen.getByText('开始作答'));
+
+    await waitFor(() => {
+      expect(screen.getByText('22. 过去任何时候您服过抗精神病药或抗抑郁药吗？')).toBeDefined();
+    });
+
+    // Click option "是" (which has hasTextInput: true)
+    fireEvent.click(screen.getByText('是'));
+
+    // Verify inline text input field expands
+    await waitFor(() => {
+      const inlineField = document.querySelector('md-outlined-text-field[label="药物名称"]');
+      expect(inlineField).toBeDefined();
+    });
+
+    // Wait 300ms to ensure auto-advance is suppressed and does not advance to Q2 automatically
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    expect(screen.getByText('22. 过去任何时候您服过抗精神病药或抗抑郁药吗？')).toBeDefined();
+
+    // Type into the text field
+    const inlineField = document.querySelector('md-outlined-text-field[label="药物名称"]');
+    if (inlineField) {
+      (inlineField as any).value = '氟西汀';
+      fireEvent(inlineField, new Event('input', { bubbles: true, composed: true }));
+    }
+
+    // Now manually click "下一题"
+    const nextBtn = screen.getByText('下一题');
+    fireEvent.click(nextBtn);
+
+    // Transitions to Question 2
+    await waitFor(() => {
+      expect(screen.getByText('23. 后续问题')).toBeDefined();
+    });
+  });
+
+  it('renders multiple-choice question with checkboxes and allows multi-selection', async () => {
+    const mockMultiScale = {
+      code: 'multi_test',
+      title: '锻炼调查',
+      subtitle: '生活习惯',
+      description: '锻炼方式调查',
+      instructions: '按实际情况作答',
+      estimatedMinutes: 1,
+      questions: [
+        {
+          id: 'G23',
+          text: 'G23. 你主要的锻炼方式是？（可多选）',
+          orderNum: 1,
+          type: 'multiple_choice',
+          options: [
+            { value: 'running', label: '跑步' },
+            { value: 'swimming', label: '游泳' },
+            { value: 'walking', label: '走路 / 散步' },
+          ],
+        },
+      ],
+    };
+
+    vi.spyOn(intakeApi, 'getScaleDetail').mockResolvedValue(mockMultiScale as any);
+
+    render(
+      <QuestionnairePlayerPage
+        scaleCode="multi_test"
+        studentNumber="2026001"
+        onClose={vi.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('开始作答')).toBeDefined();
+    });
+    fireEvent.click(screen.getByText('开始作答'));
+
+    await waitFor(() => {
+      expect(screen.getByText('G23. 你主要的锻炼方式是？（可多选）')).toBeDefined();
+    });
+
+    // Click "跑步" and "游泳"
+    fireEvent.click(screen.getByText('跑步'));
+    fireEvent.click(screen.getByText('游泳'));
+
+    // Checkboxes should exist and submit button should be enabled
+    const checkboxes = document.querySelectorAll('md-checkbox');
+    expect(checkboxes.length).toBe(3);
+
+    const submitBtn = await screen.findByText('完成并提交');
+    await waitFor(() => {
+      expect(submitBtn.closest('md-filled-button')?.hasAttribute('disabled')).toBe(false);
+    });
+  });
 });
+

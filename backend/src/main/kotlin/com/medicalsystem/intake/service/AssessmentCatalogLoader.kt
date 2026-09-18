@@ -24,7 +24,8 @@ class AssessmentCatalogLoader(
         questionToScaleMap.clear()
 
         loadOptionGroups()
-        loadDemographicsSurvey()
+        loadStandaloneSurvey("demographics_survey.json")
+        loadStandaloneSurvey("general_health_screener.json")
         loadAssessmentBatteries()
     }
 
@@ -55,19 +56,19 @@ class AssessmentCatalogLoader(
         }
     }
 
-    private fun loadDemographicsSurvey() {
-        val demoResource = resourceLoader.getResource("classpath:assessments/demographics_survey.json")
-        if (!demoResource.exists()) {
-            throw AssessmentCatalogInitializationException("demographics_survey.json not found in classpath")
+    private fun loadStandaloneSurvey(fileName: String) {
+        val resource = resourceLoader.getResource("classpath:assessments/$fileName")
+        if (!resource.exists()) {
+            throw AssessmentCatalogInitializationException("$fileName not found in classpath")
         }
         try {
-            demoResource.inputStream.use { input ->
+            resource.inputStream.use { input ->
                 val root: JsonNode = objectMapper.readTree(input)
-                val code = root.get("id")?.asText() ?: root.get("code")?.asText() ?: "demographics_survey"
+                val code = root.get("id")?.asText() ?: root.get("code")?.asText() ?: fileName.removeSuffix(".json")
                 val title = root.get("title")?.asText() ?: code
                 val subtitle = root.get("subtitle")?.asText()
                 val description = root.get("description")?.asText() ?: ""
-                val estimatedMinutes = root.get("estimatedMinutes")?.asInt() ?: 3
+                val estimatedMinutes = root.get("estimatedMinutes")?.asInt() ?: 5
                 val instructions = root.get("instructions")?.asText() ?: description
 
                 val introItemsList = mutableListOf<ScaleIntroItem>()
@@ -95,10 +96,16 @@ class AssessmentCatalogLoader(
                         if (qNodes != null && qNodes.isArray) {
                             for (q in qNodes) {
                                 val qId = q.get("id")?.asText() ?: q.get("code")?.asText()
-                                    ?: throw AssessmentCatalogInitializationException("Demographics question missing id/code")
+                                    ?: throw AssessmentCatalogInitializationException("Question missing id/code in $fileName")
                                 val text = q.get("text")?.asText() ?: ""
                                 val type = q.get("type")?.asText() ?: "single_choice"
                                 val placeholder = q.get("placeholder")?.asText()
+                                val min = if (q.has("min") && !q.get("min").isNull) q.get("min").asDouble() else null
+                                val max = if (q.has("max") && !q.get("max").isNull) q.get("max").asDouble() else null
+                                val step = if (q.has("step") && !q.get("step").isNull) q.get("step").asDouble() else null
+                                val unit = q.get("unit")?.asText()
+                                val minLabel = q.get("minLabel")?.asText()
+                                val maxLabel = q.get("maxLabel")?.asText()
                                 val options = parseOptions(q, qId, code)
                                 val question = ScaleQuestion(
                                     id = qId,
@@ -106,6 +113,12 @@ class AssessmentCatalogLoader(
                                     orderNum = globalOrder++,
                                     type = type,
                                     placeholder = placeholder,
+                                    min = min,
+                                    max = max,
+                                    step = step,
+                                    unit = unit,
+                                    minLabel = minLabel,
+                                    maxLabel = maxLabel,
                                     options = options,
                                     sectionCode = secId,
                                     sectionTitle = secTitle
@@ -140,7 +153,7 @@ class AssessmentCatalogLoader(
             }
         } catch (e: Exception) {
             if (e is AssessmentCatalogInitializationException) throw e
-            throw AssessmentCatalogInitializationException("Failed to load demographics_survey.json: ${e.message}", e)
+            throw AssessmentCatalogInitializationException("Failed to load $fileName: ${e.message}", e)
         }
     }
 
@@ -283,7 +296,18 @@ class AssessmentCatalogLoader(
             val valueNode = opt.get("value")
             val valObj: Any = if (valueNode.isInt) valueNode.asInt() else valueNode.asText()
             val label = opt.get("label")?.asText() ?: ""
-            list.add(ScaleOption(valObj, label))
+            val hasTextInput = opt.get("hasTextInput")?.asBoolean() ?: false
+            val textInputPlaceholder = opt.get("textInputPlaceholder")?.asText()
+            val textInputLabel = opt.get("textInputLabel")?.asText()
+            list.add(
+                ScaleOption(
+                    value = valObj,
+                    label = label,
+                    hasTextInput = hasTextInput,
+                    textInputPlaceholder = textInputPlaceholder,
+                    textInputLabel = textInputLabel
+                )
+            )
         }
         return list
     }

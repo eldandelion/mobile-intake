@@ -6,11 +6,20 @@ export interface QuestionGridSheetProps {
   isOpen: boolean;
   totalQuestions: number;
   currentIndex: number;
-  answers: Record<string, number>;
+  answers: Record<string, any>;
   questions: ScaleQuestion[];
   onSelectQuestion: (index: number) => void;
   onClose: () => void;
 }
+
+export const isQuestionAnswered = (val: any): boolean => {
+  if (val === undefined || val === null || val === '') return false;
+  if (Array.isArray(val)) return val.length > 0;
+  if (typeof val === 'object') {
+    return val.value !== undefined && val.value !== null && val.value !== '';
+  }
+  return true;
+};
 
 export const QuestionGridSheet: React.FC<QuestionGridSheetProps> = ({
   isOpen,
@@ -37,7 +46,7 @@ export const QuestionGridSheet: React.FC<QuestionGridSheetProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, handleKeyDown]);
 
-  const answeredCount = Object.keys(answers).length;
+  const answeredCount = questions.filter((q) => isQuestionAnswered(answers[q.id])).length;
 
   return (
     <AnimatePresence>
@@ -118,7 +127,7 @@ export const QuestionGridSheet: React.FC<QuestionGridSheetProps> = ({
               <div className="grid grid-cols-5 sm:grid-cols-6 gap-3">
                 {questions.map((q, idx) => {
                   const isCurrent = idx === currentIndex;
-                  const isAnswered = answers[q.id] !== undefined;
+                  const isAnswered = isQuestionAnswered(answers[q.id]);
 
                   let buttonStyles =
                     'bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-on-surface-variant)] hover:bg-[var(--md-sys-color-surface-container-highest)]';
