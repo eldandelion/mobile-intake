@@ -31,24 +31,28 @@
           "id": "demo_name",
           "text": "1. 您的姓名：",
           "type": "text",
+          "icon": "person",
           "placeholder": "请输入真实姓名"
         },
         {
           "id": "demo_phone",
           "text": "2. 联系电话：",
           "type": "text",
+          "icon": "phone",
           "placeholder": "11位手机号码"
         },
         {
           "id": "demo_class",
           "text": "3. 所在班级与专业：",
           "type": "text",
+          "icon": "school",
           "placeholder": "例如：计算机学院 软工2601班"
         },
         {
           "id": "demo_student_number",
           "text": "4. 学号：",
           "type": "text",
+          "icon": "badge",
           "placeholder": "请输入学生学号"
         }
       ]
@@ -81,6 +85,7 @@
           "id": "G1b_height",
           "text": "G1b. 你的身高（厘米）：",
           "type": "number",
+          "icon": "height",
           "min": 50,
           "max": 250,
           "step": 1,
@@ -91,6 +96,7 @@
           "id": "G1b_weight",
           "text": "G1b. 你的体重（公斤）：",
           "type": "number",
+          "icon": "monitor_weight",
           "min": 20,
           "max": 300,
           "step": 0.5,
@@ -101,6 +107,7 @@
           "id": "G2",
           "text": "G2. 你的年龄（周岁）：",
           "type": "number",
+          "icon": "cake",
           "min": 10,
           "max": 100,
           "step": 1,
@@ -305,13 +312,15 @@
         },
         {
           "id": "G17a",
-          "text": "G17a. 你从多少岁开始每星期喝酒的？（若不喝酒请填 0）：",
+          "text": "G17a. 你从多少岁开始每星期喝酒的？",
           "type": "number",
+          "icon": "liquor",
           "min": 0,
           "max": 80,
           "step": 1,
           "unit": "岁",
-          "placeholder": "例如：16"
+          "placeholder": "例如：16",
+          "zeroOptionLabel": "从未喝过酒"
         },
         {
           "id": "G17b",
@@ -348,6 +357,7 @@
           "id": "G18_cigs",
           "text": "G18. 每天平均抽烟多少根？（从来不吸请填 0）：",
           "type": "number",
+          "icon": "smoking_rooms",
           "min": 0,
           "max": 100,
           "step": 1,
@@ -358,6 +368,7 @@
           "id": "G18_years",
           "text": "G18. 抽烟已持续多少年？（从来不吸请填 0）：",
           "type": "number",
+          "icon": "history",
           "min": 0,
           "max": 60,
           "step": 1,
@@ -468,6 +479,7 @@
           "id": "G24_1",
           "text": "G24.1 最近一个星期，你锻炼的时间总共大约多少小时？",
           "type": "number",
+          "icon": "directions_run",
           "min": 0,
           "max": 100,
           "step": 0.5,
@@ -478,6 +490,7 @@
           "id": "G_sedentary",
           "text": "新增：最近一周，您花在坐姿状态（包括学习、伏案工作、坐姿闲聊等）的时间总共大约多少小时？",
           "type": "number",
+          "icon": "chair",
           "min": 0,
           "max": 168,
           "step": 1,
@@ -592,6 +605,7 @@
           "id": "G31c",
           "text": "G31c. 最近一次看门诊是什么时间？",
           "type": "text",
+          "icon": "calendar_month",
           "placeholder": "例如：2024年10月（如未曾就诊可填“无”）"
         },
         {
@@ -655,6 +669,7 @@
           "id": "G34_age",
           "text": "G34. （女性回答）第一次来月经的年龄是多大（周岁）？（若至今未来月经填99，男性填0）：",
           "type": "number",
+          "icon": "female",
           "min": 0,
           "max": 99,
           "step": 1,

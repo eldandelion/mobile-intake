@@ -724,5 +724,145 @@ describe('QuestionnairePlayerPage', () => {
       expect(submitBtn.closest('md-filled-button')?.hasAttribute('disabled')).toBe(false);
     });
   });
+
+  it('renders relevant icons in input fields such as phone icon for phone number field', async () => {
+    const mockDemographicsScale = {
+      code: 'demographics_survey',
+      title: '个人基本信息核对',
+      subtitle: '基本信息',
+      description: '基本信息核对',
+      instructions: '请如实填写',
+      estimatedMinutes: 2,
+      questions: [
+        {
+          id: 'demo_phone',
+          text: '2. 联系电话：',
+          orderNum: 1,
+          type: 'text',
+          icon: 'phone',
+          placeholder: '11位手机号码',
+          options: [],
+        },
+      ],
+    };
+
+    vi.spyOn(intakeApi, 'getScaleDetail').mockResolvedValue(mockDemographicsScale as any);
+
+    render(
+      <QuestionnairePlayerPage
+        scaleCode="demographics_survey"
+        studentNumber="2026001"
+        onClose={vi.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('开始作答')).toBeDefined();
+    });
+    fireEvent.click(screen.getByText('开始作答'));
+
+    await waitFor(() => {
+      expect(screen.getByText('2. 联系电话：')).toBeDefined();
+    });
+
+    // Check that leading icon has "phone"
+    const textField = document.querySelector('md-outlined-text-field');
+    expect(textField).toBeDefined();
+    const leadingIcon = textField?.querySelector('md-icon[slot="leading-icon"]');
+    expect(leadingIcon?.textContent).toBe('phone');
+  });
+
+  it('renders a separate choice button for question G17a instead of forcing user to input 0', async () => {
+    const mockScaleWithG17a = {
+      code: 'demographics_survey',
+      title: '个人基本信息核对',
+      subtitle: '基本信息',
+      description: '基本信息核对',
+      instructions: '请如实填写',
+      estimatedMinutes: 2,
+      questions: [
+        {
+          id: 'G17a',
+          text: 'G17a. 你从多少岁开始每星期喝酒的？',
+          orderNum: 1,
+          type: 'number',
+          icon: 'liquor',
+          min: 0,
+          max: 80,
+          step: 1,
+          unit: '岁',
+          placeholder: '例如：16',
+          zeroOptionLabel: '从未喝过酒',
+          options: [],
+        },
+      ],
+    };
+
+    vi.spyOn(intakeApi, 'getScaleDetail').mockResolvedValue(mockScaleWithG17a as any);
+
+    render(
+      <QuestionnairePlayerPage
+        scaleCode="demographics_survey"
+        studentNumber="2026001"
+        onClose={vi.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('开始作答')).toBeDefined();
+    });
+    fireEvent.click(screen.getByText('开始作答'));
+
+    await waitFor(() => {
+      expect(screen.getByText('G17a. 你从多少岁开始每星期喝酒的？')).toBeDefined();
+    });
+
+    // Check that separate button with "从未喝过酒" is displayed without outline, circle, icon, or subtitle, but with radio button
+    const zeroOptionBtn = screen.getByTestId('zero-option-button');
+    expect(zeroOptionBtn).toBeDefined();
+    expect(screen.getByText('从未喝过酒')).toBeDefined();
+    expect(screen.queryByText('若从未尝试过，点击此处可直接选择')).toBeNull();
+    expect(zeroOptionBtn.querySelector('md-icon')).toBeNull();
+    expect(zeroOptionBtn.querySelector('.rounded-full')).toBeNull();
+    expect(zeroOptionBtn.closest('div')?.className).not.toContain('border');
+
+    // Radio button is present to visually confirm selection, initially not checked
+    const radio = zeroOptionBtn.querySelector('md-radio');
+    expect(radio).toBeDefined();
+    expect(radio?.getAttribute('checked')).toBeNull();
+    expect(zeroOptionBtn.getAttribute('aria-pressed')).toBe('false');
+
+    // Click "从未喝过酒"
+    fireEvent.click(zeroOptionBtn);
+
+    // Now radio should be checked and answer recorded as 0
+    await waitFor(() => {
+      expect(radio?.getAttribute('checked')).toBe('');
+      expect(zeroOptionBtn.getAttribute('aria-pressed')).toBe('true');
+    });
+
+    // Outlined text field should show placeholder indicating zero option is selected
+    const textField = document.querySelector('md-outlined-text-field');
+    expect(textField?.getAttribute('placeholder')).toContain('从未喝过酒');
+    expect(textField?.getAttribute('value')).toBe('');
+
+    // If user enters an age, zero option button and radio should be deselected
+    if (textField) {
+      (textField as any).value = '18';
+      fireEvent(textField, new Event('input', { bubbles: true, composed: true }));
+    }
+
+    await waitFor(() => {
+      expect(radio?.getAttribute('checked')).toBeNull();
+      expect(zeroOptionBtn.getAttribute('aria-pressed')).toBe('false');
+    });
+
+    // Tapping the zero button again selects 0 and deselects the text field value
+    fireEvent.click(zeroOptionBtn);
+    await waitFor(() => {
+      expect(radio?.getAttribute('checked')).toBe('');
+      expect(zeroOptionBtn.getAttribute('aria-pressed')).toBe('true');
+    });
+  });
 });
 

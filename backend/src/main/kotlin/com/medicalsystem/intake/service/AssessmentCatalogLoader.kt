@@ -106,6 +106,8 @@ class AssessmentCatalogLoader(
                                 val unit = q.get("unit")?.asText()
                                 val minLabel = q.get("minLabel")?.asText()
                                 val maxLabel = q.get("maxLabel")?.asText()
+                                val icon = q.get("icon")?.asText()
+                                val zeroOptionLabel = q.get("zeroOptionLabel")?.asText()
                                 val options = parseOptions(q, qId, code)
                                 val question = ScaleQuestion(
                                     id = qId,
@@ -121,7 +123,9 @@ class AssessmentCatalogLoader(
                                     maxLabel = maxLabel,
                                     options = options,
                                     sectionCode = secId,
-                                    sectionTitle = secTitle
+                                    sectionTitle = secTitle,
+                                    icon = icon,
+                                    zeroOptionLabel = zeroOptionLabel
                                 )
                                 questionList.add(question)
                                 questionToScaleMap[qId] = code
@@ -226,6 +230,8 @@ class AssessmentCatalogLoader(
                                 val text = qNode.get("text")?.asText() ?: ""
                                 val type = qNode.get("type")?.asText() ?: "single_choice"
                                 val placeholder = qNode.get("placeholder")?.asText()
+                                val icon = qNode.get("icon")?.asText()
+                                val zeroOptionLabel = qNode.get("zeroOptionLabel")?.asText()
                                 val options = parseOptions(qNode, qId, qCode)
 
                                 val question = ScaleQuestion(
@@ -236,7 +242,9 @@ class AssessmentCatalogLoader(
                                     placeholder = placeholder,
                                     options = options,
                                     sectionCode = qCode,
-                                    sectionTitle = subscaleTitle
+                                    sectionTitle = subscaleTitle,
+                                    icon = icon,
+                                    zeroOptionLabel = zeroOptionLabel
                                 )
                                 batteryQuestions.add(question)
                                 questionToScaleMap[qId] = qCode

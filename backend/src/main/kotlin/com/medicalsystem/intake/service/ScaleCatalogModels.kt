@@ -22,7 +22,9 @@ data class ScaleQuestion(
     val maxLabel: String? = null,
     val options: List<ScaleOption> = emptyList(),
     val sectionCode: String? = null,
-    val sectionTitle: String? = null
+    val sectionTitle: String? = null,
+    val icon: String? = null,
+    val zeroOptionLabel: String? = null
 )
 
 data class BatterySection(

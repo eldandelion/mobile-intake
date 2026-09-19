@@ -72,6 +72,8 @@ export interface ScaleQuestion {
   options: ScaleOption[];
   sectionCode?: string;
   sectionTitle?: string;
+  icon?: string;
+  zeroOptionLabel?: string;
 }
 
 export interface BatterySection {

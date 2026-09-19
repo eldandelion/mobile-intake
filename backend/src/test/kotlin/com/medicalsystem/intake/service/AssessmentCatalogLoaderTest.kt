@@ -157,6 +157,14 @@ class AssessmentCatalogLoaderTest {
         val religion = demo.questions.first { it.id == "G7" }
         val otherOpt = religion.options.first { it.value == "other" }
         assertTrue(otherOpt.hasTextInput)
+
+        // Test G17a zeroOptionLabel and refined question text
+        val g17a = demo.questions.first { it.id == "G17a" }
+        assertEquals("number", g17a.type)
+        assertEquals("从未喝过酒", g17a.zeroOptionLabel)
+        assertEquals("liquor", g17a.icon)
+        assertEquals("G17a. 你从多少岁开始每星期喝酒的？", g17a.text)
+        assertFalse(g17a.text.contains("请填 0"))
     }
 
     @Test

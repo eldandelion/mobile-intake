@@ -90,6 +90,7 @@ body {
   --md-sys-color-surface-container: rgb(243 237 247);
   --md-sys-color-surface-container-high: rgb(236 230 240);
   --md-sys-color-surface-container-highest: rgb(230 224 233);
+  --md-sys-color-on-surface-container: rgb(29 27 32);
 }
 
 /* CSU Dark Theme Variables */
@@ -133,6 +134,7 @@ body {
   --md-sys-color-surface-container: rgb(33 31 38);
   --md-sys-color-surface-container-high: rgb(43 41 48);
   --md-sys-color-surface-container-highest: rgb(54 52 59);
+  --md-sys-color-on-surface-container: rgb(230 224 233);
 }
 
 :root {

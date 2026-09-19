@@ -25,6 +25,78 @@ const getOptionCornerRadius = (index: number, total: number): string => {
   return 'rounded-[4px]';
 };
 
+export const getFieldLeadingIcon = (question: ScaleQuestion): string => {
+  if (question.icon) {
+    return question.icon;
+  }
+
+  const id = question.id.toLowerCase();
+  const text = question.text.toLowerCase();
+
+  // Contact / Phone
+  if (id.includes('phone') || text.includes('电话') || text.includes('手机') || text.includes('联系方式')) {
+    return 'phone';
+  }
+  // Name
+  if (id.includes('name') || text.includes('姓名')) {
+    return 'person';
+  }
+  // Student ID
+  if (id.includes('student_number') || id.includes('studentno') || text.includes('学号')) {
+    return 'badge';
+  }
+  // Class / Major / College / School
+  if (id.includes('class') || id.includes('major') || text.includes('班级') || text.includes('专业') || text.includes('学院')) {
+    return 'school';
+  }
+  // Height
+  if (id.includes('height') || text.includes('身高')) {
+    return 'height';
+  }
+  // Weight
+  if (id.includes('weight') || text.includes('体重')) {
+    return 'monitor_weight';
+  }
+  // Age
+  if (id.includes('age') || text.includes('年龄') || text.includes('周岁')) {
+    return 'cake';
+  }
+  // Alcohol
+  if (id.includes('alcohol') || text.includes('喝酒') || text.includes('饮酒')) {
+    return 'liquor';
+  }
+  // Smoking count
+  if (id.includes('cigs') || text.includes('抽烟') || text.includes('吸烟')) {
+    return 'smoking_rooms';
+  }
+  // History / Years
+  if (id.includes('years') || text.includes('持续') || text.includes('年数')) {
+    return 'history';
+  }
+  // Exercise / Fitness
+  if (id.includes('exercise') || text.includes('锻炼') || text.includes('运动')) {
+    return 'directions_run';
+  }
+  // Sedentary / Sitting
+  if (id.includes('sedentary') || text.includes('坐姿') || text.includes('久坐')) {
+    return 'chair';
+  }
+  // Hospital / Clinic / Medical / Date
+  if (id.includes('clinic') || text.includes('门诊') || text.includes('就诊') || text.includes('时间') || text.includes('日期')) {
+    return 'calendar_month';
+  }
+  // Menstruation / Female
+  if (text.includes('月经') || text.includes('女性')) {
+    return 'female';
+  }
+
+  // Fallback based on question type
+  if (question.type === 'number') {
+    return 'pin';
+  }
+  return 'edit_note';
+};
+
 export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = ({
   scaleCode,
   studentNumber,
@@ -298,11 +370,36 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
 
   const handleNumberInput = (val: string) => {
     if (!currentQuestion) return;
+    if (autoAdvanceTimerRef.current) {
+      clearTimeout(autoAdvanceTimerRef.current);
+    }
     if (val === '') {
       recordAnswer(currentQuestion.id, '');
     } else {
       const num = Number(val);
       recordAnswer(currentQuestion.id, isNaN(num) ? val : num);
+    }
+  };
+
+  const handleZeroOptionClick = () => {
+    if (!currentQuestion) return;
+
+    if (autoAdvanceTimerRef.current) {
+      clearTimeout(autoAdvanceTimerRef.current);
+    }
+
+    const isCurrentlyZero = currentAnswer === 0 || currentAnswer === '0';
+    if (isCurrentlyZero) {
+      recordAnswer(currentQuestion.id, '');
+      return;
+    }
+
+    recordAnswer(currentQuestion.id, 0);
+
+    if (currentIndex < totalQuestions - 1) {
+      autoAdvanceTimerRef.current = setTimeout(() => {
+        setCurrentIndex((prev) => prev + 1);
+      }, 200);
     }
   };
 
@@ -579,7 +676,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
               }}
               aria-label="查看题目列表并快速跳转"
               title="点击查看所有题目并快速跳转"
-              className="px-3 py-1 rounded-full bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-primary)] text-xs sm:text-sm font-semibold shrink-0 cursor-pointer active:scale-95 transition-all hover:bg-[var(--md-sys-color-surface-container-highest)] select-none focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)]"
+              className="px-3 py-1 rounded-full bg-transparent border border-[var(--md-sys-color-outline)] text-[var(--md-sys-color-on-primary-container)] text-xs sm:text-sm font-semibold shrink-0 cursor-pointer active:scale-95 transition-all hover:bg-[var(--md-sys-color-surface-container-low)] select-none focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)]"
             >
               <span>第 {currentIndex + 1} / {totalQuestions} 题</span>
             </button>
@@ -834,42 +931,97 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
                   </div>
                 )}
 
-                {currentQuestion.type === 'number' && (
-                  <div className="space-y-4 pt-2">
-                    <md-outlined-text-field
-                      type="number"
-                      label="数值"
-                      value={currentAnswer !== undefined ? String(currentAnswer) : ''}
-                      placeholder={currentQuestion.placeholder || '请输入数值'}
-                      min={currentQuestion.min}
-                      max={currentQuestion.max}
-                      step={currentQuestion.step ?? 1}
-                      inputmode={currentQuestion.step && currentQuestion.step < 1 ? 'decimal' : 'numeric'}
-                      className="w-full"
-                      supporting-text={
-                        currentQuestion.min !== undefined && currentQuestion.max !== undefined
-                          ? `有效范围：${currentQuestion.min} ~ ${currentQuestion.max} ${currentQuestion.unit || ''}`
-                          : currentQuestion.placeholder || '请输入数值'
-                      }
-                      onInput={(e: any) => handleNumberInput(e.target.value)}
-                      onKeyDown={(e: any) => {
-                        if (e.key === 'Enter' && isCurrentAnswered) {
-                          handleNext();
+                {currentQuestion.type === 'number' && (() => {
+                  const zeroOptionLabel = currentQuestion.zeroOptionLabel || (currentQuestion.id === 'G17a' ? '从未喝过酒' : undefined);
+                  const isZeroSelected = Boolean(zeroOptionLabel && (currentAnswer === 0 || currentAnswer === '0'));
+
+                  return (
+                    <div className="space-y-4 pt-2">
+                      <md-outlined-text-field
+                        type="number"
+                        label={zeroOptionLabel ? '开始饮酒年龄' : '数值'}
+                        value={isZeroSelected ? '' : (currentAnswer !== undefined && currentAnswer !== '' ? String(currentAnswer) : '')}
+                        placeholder={isZeroSelected ? `已选择“${zeroOptionLabel}”` : (currentQuestion.placeholder || '请输入数值')}
+                        min={zeroOptionLabel && currentQuestion.min === 0 ? 1 : currentQuestion.min}
+                        max={currentQuestion.max}
+                        step={currentQuestion.step ?? 1}
+                        inputmode={currentQuestion.step && currentQuestion.step < 1 ? 'decimal' : 'numeric'}
+                        className="w-full"
+                        supporting-text={
+                          isZeroSelected
+                            ? `已选择“${zeroOptionLabel}”，若需修改请在此直接输入开始饮酒年龄`
+                            : currentQuestion.min !== undefined && currentQuestion.max !== undefined
+                            ? `有效范围：${zeroOptionLabel && currentQuestion.min === 0 ? 1 : currentQuestion.min} ~ ${currentQuestion.max} ${currentQuestion.unit || ''}`
+                            : currentQuestion.placeholder || '请输入数值'
                         }
-                      }}
-                    >
-                      <md-icon slot="leading-icon">pin</md-icon>
-                      {currentQuestion.unit && (
-                        <span
-                          slot="trailing-icon"
-                          className="text-xs font-semibold text-[var(--md-sys-color-on-surface-variant)] pr-3 select-none"
-                        >
-                          {currentQuestion.unit}
-                        </span>
+                        onInput={(e: any) => handleNumberInput(e.target.value)}
+                        onKeyDown={(e: any) => {
+                          if (e.key === 'Enter' && isCurrentAnswered) {
+                            handleNext();
+                          }
+                        }}
+                      >
+                        <md-icon slot="leading-icon">{getFieldLeadingIcon(currentQuestion)}</md-icon>
+                        {currentQuestion.unit && (
+                          <span
+                            slot="trailing-icon"
+                            className="text-xs font-semibold text-[var(--md-sys-color-on-surface-variant)] pr-3 select-none"
+                          >
+                            {currentQuestion.unit}
+                          </span>
+                        )}
+                      </md-outlined-text-field>
+
+                      {zeroOptionLabel && (
+                        <div className="space-y-3 pt-1">
+                          <div className="flex items-center gap-3 py-1">
+                            <div className="h-[1px] flex-1 bg-[var(--md-sys-color-outline-variant)]" />
+                            <span className="text-xs font-medium text-[var(--md-sys-color-on-surface-variant)] select-none">
+                              或者
+                            </span>
+                            <div className="h-[1px] flex-1 bg-[var(--md-sys-color-outline-variant)]" />
+                          </div>
+
+                          <div
+                            className={`w-full transition-all duration-200 relative overflow-hidden rounded-2xl ${
+                              isZeroSelected
+                                ? 'bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)]'
+                                : 'bg-[var(--md-sys-color-surface-container-low)] hover:bg-[var(--md-sys-color-surface-container)] text-[var(--md-sys-color-on-surface)]'
+                            }`}
+                          >
+                            <div
+                              role="button"
+                              tabIndex={0}
+                              aria-pressed={isZeroSelected}
+                              data-testid="zero-option-button"
+                              onClick={handleZeroOptionClick}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  handleZeroOptionClick();
+                                }
+                              }}
+                              className="w-full min-h-[56px] px-5 py-4 text-left flex items-center justify-between cursor-pointer select-none relative active:scale-[0.99] transition-transform"
+                            >
+                              <md-ripple></md-ripple>
+                              <span className={`text-base leading-snug pr-4 ${isZeroSelected ? 'font-semibold' : 'font-medium'}`}>
+                                {zeroOptionLabel}
+                              </span>
+
+                              <md-radio
+                                checked={isZeroSelected}
+                                name={`question_${currentQuestion.id}_zero`}
+                                value="0"
+                                tabIndex={-1}
+                                className="pointer-events-none shrink-0"
+                              ></md-radio>
+                            </div>
+                          </div>
+                        </div>
                       )}
-                    </md-outlined-text-field>
-                  </div>
-                )}
+                    </div>
+                  );
+                })()}
 
                 {/* Text Question (Fallback for text and any other types) */}
                 {currentQuestion.type !== 'single_choice' &&
@@ -891,7 +1043,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
                           }
                         }}
                       >
-                        <md-icon slot="leading-icon">edit_note</md-icon>
+                        <md-icon slot="leading-icon">{getFieldLeadingIcon(currentQuestion)}</md-icon>
                       </md-outlined-text-field>
                     </div>
                   )}
