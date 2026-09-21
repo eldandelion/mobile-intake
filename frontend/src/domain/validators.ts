@@ -140,7 +140,83 @@ export function validateEmailAddress(raw?: string | null): ValidationResult<stri
 }
 
 // ---------------------------------------------------------------------------
-// 6. Questionnaire Question & Scale Response Specification
+// 6. Birth Date Specification (YYYY-MM-DD)
+// Validates calendar dates (leap year aware) and student age (14-70 years).
+// ---------------------------------------------------------------------------
+export const MIN_STUDENT_AGE = 14;
+export const MAX_STUDENT_AGE = 70;
+
+const BIRTH_DATE_PATTERN = /^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+
+/**
+ * Returns the number of days in a given month of a given year (1-indexed month: 1=Jan, 12=Dec).
+ * Properly handles leap years for February.
+ */
+export function getDaysInMonth(year: number, month: number): number {
+  if (isNaN(year) || isNaN(month) || month < 1 || month > 12) {
+    return 31;
+  }
+  return new Date(year, month, 0).getDate();
+}
+
+/**
+ * Validates a birth date string in canonical ISO-8601 format (YYYY-MM-DD).
+ * Ensures:
+ * 1. Correct format YYYY-MM-DD.
+ * 2. Real calendar date existence (days matching month & leap year).
+ * 3. Chronological student age between minAge (14) and maxAge (70).
+ */
+export function validateBirthDate(
+  dateStr?: string | null,
+  minAge = MIN_STUDENT_AGE,
+  maxAge = MAX_STUDENT_AGE
+): ValidationResult<string> {
+  if (!dateStr || !dateStr.trim()) {
+    return { isValid: false, error: '请选择出生年月日' };
+  }
+  const trimmed = dateStr.trim();
+  const match = BIRTH_DATE_PATTERN.exec(trimmed);
+  if (!match) {
+    return { isValid: false, error: '出生日期格式不正确（应为 YYYY-MM-DD）' };
+  }
+
+  const year = parseInt(match[1], 10);
+  const month = parseInt(match[2], 10);
+  const day = parseInt(match[3], 10);
+
+  const maxDays = getDaysInMonth(year, month);
+  if (day < 1 || day > maxDays) {
+    return { isValid: false, error: `请输入有效的日期 (该月最大天数为 ${maxDays} 日)` };
+  }
+
+  const date = new Date(year, month - 1, day);
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+    return { isValid: false, error: '请输入有效的公历日期' };
+  }
+
+  const today = new Date();
+  if (date > today) {
+    return { isValid: false, error: '出生日期不能晚于当前时间' };
+  }
+
+  let age = today.getFullYear() - year;
+  const monthDiff = today.getMonth() - (month - 1);
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < day)) {
+    age--;
+  }
+
+  if (age < minAge) {
+    return { isValid: false, error: `年龄须年满 ${minAge} 周岁` };
+  }
+  if (age > maxAge) {
+    return { isValid: false, error: `年龄超出适用范围（最大 ${maxAge} 周岁）` };
+  }
+
+  return { isValid: true, normalized: trimmed };
+}
+
+// ---------------------------------------------------------------------------
+// 7. Questionnaire Question & Scale Response Specification
 // ---------------------------------------------------------------------------
 export interface QuestionValidationContext {
   readonly id: string;
@@ -164,7 +240,12 @@ export function validateQuestionAnswer(
     return { isValid: false, error: '请完成本道题目作答' };
   }
 
-  // 2. Multiple Choice validation
+  // 2. Date Question validation
+  if (q.type === 'date') {
+    return validateBirthDate(String(value));
+  }
+
+  // 3. Multiple Choice validation
   if (q.type === 'multiple_choice') {
     if (!Array.isArray(value) || value.length === 0) {
       return { isValid: false, error: '多选题至少选择一项' };

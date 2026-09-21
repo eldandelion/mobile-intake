@@ -84,6 +84,14 @@ data class ScaleResponseSet(
                     }
                 }
             }
+
+            // 5. Date of Birth Invariant
+            if (q.type == "date") {
+                val dateStr = rawAnswer.toString().trim()
+                if (!BirthDate.isValid(dateStr)) {
+                    throw DomainValidationException("Answer for question '${q.id}' must be a valid birth date (YYYY-MM-DD within age 14-70), received: '$rawAnswer'")
+                }
+            }
         }
     }
 }

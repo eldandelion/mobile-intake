@@ -582,6 +582,74 @@ describe('QuestionnairePlayerPage', () => {
     });
   });
 
+  it('renders date question with 3-column inputs and enables submission upon valid birth date', async () => {
+    const mockDateScale = {
+      code: 'date_test',
+      title: '基本信息调查',
+      subtitle: '人口学资料',
+      description: '出生日期评估',
+      instructions: '按实际情况作答',
+      estimatedMinutes: 1,
+      questions: [
+        {
+          id: 'G2',
+          field: 'birthday',
+          text: 'G2. 出生日期：',
+          orderNum: 1,
+          type: 'date',
+          icon: 'cake',
+          options: [],
+        },
+      ],
+    };
+
+    vi.spyOn(intakeApi, 'getScaleDetail').mockResolvedValue(mockDateScale as any);
+
+    render(
+      <QuestionnairePlayerPage
+        scaleCode="date_test"
+        studentNumber="8209220532"
+        onClose={vi.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('开始作答')).toBeDefined();
+    });
+    fireEvent.click(screen.getByText('开始作答'));
+
+    await waitFor(() => {
+      expect(screen.getByText('G2. 出生日期：')).toBeDefined();
+    });
+
+    const select = document.querySelector('md-outlined-select[label="月"]') as HTMLElement;
+    const dayInput = document.querySelector('md-outlined-text-field[label="日"]') as HTMLElement;
+    const yearInput = document.querySelector('md-outlined-text-field[label="年"]') as HTMLElement;
+
+    expect(select).toBeDefined();
+    expect(dayInput).toBeDefined();
+    expect(yearInput).toBeDefined();
+
+    const submitBtn = await screen.findByText('完成并提交');
+    // Initially disabled
+    expect(submitBtn.closest('md-filled-button')?.hasAttribute('disabled')).toBe(true);
+
+    // Enter valid date: 2006-05-18
+    (select as any).value = '5';
+    fireEvent(select, new Event('change', { bubbles: true, cancelable: true }));
+
+    (dayInput as any).value = '18';
+    fireEvent(dayInput, new Event('input', { bubbles: true, cancelable: true }));
+
+    (yearInput as any).value = '2006';
+    fireEvent(yearInput, new Event('input', { bubbles: true, cancelable: true }));
+
+    // Now submit button is enabled
+    await waitFor(() => {
+      expect(submitBtn.closest('md-filled-button')?.hasAttribute('disabled')).toBe(false);
+    });
+  });
+
   it('renders single-choice option with hasTextInput, expands text field, and suppresses auto-advance', async () => {
     const mockTextInputScale = {
       code: 'text_input_test',

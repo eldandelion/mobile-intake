@@ -87,6 +87,22 @@ declare global {
         onChange?: (e: any) => void;
         onKeyDown?: (e: any) => void;
       }, HTMLElement>;
+      'md-outlined-select': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+        label?: string;
+        value?: string;
+        disabled?: boolean;
+        error?: boolean;
+        'error-text'?: string;
+        errorText?: string;
+        'supporting-text'?: string;
+        supportingText?: string;
+        onChange?: (e: any) => void;
+      }, HTMLElement>;
+      'md-select-option': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+        value?: string;
+        selected?: boolean;
+        disabled?: boolean;
+      }, HTMLElement>;
       'md-navigation-bar': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
         'active-index'?: number;
       }, HTMLElement>;

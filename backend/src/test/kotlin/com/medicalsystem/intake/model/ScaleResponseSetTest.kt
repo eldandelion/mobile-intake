@@ -42,6 +42,12 @@ class ScaleResponseSetTest {
                 type = "number",
                 min = 10.0,
                 max = 100.0
+            ),
+            ScaleQuestion(
+                id = "q4_dob",
+                text = "问题 4 (出生日期)",
+                orderNum = 4,
+                type = "date"
             )
         )
     )
@@ -51,7 +57,8 @@ class ScaleResponseSetTest {
         val answers = mapOf(
             "q1" to 1,
             "q2_text" to "测试文本",
-            "q3_num" to 50
+            "q3_num" to 50,
+            "q4_dob" to "2006-05-18"
         )
         val responseSet = ScaleResponseSet(ScaleCode("test_scale"), answers)
         assertDoesNotThrow { responseSet.validateAgainst(testDetail) }
@@ -68,7 +75,8 @@ class ScaleResponseSetTest {
     fun `missing question fails validation`() {
         val answers = mapOf(
             "q1" to 1,
-            "q2_text" to "测试文本"
+            "q2_text" to "测试文本",
+            "q4_dob" to "2006-05-18"
             // q3_num missing
         )
         val responseSet = ScaleResponseSet(ScaleCode("test_scale"), answers)
@@ -81,7 +89,8 @@ class ScaleResponseSetTest {
         val answers = mapOf(
             "q1" to 1,
             "q2_text" to "   ",
-            "q3_num" to 50
+            "q3_num" to 50,
+            "q4_dob" to "2006-05-18"
         )
         val responseSet = ScaleResponseSet(ScaleCode("test_scale"), answers)
         val ex = assertThrows<DomainValidationException> { responseSet.validateAgainst(testDetail) }
@@ -93,7 +102,8 @@ class ScaleResponseSetTest {
         val answers = mapOf(
             "q1" to 99, // Allowed: 0, 1, 2, 3
             "q2_text" to "文本",
-            "q3_num" to 50
+            "q3_num" to 50,
+            "q4_dob" to "2006-05-18"
         )
         val responseSet = ScaleResponseSet(ScaleCode("test_scale"), answers)
         val ex = assertThrows<DomainValidationException> { responseSet.validateAgainst(testDetail) }
@@ -106,7 +116,8 @@ class ScaleResponseSetTest {
         val answersLow = mapOf(
             "q1" to 1,
             "q2_text" to "文本",
-            "q3_num" to 5
+            "q3_num" to 5,
+            "q4_dob" to "2006-05-18"
         )
         val responseSetLow = ScaleResponseSet(ScaleCode("test_scale"), answersLow)
         val exLow = assertThrows<DomainValidationException> { responseSetLow.validateAgainst(testDetail) }
@@ -116,11 +127,37 @@ class ScaleResponseSetTest {
         val answersHigh = mapOf(
             "q1" to 1,
             "q2_text" to "文本",
-            "q3_num" to 150
+            "q3_num" to 150,
+            "q4_dob" to "2006-05-18"
         )
         val responseSetHigh = ScaleResponseSet(ScaleCode("test_scale"), answersHigh)
         val exHigh = assertThrows<DomainValidationException> { responseSetHigh.validateAgainst(testDetail) }
         assertTrue(exHigh.message!!.contains("cannot be greater than maximum"))
+    }
+
+    @Test
+    fun `date question fails validation on invalid calendar date or format`() {
+        // Non-leap year Feb 29
+        val answersInvalidCal = mapOf(
+            "q1" to 1,
+            "q2_text" to "文本",
+            "q3_num" to 50,
+            "q4_dob" to "2003-02-29"
+        )
+        val responseSetCal = ScaleResponseSet(ScaleCode("test_scale"), answersInvalidCal)
+        val exCal = assertThrows<DomainValidationException> { responseSetCal.validateAgainst(testDetail) }
+        assertTrue(exCal.message!!.contains("must be a valid birth date"))
+
+        // Malformed string
+        val answersMalformed = mapOf(
+            "q1" to 1,
+            "q2_text" to "文本",
+            "q3_num" to 50,
+            "q4_dob" to "2006/05/18"
+        )
+        val responseSetMal = ScaleResponseSet(ScaleCode("test_scale"), answersMalformed)
+        val exMal = assertThrows<DomainValidationException> { responseSetMal.validateAgainst(testDetail) }
+        assertTrue(exMal.message!!.contains("must be a valid birth date"))
     }
 
     @Test
@@ -129,6 +166,7 @@ class ScaleResponseSetTest {
             "q1" to 1,
             "q2_text" to "测试文本",
             "q3_num" to 50,
+            "q4_dob" to "2006-05-18",
             "hacked_key" to "malicious"
         )
         val responseSet = ScaleResponseSet(ScaleCode("test_scale"), answers)

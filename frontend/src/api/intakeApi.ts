@@ -61,7 +61,8 @@ export interface ScaleQuestion {
   id: string;
   text: string;
   orderNum: number;
-  type: string; // 'single_choice' | 'multiple_choice' | 'number' | 'slider' | 'text' | 'select'
+  type: string; // 'single_choice' | 'multiple_choice' | 'number' | 'slider' | 'text' | 'select' | 'date'
+  field?: string;
   placeholder?: string;
   min?: number;
   max?: number;

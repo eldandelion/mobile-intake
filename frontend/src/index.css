@@ -145,3 +145,9 @@ body {
   color-scheme: dark;
 }
 
+md-outlined-select,
+md-filled-select {
+  --md-outlined-select-text-field-container-shape: var(--md-outlined-text-field-container-shape, 4px);
+  --md-outlined-select-text-field-min-width: 0px;
+}
+

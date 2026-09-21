@@ -6,6 +6,10 @@ import {
   validateIdCardNumber,
   validateEmailAddress,
   validateQuestionAnswer,
+  getDaysInMonth,
+  validateBirthDate,
+  MIN_STUDENT_AGE,
+  MAX_STUDENT_AGE,
 } from './validators';
 
 describe('Frontend Domain Value Validators', () => {
@@ -235,6 +239,71 @@ describe('Frontend Domain Value Validators', () => {
     });
   });
 
+  describe('validateBirthDate and getDaysInMonth', () => {
+    it('getDaysInMonth handles variable month lengths and leap years', () => {
+      expect(getDaysInMonth(2024, 1)).toBe(31);
+      expect(getDaysInMonth(2024, 4)).toBe(30);
+      expect(getDaysInMonth(2024, 2)).toBe(29); // Leap year
+      expect(getDaysInMonth(2023, 2)).toBe(28); // Non-leap year
+      expect(getDaysInMonth(2000, 2)).toBe(29); // Century leap year
+      expect(getDaysInMonth(1900, 2)).toBe(28); // Century non-leap year
+    });
+
+    it('accepts valid birth dates within student age bounds', () => {
+      const currentYear = new Date().getFullYear();
+      const validDob = `${currentYear - 18}-05-18`;
+      const res = validateBirthDate(validDob);
+      expect(res.isValid).toBe(true);
+      expect(res.normalized).toBe(validDob);
+
+      // Leap year Feb 29
+      const leapDob = '2004-02-29';
+      expect(validateBirthDate(leapDob).isValid).toBe(true);
+    });
+
+    it('rejects invalid calendar dates', () => {
+      // Non-leap year Feb 29
+      const resNonLeap = validateBirthDate('2003-02-29');
+      expect(resNonLeap.isValid).toBe(false);
+      expect(resNonLeap.error).toContain('该月最大天数为 28 日');
+
+      // April 31
+      const resApril = validateBirthDate('2004-04-31');
+      expect(resApril.isValid).toBe(false);
+      expect(resApril.error).toContain('该月最大天数为 30 日');
+
+      // Invalid month
+      expect(validateBirthDate('2004-13-10').isValid).toBe(false);
+    });
+
+    it('rejects age out of bounds (14-70) and future dates', () => {
+      const currentYear = new Date().getFullYear();
+
+      // Underage (< 14)
+      const underage = `${currentYear - 10}-01-01`;
+      const resUnderage = validateBirthDate(underage);
+      expect(resUnderage.isValid).toBe(false);
+      expect(resUnderage.error).toContain(`年龄须年满 ${MIN_STUDENT_AGE} 周岁`);
+
+      // Overage (> 70)
+      const overage = `${currentYear - 80}-01-01`;
+      const resOverage = validateBirthDate(overage);
+      expect(resOverage.isValid).toBe(false);
+      expect(resOverage.error).toContain(`最大 ${MAX_STUDENT_AGE} 周岁`);
+
+      // Future date
+      const future = `${currentYear + 1}-01-01`;
+      const resFuture = validateBirthDate(future);
+      expect(resFuture.isValid).toBe(false);
+      expect(resFuture.error).toBe('出生日期不能晚于当前时间');
+
+      // Incomplete or empty
+      expect(validateBirthDate('').isValid).toBe(false);
+      expect(validateBirthDate('2006-05-').isValid).toBe(false);
+      expect(validateBirthDate('2006/05/18').isValid).toBe(false);
+    });
+  });
+
   describe('validateQuestionAnswer', () => {
     it('rejects empty or undefined answers', () => {
       const q = { id: 'q1', type: 'single_choice', text: '题目1' };
@@ -344,6 +413,23 @@ describe('Frontend Domain Value Validators', () => {
         const q = { id: 'demo_name', field: 'name', type: 'text', text: '真实姓名' };
         expect(validateQuestionAnswer(q, '张三').isValid).toBe(true);
         expect(validateQuestionAnswer(q, 'A').isValid).toBe(false);
+      });
+    });
+
+    describe('Date questions (e.g. G2 Date of Birth)', () => {
+      const q = { id: 'G2', field: 'birthday', type: 'date', text: 'G2. 出生日期：' };
+
+      it('validates valid ISO date string within age bounds', () => {
+        const currentYear = new Date().getFullYear();
+        expect(validateQuestionAnswer(q, `${currentYear - 19}-08-20`).isValid).toBe(true);
+        expect(validateQuestionAnswer(q, '2004-02-29').isValid).toBe(true);
+      });
+
+      it('rejects invalid calendar dates or out-of-range dates', () => {
+        expect(validateQuestionAnswer(q, '2003-02-29').isValid).toBe(false);
+        expect(validateQuestionAnswer(q, '2004-04-31').isValid).toBe(false);
+        expect(validateQuestionAnswer(q, '2004-05-').isValid).toBe(false);
+        expect(validateQuestionAnswer(q, 'not-a-date').isValid).toBe(false);
       });
     });
   });

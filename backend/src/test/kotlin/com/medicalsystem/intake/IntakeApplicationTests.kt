@@ -241,8 +241,10 @@ class IntakeApplicationTests {
         val demoAnswers = demoDetail.questions.associate { q ->
             val sampleVal: Any = if (q.id == "demo_class") {
                 "计算机学院 软件工程"
-            } else if (q.id == "demo_id_card") {
+            } else if (q.id == "demo_id_card" || q.id == "idCardNumber") {
                 "110101199003072375"
+            } else if (q.type == "date" || q.id == "G2") {
+                "2004-05-18"
             } else if (q.options.isNotEmpty()) {
                 q.options[0].value
             } else if (q.type == "number" || q.type == "slider") {
@@ -396,6 +398,8 @@ class IntakeApplicationTests {
                 "计算机学院 软件工程"
             } else if (q.id == "demo_id_card") {
                 "110101199003072375"
+            } else if (q.type == "date" || q.id == "G2") {
+                "2004-05-18"
             } else if (q.options.isNotEmpty()) {
                 q.options[0].value
             } else if (q.type == "number" || q.type == "slider") {

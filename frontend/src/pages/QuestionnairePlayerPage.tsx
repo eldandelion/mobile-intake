@@ -5,6 +5,7 @@ import { intakeApi, ScaleDetail, ScaleQuestion, ScaleOption } from '../api/intak
 import { PrimaryButton, OutlinedButton, TertiaryButton } from '../components/common/Buttons';
 import { QuestionGridSheet } from '../components/assessments/QuestionGridSheet';
 import { QuestionnaireIntroScaffold } from '../components/assessments/QuestionnaireIntroScaffold';
+import { DateQuestionField } from '../components/assessments/DateQuestionField';
 import { setCenteredDialogAnimation } from '../utils/dialogAnimation';
 import { useAssessmentDraft } from '../hooks/useAssessmentDraft';
 import { useSnackbar } from '../contexts/SnackbarContext';
@@ -1037,11 +1038,29 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
                   );
                 })()}
 
+                {/* Date Question (Option B: Month dropdown, Day input, Year input) */}
+                {currentQuestion.type === 'date' && (
+                  <DateQuestionField
+                    question={currentQuestion}
+                    value={typeof currentAnswer === 'string' ? currentAnswer : ''}
+                    error={currentAnswer ? currentValidation.error : undefined}
+                    onChange={(isoDate) => {
+                      recordAnswer(currentQuestion.id, isoDate);
+                    }}
+                    onEnterPress={() => {
+                      if (isCurrentAnswered) {
+                        handleNext();
+                      }
+                    }}
+                  />
+                )}
+
                 {/* Text Question (Fallback for text and any other types) */}
                 {currentQuestion.type !== 'single_choice' &&
                   currentQuestion.type !== 'multiple_choice' &&
                   currentQuestion.type !== 'slider' &&
-                  currentQuestion.type !== 'number' && (
+                  currentQuestion.type !== 'number' &&
+                  currentQuestion.type !== 'date' && (
                     <div className="space-y-4 pt-2">
                       <md-outlined-text-field
                         type="text"

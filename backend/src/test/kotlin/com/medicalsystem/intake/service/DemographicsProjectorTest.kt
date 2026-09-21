@@ -54,10 +54,10 @@ class DemographicsProjectorTest {
             ),
             ScaleQuestion(
                 id = "G2",
-                field = "age",
-                text = "G2. 你的年龄（周岁）：",
+                field = "birthday",
+                text = "G2. 出生日期：",
                 orderNum = 5,
-                type = "number"
+                type = "date"
             ),
             ScaleQuestion(
                 id = "G4",
@@ -122,6 +122,17 @@ class DemographicsProjectorTest {
 
         assertEquals("女", dto.gender)
         assertEquals("少数民族", dto.ethnicity)
+    }
+
+    @Test
+    fun `test project extracts birthday directly from G2 date string`() {
+        val answers = mapOf<String, Any>(
+            "G2" to "2006-05-18"
+        )
+        val dto = projector.project(answers)
+
+        assertEquals("2006-05-18", dto.birthday)
+        assertNull(dto.idCardNumber)
     }
 
     @Test

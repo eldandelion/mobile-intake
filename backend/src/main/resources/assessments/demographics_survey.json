@@ -121,15 +121,10 @@
         },
         {
           "id": "G2",
-          "field": "age",
-          "text": "G2. 你的年龄（周岁）：",
-          "type": "number",
-          "icon": "cake",
-          "min": 10,
-          "max": 100,
-          "step": 1,
-          "unit": "岁",
-          "placeholder": "例如：18"
+          "field": "birthday",
+          "text": "G2. 出生日期：",
+          "type": "date",
+          "icon": "cake"
         },
         {
           "id": "G3",

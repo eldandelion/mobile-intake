@@ -155,6 +155,75 @@ class DomainValuesTest {
         assertThrows<DomainValidationException> { IdCardNumber("123456") }
     }
 
+    // --- BirthDate Tests ---
+
+    @Test
+    fun `BirthDate accepts valid calendar dates within age bounds`() {
+        val today = LocalDate.now()
+        val validDateUndergrad = "${today.year - 18}-05-18"
+        assertDoesNotThrow { BirthDate(validDateUndergrad) }
+        assertTrue(BirthDate.isValid(validDateUndergrad))
+
+        // Leap year 2004-02-29 (age 22 in 2026)
+        assertDoesNotThrow { BirthDate("2004-02-29") }
+        assertTrue(BirthDate.isValid("2004-02-29"))
+
+        // Centurial leap year 2000-02-29
+        assertDoesNotThrow { BirthDate("2000-02-29") }
+        assertTrue(BirthDate.isValid("2000-02-29"))
+
+        val bd = BirthDate("  2004-02-29  ")
+        assertEquals("2004-02-29", bd.normalized())
+        assertEquals(LocalDate.of(2004, 2, 29), bd.toLocalDate())
+    }
+
+    @Test
+    fun `BirthDate rejects invalid calendar dates`() {
+        // Non-leap year Feb 29
+        assertThrows<DomainValidationException> { BirthDate("2003-02-29") }
+        assertFalse(BirthDate.isValid("2003-02-29"))
+
+        // 1900 is not a leap year
+        assertThrows<DomainValidationException> { BirthDate("1900-02-29") }
+        assertFalse(BirthDate.isValid("1900-02-29"))
+
+        // April has only 30 days
+        assertThrows<DomainValidationException> { BirthDate("2004-04-31") }
+        assertFalse(BirthDate.isValid("2004-04-31"))
+
+        // Invalid month 13
+        assertThrows<DomainValidationException> { BirthDate("2004-13-10") }
+        assertFalse(BirthDate.isValid("2004-13-10"))
+
+        // Day 00
+        assertThrows<DomainValidationException> { BirthDate("2004-05-00") }
+        assertFalse(BirthDate.isValid("2004-05-00"))
+    }
+
+    @Test
+    fun `BirthDate rejects out-of-bounds age and future dates`() {
+        val today = LocalDate.now()
+
+        // Future date
+        val futureDate = today.plusDays(1).toString()
+        assertFalse(BirthDate.isValid(futureDate))
+
+        // Under minimum age (e.g. 10 years old)
+        val underage = "${today.year - 10}-01-01"
+        assertThrows<DomainValidationException> { BirthDate(underage) }
+        assertFalse(BirthDate.isValid(underage))
+
+        // Over maximum age (e.g. 80 years old)
+        val overage = "${today.year - 80}-01-01"
+        assertThrows<DomainValidationException> { BirthDate(overage) }
+        assertFalse(BirthDate.isValid(overage))
+
+        // Malformed format
+        assertThrows<DomainValidationException> { BirthDate("2004/05/18") }
+        assertThrows<DomainValidationException> { BirthDate("not-a-date") }
+        assertFalse(BirthDate.isValid("2004/05/18"))
+    }
+
     // --- ScaleCode Tests ---
 
     @Test

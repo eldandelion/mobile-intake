@@ -40,8 +40,9 @@ class DemographicsProjector(
 
         // 1. ID Card & Birthday
         val idCard = resolveText(questionsByField["idCardNumber"], answers, listOf("demo_id_card", "idCardNumber"))
-        val age = resolveText(questionsByField["age"], answers, listOf("G2", "age"))
-        val birthday = extractBirthday(idCard, age)
+        val birthdayAnswer = resolveText(questionsByField["birthday"], answers, listOf("G2", "birthday", "dateOfBirth", "birthDate"))
+        val age = resolveText(questionsByField["age"], answers, listOf("age"))
+        val birthday = extractBirthday(idCard, birthdayAnswer, age)
 
         // 2. Gender: dynamic catalog option label resolution with ID card fallback
         val gender = resolveChoice(questionsByField["gender"], answers, listOf("G1", "demo_gender", "gender"))
@@ -99,7 +100,13 @@ class DemographicsProjector(
         return if (raw.isNullOrEmpty()) null else raw
     }
 
-    private fun extractBirthday(idCard: String?, age: String?): String? {
+    private fun extractBirthday(idCard: String?, birthdayAnswer: String?, age: String?): String? {
+        if (!birthdayAnswer.isNullOrBlank()) {
+            val trimmed = birthdayAnswer.trim()
+            if (trimmed.matches(Regex("""^\d{4}-\d{2}-\d{2}$"""))) {
+                return trimmed
+            }
+        }
         if (!idCard.isNullOrBlank()) {
             if (com.medicalsystem.intake.model.IdCardNumber.isValid(idCard)) {
                 return com.medicalsystem.intake.model.IdCardNumber(idCard).birthDate().toString()
@@ -109,6 +116,13 @@ class DemographicsProjector(
                 val (y, m, d) = match.destructured
                 return "$y-$m-$d"
             }
+        }
+        if (!birthdayAnswer.isNullOrBlank()) {
+            val trimmed = birthdayAnswer.trim()
+            if (trimmed.matches(Regex("""^\d+$"""))) {
+                return "${trimmed}周岁"
+            }
+            return trimmed
         }
         if (!age.isNullOrBlank()) {
             return "${age}周岁"

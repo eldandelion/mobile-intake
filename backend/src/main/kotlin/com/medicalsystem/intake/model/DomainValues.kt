@@ -2,6 +2,7 @@ package com.medicalsystem.intake.model
 
 import com.medicalsystem.intake.exception.DomainValidationException
 import java.time.LocalDate
+import java.time.Period
 
 /**
  * Value Object representing an institutional Student Number.
@@ -156,6 +157,49 @@ value class IdCardNumber(val value: String) {
         val seq = upper.substring(14, 17).toInt()
         return if (seq % 2 == 1) "男" else "女"
     }
+}
+
+/**
+ * Value Object representing a person's birth date (ISO-8601 YYYY-MM-DD).
+ * Enforces calendar validity (leap years) and university intake age bounds (14 to 70 years old).
+ */
+@JvmInline
+value class BirthDate(val value: String) {
+    companion object {
+        const val MIN_STUDENT_AGE = 14
+        const val MAX_STUDENT_AGE = 70
+        private val PATTERN = Regex("""^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$""")
+
+        fun isValid(raw: String?, minAge: Int = MIN_STUDENT_AGE, maxAge: Int = MAX_STUDENT_AGE): Boolean {
+            if (raw == null) return false
+            val trimmed = raw.trim()
+            val match = PATTERN.matchEntire(trimmed) ?: return false
+            val year = match.groupValues[1].toInt()
+            val month = match.groupValues[2].toInt()
+            val day = match.groupValues[3].toInt()
+
+            val date = try {
+                LocalDate.of(year, month, day)
+            } catch (_: Exception) {
+                return false
+            }
+
+            val today = LocalDate.now()
+            if (date.isAfter(today)) return false
+
+            val age = Period.between(date, today).years
+            return age in minAge..maxAge
+        }
+    }
+
+    init {
+        if (!isValid(value)) {
+            throw DomainValidationException("Invalid birth date: '$value'. Must be valid calendar YYYY-MM-DD within age $MIN_STUDENT_AGE-$MAX_STUDENT_AGE.")
+        }
+    }
+
+    fun toLocalDate(): LocalDate = LocalDate.parse(value.trim())
+    fun normalized(): String = value.trim()
 }
 
 /**
