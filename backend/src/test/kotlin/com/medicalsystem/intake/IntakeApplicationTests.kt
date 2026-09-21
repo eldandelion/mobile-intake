@@ -84,7 +84,7 @@ class IntakeApplicationTests {
 
     @Test
     fun `test full student registration, scale completion, and admin CSV export lifecycle`() {
-        val studentNumber = "2026099"
+        val studentNumber = "2026099001"
         val phone = "13800112233"
         val registerReq = RegisterRequest(
             studentNumber = studentNumber,
@@ -328,7 +328,7 @@ class IntakeApplicationTests {
 
     @Test
     fun `test draft save, retrieve, status IN_PROGRESS, and purge on completion`() {
-        val studentNumber = "2026088"
+        val studentNumber = "2026088001"
         val registerReq = RegisterRequest(
             studentNumber = studentNumber,
             fullName = "李寻欢",
@@ -428,5 +428,66 @@ class IntakeApplicationTests {
             .andExpect(status().isOk)
             .andExpect(jsonPath("$[?(@.code == 'demographics_survey')].status").value("COMPLETED"))
             .andExpect(jsonPath("$[?(@.code == 'demographics_survey')].completionPercentage").value(100))
+    }
+
+    @Test
+    fun `test international student registration with lowercase l normalizes and allows login`() {
+        val rawStudentNumber = "l209220532"
+        val phone = "13900112233"
+        val registerReq = RegisterRequest(
+            studentNumber = rawStudentNumber,
+            fullName = "John Doe",
+            phone = phone,
+            password = "securePassword123"
+        )
+
+        // Register with lowercase 'l'
+        mockMvc.perform(
+            post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(registerReq))
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.student.studentNumber").value("L209220532"))
+
+        // Login with lowercase 'l'
+        mockMvc.perform(
+            post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(LoginRequest(identifier = "l209220532", password = "securePassword123")))
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.student.studentNumber").value("L209220532"))
+    }
+
+    @Test
+    fun `test register rejects degenerate and leading zero student numbers`() {
+        // Degenerate repeating 9s
+        mockMvc.perform(
+            post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(
+                    RegisterRequest(
+                        studentNumber = "9999999999",
+                        fullName = "张三",
+                        phone = "13800000001",
+                        password = "password123"
+                    )
+                ))
+        ).andExpect(status().isBadRequest)
+
+        // Leading zero
+        mockMvc.perform(
+            post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(
+                    RegisterRequest(
+                        studentNumber = "0209220532",
+                        fullName = "张三",
+                        phone = "13800000002",
+                        password = "password123"
+                    )
+                ))
+        ).andExpect(status().isBadRequest)
     }
 }

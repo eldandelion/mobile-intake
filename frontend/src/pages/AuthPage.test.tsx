@@ -108,7 +108,7 @@ describe('AuthPage', () => {
     const phoneField = document.querySelector('md-outlined-text-field[label="手机号码"]')!;
 
     simulateInput(nameField, '李四');
-    simulateInput(numberField, '2026002');
+    simulateInput(numberField, '2026002001');
     simulateInput(phoneField, '13800138000');
 
     fireEvent.click(screen.getByText('下一步'));
@@ -150,7 +150,7 @@ describe('AuthPage', () => {
 
     // Step 1
     simulateInput(document.querySelector('md-outlined-text-field[label="真实姓名"]')!, '王五');
-    simulateInput(document.querySelector('md-outlined-text-field[label="学号"]')!, '2026003');
+    simulateInput(document.querySelector('md-outlined-text-field[label="学号"]')!, '2026003001');
     simulateInput(document.querySelector('md-outlined-text-field[label="手机号码"]')!, '13900139000');
     fireEvent.click(screen.getByText('下一步'));
 
@@ -215,7 +215,7 @@ describe('AuthPage', () => {
     const numField = document.querySelector('md-outlined-text-field[label="学号"]')!;
     const pwdField = document.querySelector('md-outlined-text-field[label="登录密码"]')!;
 
-    simulateInput(numField, '2026001');
+    simulateInput(numField, '8209220532');
     simulateInput(pwdField, 'wrongPassword');
 
     const nextBtn = screen.getByText('下一步');
@@ -277,10 +277,64 @@ describe('AuthPage', () => {
     fireEvent.click(screen.getByText('下一步'));
 
     expect(
-      document.querySelector('md-outlined-text-field[error-text="学号须为 4 至 20 位字母或数字组合"]')
+      document.querySelector('md-outlined-text-field[error-text="学号格式不正确（本科生10位数字、研究生9位数字，留学生以L开头加9位数字，首位非0）"]')
     ).not.toBeNull();
     expect(
       document.querySelector('md-outlined-text-field[error-text="请输入正确的11位中国大陆手机号码"]')
+    ).not.toBeNull();
+  });
+
+  it('normalizes lowercase l in international student number and accepts it', async () => {
+    const loginSpy = vi.spyOn(intakeApi, 'login').mockResolvedValue({
+      token: 'jwt-token',
+      student: {
+        studentNumber: 'L209220532',
+        fullName: 'John Doe',
+        phone: '13900112233',
+        registeredAt: '2026-09-01T10:00:00',
+      },
+    });
+
+    render(
+      <AuthProvider>
+        <AuthPage />
+      </AuthProvider>
+    );
+
+    const numField = document.querySelector('md-outlined-text-field[label="学号"]')!;
+    const pwdField = document.querySelector('md-outlined-text-field[label="登录密码"]')!;
+
+    simulateInput(numField, '  l209220532  ');
+    simulateInput(pwdField, 'secret123');
+
+    fireEvent.click(screen.getByText('下一步'));
+
+    await waitFor(() => {
+      expect(loginSpy).toHaveBeenCalledWith({
+        identifier: 'L209220532',
+        studentNumber: 'L209220532',
+        password: 'secret123',
+      });
+    });
+  });
+
+  it('rejects degenerate uniform repeating student numbers', async () => {
+    render(
+      <AuthProvider>
+        <AuthPage />
+      </AuthProvider>
+    );
+
+    const numField = document.querySelector('md-outlined-text-field[label="学号"]')!;
+    const pwdField = document.querySelector('md-outlined-text-field[label="登录密码"]')!;
+
+    simulateInput(numField, '9999999999');
+    simulateInput(pwdField, 'secret123');
+
+    fireEvent.click(screen.getByText('下一步'));
+
+    expect(
+      document.querySelector('md-outlined-text-field[error-text="学号不能为全重复数字"]')
     ).not.toBeNull();
   });
 });

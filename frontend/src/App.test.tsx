@@ -6,7 +6,7 @@ import { tokenStorage } from './api/intakeApi';
 
 describe('App Top Bar & Navigation', () => {
   const mockStudent = {
-    studentNumber: '2026001',
+    studentNumber: '8209220532',
     fullName: '张同学',
     phone: '13800000000',
     registeredAt: '2026-09-01T08:00:00',
@@ -46,7 +46,7 @@ describe('App Top Bar & Navigation', () => {
     vi.spyOn(intakeApi, 'getMe').mockResolvedValue(mockStudent);
     vi.spyOn(intakeApi, 'getScales').mockResolvedValue(mockScales);
     vi.spyOn(intakeApi, 'getMyProfile').mockResolvedValue({
-      studentNumber: '2026001',
+      studentNumber: '8209220532',
       fullName: '张同学',
       phone: '13800000000',
       registeredAt: '2026-09-01T08:00:00',

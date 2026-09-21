@@ -4,20 +4,27 @@ import com.medicalsystem.intake.exception.DomainValidationException
 import java.time.LocalDate
 
 /**
- * Value Object representing an institutional Student Number (4-20 alphanumeric characters).
+ * Value Object representing an institutional Student Number.
+ * Valid formats:
+ * - Domestic Undergraduate: 10 digits starting with 1-9 (e.g. 8209220532)
+ * - Domestic Postgraduate: 9 digits starting with 1-9 (e.g. 264718003)
+ * - International Student: 'L' or 'l' followed by 9 digits starting with 1-9 (e.g. L209220532)
+ * Anti-degeneracy: cannot have all identical digits (e.g. 9999999999, L999999999).
  * Protects against formula injection prefixes in CSV exports.
  */
 @JvmInline
 value class StudentNumber(val value: String) {
     companion object {
-        private val PATTERN = Regex("^[A-Za-z0-9]{4,20}$")
+        private val PATTERN = Regex("^([1-9]\\d{8,9}|[Ll][1-9]\\d{8})$")
         private val INJECTION_PREFIXES = charArrayOf('=', '+', '-', '@', '\t', '\r')
 
         fun isValid(raw: String?): Boolean {
             if (raw == null) return false
             val trimmed = raw.trim()
-            if (!PATTERN.matches(trimmed)) return false
             if (INJECTION_PREFIXES.any { trimmed.startsWith(it) }) return false
+            if (!PATTERN.matches(trimmed)) return false
+            val digits = trimmed.filter { it.isDigit() }
+            if (digits.toSet().size <= 1) return false
             return true
         }
     }
@@ -28,7 +35,11 @@ value class StudentNumber(val value: String) {
             throw DomainValidationException("Student number cannot start with formula characters: '$value'")
         }
         if (!PATTERN.matches(trimmed)) {
-            throw DomainValidationException("Student number must be 4-20 alphanumeric characters, received: '$value'")
+            throw DomainValidationException("Student number must be 10 digits for undergrad, 9 digits for postgrad, or 'L' + 9 digits for international students, with non-zero leading digit; received: '$value'")
+        }
+        val digits = trimmed.filter { it.isDigit() }
+        if (digits.toSet().size <= 1) {
+            throw DomainValidationException("Student number cannot have all identical digits: '$value'")
         }
     }
 

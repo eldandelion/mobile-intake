@@ -66,7 +66,7 @@ class ScaleSubmissionServiceTest {
 
     @Test
     fun `test successful submission with valid options`() {
-        val studentNumber = "2026001"
+        val studentNumber = "2026001001"
         whenever(submissionRepository.existsByStudentNumberAndScaleCode(studentNumber, "phq_9")).thenReturn(false)
         whenever(submissionRepository.save(any<ScaleSubmissionEntity>())).thenAnswer { it.arguments[0] }
 
@@ -81,7 +81,7 @@ class ScaleSubmissionServiceTest {
 
     @Test
     fun `test submission rejection when already submitted and locked`() {
-        val studentNumber = "2026001"
+        val studentNumber = "2026001001"
         whenever(submissionRepository.existsByStudentNumberAndScaleCode(studentNumber, "phq_9")).thenReturn(true)
 
         val request = SubmitScaleRequest(answers = mapOf("phq9_1" to 1, "phq9_2" to 0))
@@ -93,7 +93,7 @@ class ScaleSubmissionServiceTest {
 
     @Test
     fun `test submission rejection when question is missing`() {
-        val studentNumber = "2026001"
+        val studentNumber = "2026001001"
         whenever(submissionRepository.existsByStudentNumberAndScaleCode(studentNumber, "phq_9")).thenReturn(false)
 
         // Missing phq9_2
@@ -106,7 +106,7 @@ class ScaleSubmissionServiceTest {
 
     @Test
     fun `test submission rejection when answer is out of bounds Likert value`() {
-        val studentNumber = "2026001"
+        val studentNumber = "2026001001"
         whenever(submissionRepository.existsByStudentNumberAndScaleCode(studentNumber, "phq_9")).thenReturn(false)
 
         // Out-of-bounds 999 option

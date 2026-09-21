@@ -8,7 +8,7 @@ describe('ProfilePage', () => {
   beforeEach(() => {
     tokenStorage.set('test-token');
     vi.spyOn(intakeApi, 'getMe').mockResolvedValue({
-      studentNumber: '2026001',
+      studentNumber: '8209220532',
       fullName: '李同学',
       phone: '13812345678',
       registeredAt: '2026-09-01T10:00:00',
@@ -24,7 +24,7 @@ describe('ProfilePage', () => {
       },
     ]);
     vi.spyOn(intakeApi, 'getMyProfile').mockResolvedValue({
-      studentNumber: '2026001',
+      studentNumber: '8209220532',
       fullName: '李同学',
       phone: '13812345678',
       registeredAt: '2026-09-01T10:00:00',
@@ -70,7 +70,7 @@ describe('ProfilePage', () => {
     expect(screen.getByText('个人资料照片')).toBeDefined();
     expect(screen.getByText('姓名')).toBeDefined();
     expect(screen.getByText('学号')).toBeDefined();
-    expect(screen.getByText('2026001')).toBeDefined();
+    expect(screen.getByText('8209220532')).toBeDefined();
     expect(screen.getByText('性别')).toBeDefined();
     expect(screen.getByText('男')).toBeDefined();
     expect(screen.getByText('民族')).toBeDefined();

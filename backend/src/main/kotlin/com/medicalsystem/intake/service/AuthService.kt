@@ -59,8 +59,15 @@ class AuthService(
             throw com.medicalsystem.intake.exception.ValidationException("Password is required")
         }
 
-        val student = studentRepository.findByStudentNumber(identifier).orElse(null)
-            ?: studentRepository.findByPhone(identifier).orElse(null)
+        val cleanIdentifier = identifier.trim()
+        val normalizedStudentNumber = if (cleanIdentifier.startsWith("l", ignoreCase = true)) {
+            cleanIdentifier.uppercase()
+        } else {
+            cleanIdentifier
+        }
+
+        val student = studentRepository.findByStudentNumber(normalizedStudentNumber).orElse(null)
+            ?: studentRepository.findByPhone(cleanIdentifier).orElse(null)
             ?: throw UnauthorizedException("Invalid credentials")
 
         if (!passwordEncoder.matches(password, student.passwordHash)) {

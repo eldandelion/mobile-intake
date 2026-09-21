@@ -48,7 +48,7 @@ class CsvExportServiceTest {
     @Test
     fun `test exportStudentsCsv includes UTF-8 BOM and sanitizes student fields`() {
         val maliciousStudent = IntakeStudentEntity(
-            studentNumber = "2026999",
+            studentNumber = "2026999001",
             fullName = "=cmd|' /C calc'!A0",
             phone = "+13800001111",
             passwordHash = "hash"
@@ -67,7 +67,7 @@ class CsvExportServiceTest {
         val content = String(csvBytes, Charsets.UTF_8)
         assertTrue(content.contains("学号,姓名,专业"))
         // Formula injection should be neutralized with leading single quote
-        assertTrue(content.contains("2026999"))
+        assertTrue(content.contains("2026999001"))
         assertTrue(content.contains("'=cmd|' /C calc'!A0"))
         assertTrue(content.contains("'+13800001111"))
     }
@@ -75,7 +75,7 @@ class CsvExportServiceTest {
     @Test
     fun `test exportAssessmentsCsv maps questionId to canonical scale code via ACL bridge`() {
         val submission = ScaleSubmissionEntity(
-            studentNumber = "2026001",
+            studentNumber = "2026001001",
             scaleCode = "MENTAL_HEALTH_ASSESSMENT",
             answersJson = """{"phq9_1":2,"gad7_1":1}""",
             status = "COMPLETED"
@@ -95,8 +95,8 @@ class CsvExportServiceTest {
         val content = String(csvBytes, Charsets.UTF_8)
         assertTrue(content.contains("student_number,scale_code,question_id,selected_value,completed_at"))
         // Check that phq_9 and gad_7 are emitted instead of MENTAL_HEALTH_ASSESSMENT
-        assertTrue(content.contains("2026001,phq_9,phq9_1,2"))
-        assertTrue(content.contains("2026001,gad_7,gad7_1,1"))
-        assertFalse(content.contains("2026001,MENTAL_HEALTH_ASSESSMENT"))
+        assertTrue(content.contains("2026001001,phq_9,phq9_1,2"))
+        assertTrue(content.contains("2026001001,gad_7,gad7_1,1"))
+        assertFalse(content.contains("2026001001,MENTAL_HEALTH_ASSESSMENT"))
     }
 }

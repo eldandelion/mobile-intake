@@ -4,7 +4,7 @@ import { useAssessmentDraft } from './useAssessmentDraft';
 import { intakeApi } from '../api/intakeApi';
 
 describe('useAssessmentDraft', () => {
-  const studentNumber = '2026001';
+  const studentNumber = '8209220532';
   const scaleCode = 'phq_9';
   const draftKey = `intake_draft_${studentNumber}_${scaleCode}`;
 

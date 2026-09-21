@@ -12,8 +12,13 @@ export interface ValidationResult<T = string> {
 
 // ---------------------------------------------------------------------------
 // 1. Student Number Specification
+// Valid formats:
+// - Domestic Undergraduate: 10 digits starting with 1-9 (e.g. 8209220532)
+// - Domestic Postgraduate: 9 digits starting with 1-9 (e.g. 264718003)
+// - International Student: 'L' or 'l' followed by 9 digits starting with 1-9 (e.g. L209220532)
+// Anti-degeneracy: digits cannot all be identical (e.g. 9999999999, L999999999).
 // ---------------------------------------------------------------------------
-const STUDENT_NUM_PATTERN = /^[A-Za-z0-9]{4,20}$/;
+const STUDENT_NUM_PATTERN = /^([1-9]\d{8,9}|[Ll][1-9]\d{8})$/;
 const INJECTION_PREFIXES = ['=', '+', '-', '@', '\t', '\r'];
 
 export function validateStudentNumber(raw?: string | null): ValidationResult<string> {
@@ -25,7 +30,14 @@ export function validateStudentNumber(raw?: string | null): ValidationResult<str
     return { isValid: false, error: '学号不能包含公式或特殊计算符号' };
   }
   if (!STUDENT_NUM_PATTERN.test(trimmed)) {
-    return { isValid: false, error: '学号须为 4 至 20 位字母或数字组合' };
+    return {
+      isValid: false,
+      error: '学号格式不正确（本科生10位数字、研究生9位数字，留学生以L开头加9位数字，首位非0）',
+    };
+  }
+  const digits = trimmed.replace(/\D/g, '');
+  if (new Set(digits).size <= 1) {
+    return { isValid: false, error: '学号不能为全重复数字' };
   }
   return { isValid: true, normalized: trimmed.toUpperCase() };
 }

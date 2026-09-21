@@ -11,12 +11,15 @@ import {
 describe('Frontend Domain Value Validators', () => {
   describe('validateStudentNumber', () => {
     it.each([
-      ['2026001', '2026001'],
-      ['csu123456', 'CSU123456'],
-      ['abcd', 'ABCD'],
-      ['12345678901234567890', '12345678901234567890'], // 20 chars
-      ['  CSU888  ', 'CSU888'],
-    ])('accepts valid student number and normalizes to uppercase: %s', (input, expectedNorm) => {
+      ['8209220532', '8209220532'], // 10-digit undergrad
+      ['2026001001', '2026001001'],
+      ['264718003', '264718003'], // 9-digit postgrad
+      ['202600101', '202600101'],
+      ['L209220532', 'L209220532'], // 10-character international
+      ['l209220532', 'L209220532'], // lowercase 'l' auto-normalizes
+      ['  l209220532  ', 'L209220532'],
+      ['  8209220532  ', '8209220532'],
+    ])('accepts valid institutional student number and normalizes to uppercase: %s', (input, expectedNorm) => {
       const res = validateStudentNumber(input);
       expect(res.isValid).toBe(true);
       expect(res.normalized).toBe(expectedNorm);
@@ -35,24 +38,43 @@ describe('Frontend Domain Value Validators', () => {
     });
 
     it.each([
-      ['123', '学号须为 4 至 20 位字母或数字组合'], // 3 chars
-      ['123456789012345678901', '学号须为 4 至 20 位字母或数字组合'], // 21 chars
-      ['2026-001', '学号须为 4 至 20 位字母或数字组合'],
-      ['2026 001', '学号须为 4 至 20 位字母或数字组合'],
-      ['学号1234', '学号须为 4 至 20 位字母或数字组合'],
-    ])('rejects format violations: %s', (input, errorMsg) => {
+      ['0209220532'],
+      ['026471800'],
+      ['L009220532'],
+      ['123'], // 3 chars
+      ['2026001'], // 7 chars
+      ['12345678'], // 8 chars
+      ['12345678901'], // 11 chars
+      ['M209220532'], // only 'L' allowed
+      ['abcd'],
+      ['CSU123456'],
+      ['8209-22053'],
+      ['8209 22053'],
+    ])('rejects format and leading zero violations: %s', (input) => {
       const res = validateStudentNumber(input);
       expect(res.isValid).toBe(false);
-      expect(res.error).toBe(errorMsg);
+      expect(res.error).toBe('学号格式不正确（本科生10位数字、研究生9位数字，留学生以L开头加9位数字，首位非0）');
+    });
+
+    it.each([
+      ['9999999999'],
+      ['2222222222'],
+      ['111111111'],
+      ['L999999999'],
+      ['L111111111'],
+    ])('rejects degenerate uniform digit repetitions: %s', (input) => {
+      const res = validateStudentNumber(input);
+      expect(res.isValid).toBe(false);
+      expect(res.error).toBe('学号不能为全重复数字');
     });
 
     it.each([
       ['=CMD()'],
-      ['+12345'],
+      ['+8209220532'],
       ['@SUM(1,2)'],
       ['-9999'],
-      ['\tCSU123'],
-      ['\rCSU123'],
+      ['\tL209220532'],
+      ['\rL209220532'],
     ])('rejects Excel formula injection prefixes: %s', (input) => {
       const res = validateStudentNumber(input);
       expect(res.isValid).toBe(false);
@@ -314,7 +336,7 @@ describe('Frontend Domain Value Validators', () => {
 
       it('validates student number field and rejects formula injection', () => {
         const q = { id: 'demo_student_number', field: 'student_number', type: 'text', text: '学号' };
-        expect(validateQuestionAnswer(q, '2026001').isValid).toBe(true);
+        expect(validateQuestionAnswer(q, '8209220532').isValid).toBe(true);
         expect(validateQuestionAnswer(q, '=CMD()').isValid).toBe(false);
       });
 

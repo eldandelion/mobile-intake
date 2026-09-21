@@ -14,36 +14,73 @@ class DomainValuesTest {
     // --- StudentNumber Tests ---
 
     @Test
-    fun `StudentNumber accepts valid alphanumeric formats`() {
-        assertDoesNotThrow { StudentNumber("2026001") }
-        assertDoesNotThrow { StudentNumber("STU123456") }
-        assertDoesNotThrow { StudentNumber("abcd") }
-        assertDoesNotThrow { StudentNumber("12345678901234567890") } // 20 chars
+    fun `StudentNumber accepts valid institutional formats`() {
+        // 10-digit domestic undergraduate
+        assertDoesNotThrow { StudentNumber("8209220532") }
+        assertDoesNotThrow { StudentNumber("2026001001") }
+        assertTrue(StudentNumber.isValid("8209220532"))
 
-        val sn = StudentNumber("  stu2026001  ")
-        assertEquals("STU2026001", sn.normalized())
+        // 9-digit domestic postgraduate
+        assertDoesNotThrow { StudentNumber("264718003") }
+        assertDoesNotThrow { StudentNumber("202600101") }
+        assertTrue(StudentNumber.isValid("264718003"))
+
+        // 10-character international student (L or l followed by 9 digits)
+        assertDoesNotThrow { StudentNumber("L209220532") }
+        assertDoesNotThrow { StudentNumber("l209220532") }
+        assertTrue(StudentNumber.isValid("L209220532"))
+        assertTrue(StudentNumber.isValid("l209220532"))
+
+        // Normalization and whitespace trimming
+        val snUndergrad = StudentNumber("  8209220532  ")
+        assertEquals("8209220532", snUndergrad.normalized())
+
+        val snInternational = StudentNumber("  l209220532  ")
+        assertEquals("L209220532", snInternational.normalized())
     }
 
     @Test
-    fun `StudentNumber rejects too short or too long strings`() {
+    fun `StudentNumber rejects leading zero`() {
+        assertThrows<DomainValidationException> { StudentNumber("0209220532") }
+        assertThrows<DomainValidationException> { StudentNumber("026471800") }
+        assertThrows<DomainValidationException> { StudentNumber("L009220532") }
+        assertFalse(StudentNumber.isValid("0209220532"))
+        assertFalse(StudentNumber.isValid("026471800"))
+        assertFalse(StudentNumber.isValid("L009220532"))
+    }
+
+    @Test
+    fun `StudentNumber rejects degenerate uniform digit repetitions`() {
+        assertThrows<DomainValidationException> { StudentNumber("9999999999") }
+        assertThrows<DomainValidationException> { StudentNumber("111111111") }
+        assertThrows<DomainValidationException> { StudentNumber("L999999999") }
+        assertThrows<DomainValidationException> { StudentNumber("L111111111") }
+        assertFalse(StudentNumber.isValid("9999999999"))
+        assertFalse(StudentNumber.isValid("111111111"))
+        assertFalse(StudentNumber.isValid("L999999999"))
+        assertFalse(StudentNumber.isValid("L111111111"))
+    }
+
+    @Test
+    fun `StudentNumber rejects invalid lengths and invalid characters`() {
         assertThrows<DomainValidationException> { StudentNumber("123") } // 3 chars
-        assertThrows<DomainValidationException> { StudentNumber("123456789012345678901") } // 21 chars
-    }
-
-    @Test
-    fun `StudentNumber rejects special characters and whitespace inside`() {
-        assertThrows<DomainValidationException> { StudentNumber("stu 01") }
-        assertThrows<DomainValidationException> { StudentNumber("stu-01") }
-        assertThrows<DomainValidationException> { StudentNumber("stu_01") }
-        assertThrows<DomainValidationException> { StudentNumber("2026@001") }
+        assertThrows<DomainValidationException> { StudentNumber("2026001") } // 7 chars
+        assertThrows<DomainValidationException> { StudentNumber("12345678") } // 8 chars
+        assertThrows<DomainValidationException> { StudentNumber("12345678901") } // 11 chars
+        assertThrows<DomainValidationException> { StudentNumber("M209220532") } // Only 'L' allowed
+        assertThrows<DomainValidationException> { StudentNumber("STU123456") }
+        assertThrows<DomainValidationException> { StudentNumber("8209 22053") }
+        assertThrows<DomainValidationException> { StudentNumber("8209-22053") }
+        assertFalse(StudentNumber.isValid("2026001"))
+        assertFalse(StudentNumber.isValid("M209220532"))
     }
 
     @Test
     fun `StudentNumber rejects formula injection prefixes`() {
-        assertThrows<DomainValidationException> { StudentNumber("=cmd|' /C calc'!A0") }
-        assertThrows<DomainValidationException> { StudentNumber("+123456") }
-        assertThrows<DomainValidationException> { StudentNumber("-123456") }
-        assertThrows<DomainValidationException> { StudentNumber("@SUM(A1:A10)") }
+        assertThrows<DomainValidationException> { StudentNumber("=8209220532") }
+        assertThrows<DomainValidationException> { StudentNumber("+8209220532") }
+        assertThrows<DomainValidationException> { StudentNumber("-8209220532") }
+        assertThrows<DomainValidationException> { StudentNumber("@8209220532") }
         assertFalse(StudentNumber.isValid("=cmd"))
     }
 

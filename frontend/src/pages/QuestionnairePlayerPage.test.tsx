@@ -78,7 +78,7 @@ describe('QuestionnairePlayerPage', () => {
     render(
       <QuestionnairePlayerPage
         scaleCode="phq_9"
-        studentNumber="2026001"
+        studentNumber="8209220532"
         onClose={handleClose}
       />
     );
@@ -106,13 +106,13 @@ describe('QuestionnairePlayerPage', () => {
 
   it('bypasses intro page and resumes directly at question when saved draft exists', async () => {
     // Pre-seed draft with question 1 answered
-    localStorage.setItem('intake_draft_2026001_phq_9', JSON.stringify({ phq9_1: 1 }));
+    localStorage.setItem('intake_draft_8209220532_phq_9', JSON.stringify({ phq9_1: 1 }));
 
     const handleClose = vi.fn();
     render(
       <QuestionnairePlayerPage
         scaleCode="phq_9"
-        studentNumber="2026001"
+        studentNumber="8209220532"
         onClose={handleClose}
       />
     );
@@ -126,13 +126,13 @@ describe('QuestionnairePlayerPage', () => {
 
   it('allows opening instructions from header three-dot menu and returning to question', async () => {
     // Pre-seed draft to start in questionnaire
-    localStorage.setItem('intake_draft_2026001_phq_9', JSON.stringify({ phq9_1: 1 }));
+    localStorage.setItem('intake_draft_8209220532_phq_9', JSON.stringify({ phq9_1: 1 }));
 
     const handleClose = vi.fn();
     render(
       <QuestionnairePlayerPage
         scaleCode="phq_9"
-        studentNumber="2026001"
+        studentNumber="8209220532"
         onClose={handleClose}
       />
     );
@@ -167,7 +167,7 @@ describe('QuestionnairePlayerPage', () => {
     render(
       <QuestionnairePlayerPage
         scaleCode="phq_9"
-        studentNumber="2026001"
+        studentNumber="8209220532"
         onClose={handleClose}
       />
     );
@@ -234,7 +234,7 @@ describe('QuestionnairePlayerPage', () => {
     render(
       <QuestionnairePlayerPage
         scaleCode="phq_9"
-        studentNumber="2026001"
+        studentNumber="8209220532"
         onClose={handleClose}
       />
     );
@@ -279,7 +279,7 @@ describe('QuestionnairePlayerPage', () => {
     const { unmount } = render(
       <QuestionnairePlayerPage
         scaleCode="phq_9"
-        studentNumber="2026001"
+        studentNumber="8209220532"
         onClose={handleClose}
       />
     );
@@ -298,7 +298,7 @@ describe('QuestionnairePlayerPage', () => {
     render(
       <QuestionnairePlayerPage
         scaleCode="phq_9"
-        studentNumber="2026001"
+        studentNumber="8209220532"
         onClose={handleClose}
       />
     );
@@ -352,7 +352,7 @@ describe('QuestionnairePlayerPage', () => {
     render(
       <QuestionnairePlayerPage
         scaleCode="phq_9"
-        studentNumber="2026001"
+        studentNumber="8209220532"
         onClose={vi.fn()}
       />
     );
@@ -390,7 +390,7 @@ describe('QuestionnairePlayerPage', () => {
     render(
       <QuestionnairePlayerPage
         scaleCode="phq_9"
-        studentNumber="2026001"
+        studentNumber="8209220532"
         onClose={vi.fn()}
       />
     );
@@ -410,7 +410,7 @@ describe('QuestionnairePlayerPage', () => {
     render(
       <QuestionnairePlayerPage
         scaleCode="phq_9"
-        studentNumber="2026001"
+        studentNumber="8209220532"
         onClose={vi.fn()}
       />
     );
@@ -483,7 +483,7 @@ describe('QuestionnairePlayerPage', () => {
     render(
       <QuestionnairePlayerPage
         scaleCode="slider_test"
-        studentNumber="2026001"
+        studentNumber="8209220532"
         onClose={vi.fn()}
       />
     );
@@ -550,7 +550,7 @@ describe('QuestionnairePlayerPage', () => {
     render(
       <QuestionnairePlayerPage
         scaleCode="number_test"
-        studentNumber="2026001"
+        studentNumber="8209220532"
         onClose={vi.fn()}
       />
     );
@@ -625,7 +625,7 @@ describe('QuestionnairePlayerPage', () => {
     render(
       <QuestionnairePlayerPage
         scaleCode="text_input_test"
-        studentNumber="2026001"
+        studentNumber="8209220532"
         onClose={vi.fn()}
       />
     );
@@ -697,7 +697,7 @@ describe('QuestionnairePlayerPage', () => {
     render(
       <QuestionnairePlayerPage
         scaleCode="multi_test"
-        studentNumber="2026001"
+        studentNumber="8209220532"
         onClose={vi.fn()}
       />
     );
@@ -751,7 +751,7 @@ describe('QuestionnairePlayerPage', () => {
     render(
       <QuestionnairePlayerPage
         scaleCode="demographics_survey"
-        studentNumber="2026001"
+        studentNumber="8209220532"
         onClose={vi.fn()}
       />
     );
@@ -803,7 +803,7 @@ describe('QuestionnairePlayerPage', () => {
     render(
       <QuestionnairePlayerPage
         scaleCode="demographics_survey"
-        studentNumber="2026001"
+        studentNumber="8209220532"
         onClose={vi.fn()}
       />
     );
@@ -889,7 +889,7 @@ describe('QuestionnairePlayerPage', () => {
     render(
       <QuestionnairePlayerPage
         scaleCode="demo_num"
-        studentNumber="2026001"
+        studentNumber="8209220532"
         onClose={vi.fn()}
       />
     );
@@ -951,7 +951,7 @@ describe('QuestionnairePlayerPage', () => {
     render(
       <QuestionnairePlayerPage
         scaleCode="demo_id"
-        studentNumber="2026001"
+        studentNumber="8209220532"
         onClose={vi.fn()}
       />
     );

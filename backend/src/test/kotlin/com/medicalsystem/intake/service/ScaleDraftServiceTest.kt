@@ -22,7 +22,7 @@ class ScaleDraftServiceTest {
         objectMapper = objectMapper
     )
 
-    private val studentNumber = "2026001"
+    private val studentNumber = "2026001001"
     private val scaleCode = "phq_9"
 
     @org.junit.jupiter.api.BeforeEach
