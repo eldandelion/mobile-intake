@@ -101,6 +101,29 @@ export interface ScaleDetail {
   sections?: BatterySection[];
 }
 
+export interface StudentDemographicsDto {
+  isSubmitted: boolean;
+  gender?: string | null;
+  ethnicity?: string | null;
+  major?: string | null;
+  birthday?: string | null;
+  idCardNumber?: string | null;
+  email?: string | null;
+  homeAddress?: string | null;
+  emergencyContact?: string | null;
+  emergencyPhone?: string | null;
+  completedAt?: string | null;
+}
+
+export interface StudentProfileDto {
+  studentNumber: string;
+  fullName: string;
+  phone: string;
+  registeredAt: string;
+  isDemographicsSubmitted: boolean;
+  demographics: StudentDemographicsDto;
+}
+
 export interface SubmitScaleResponse {
   scaleCode: string;
   status: string;
@@ -192,6 +215,8 @@ export const intakeApi = {
     }),
 
   getMe: () => request<StudentDto>('/api/auth/me'),
+
+  getMyProfile: () => request<StudentProfileDto>('/api/students/me/profile'),
 
   // Scales
   getScales: () => request<ScaleSummaryDto[]>('/api/scales'),

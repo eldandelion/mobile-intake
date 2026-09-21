@@ -16,12 +16,14 @@ class CsvExportServiceTest {
     private val submissionRepository: ScaleSubmissionRepository = mock()
     private val scaleCatalogService: ScaleCatalogService = mock()
     private val objectMapper = ObjectMapper()
+    private val demographicsProjector = DemographicsProjector(scaleCatalogService, objectMapper)
 
     private val csvExportService = CsvExportService(
         studentRepository = studentRepository,
         submissionRepository = submissionRepository,
         scaleCatalogService = scaleCatalogService,
-        objectMapper = objectMapper
+        objectMapper = objectMapper,
+        demographicsProjector = demographicsProjector
     )
 
     @Test

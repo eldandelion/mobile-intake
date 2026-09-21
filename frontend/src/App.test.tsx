@@ -45,6 +45,14 @@ describe('App Top Bar & Navigation', () => {
     tokenStorage.set('valid-test-token');
     vi.spyOn(intakeApi, 'getMe').mockResolvedValue(mockStudent);
     vi.spyOn(intakeApi, 'getScales').mockResolvedValue(mockScales);
+    vi.spyOn(intakeApi, 'getMyProfile').mockResolvedValue({
+      studentNumber: '2026001',
+      fullName: '张同学',
+      phone: '13800000000',
+      registeredAt: '2026-09-01T08:00:00',
+      isDemographicsSubmitted: false,
+      demographics: { isSubmitted: false },
+    });
   });
 
   it('displays "还有x项任务待完成" in the top bar header', async () => {

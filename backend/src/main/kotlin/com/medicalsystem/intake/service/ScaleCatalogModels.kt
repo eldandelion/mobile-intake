@@ -13,6 +13,7 @@ data class ScaleQuestion(
     val text: String,
     val orderNum: Int,
     val type: String = "single_choice",
+    val field: String? = null,
     val placeholder: String? = null,
     val min: Double? = null,
     val max: Double? = null,

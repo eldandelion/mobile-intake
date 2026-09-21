@@ -23,6 +23,23 @@ describe('ProfilePage', () => {
         status: 'COMPLETED',
       },
     ]);
+    vi.spyOn(intakeApi, 'getMyProfile').mockResolvedValue({
+      studentNumber: '2026001',
+      fullName: '李同学',
+      phone: '13812345678',
+      registeredAt: '2026-09-01T10:00:00',
+      isDemographicsSubmitted: true,
+      demographics: {
+        isSubmitted: true,
+        gender: '男',
+        ethnicity: '汉族',
+        major: '软件工程',
+        birthday: '2001-02-05',
+        idCardNumber: '110101200102051234',
+        email: 'student@csu.edu.cn',
+        homeAddress: '湖南省长沙市岳麓区',
+      },
+    });
     vi.spyOn(intakeApi, 'getSubmission').mockResolvedValue({
       scaleCode: 'demographics_survey',
       status: 'COMPLETED',
@@ -56,6 +73,8 @@ describe('ProfilePage', () => {
     expect(screen.getByText('2026001')).toBeDefined();
     expect(screen.getByText('性别')).toBeDefined();
     expect(screen.getByText('男')).toBeDefined();
+    expect(screen.getByText('民族')).toBeDefined();
+    expect(screen.getByText('汉族')).toBeDefined();
     expect(screen.getByText('电话')).toBeDefined();
     expect(screen.getByText('13812345678')).toBeDefined();
     expect(screen.getByText('邮箱')).toBeDefined();

@@ -6,25 +6,17 @@ import { OutlinedButton, PrimaryButton } from '../components/common/Buttons';
 import { setCenteredDialogAnimation } from '../utils/dialogAnimation';
 import type { MdDialog } from '@material/web/dialog/dialog';
 
-function parseBirthdayFromIdCard(idCard?: string): string {
-  if (!idCard) return '未填报';
-  const trimmed = String(idCard).trim();
-  const match = trimmed.match(/\d{6}(\d{4})(\d{2})(\d{2})/);
-  if (match) {
-    const year = match[1];
-    const month = parseInt(match[2], 10);
-    const day = parseInt(match[3], 10);
-    return `${year}年${month}月${day}日`;
+function formatBirthday(birthday?: string | null): string {
+  if (!birthday) return '未填报';
+  const trimmed = String(birthday).trim();
+  if (trimmed.endsWith('周岁') || trimmed.endsWith('岁')) {
+    return trimmed;
   }
-  return '未填报';
-}
-
-function getGenderText(gender?: any): string {
-  if (!gender) return '未填报';
-  const val = String(gender);
-  if (val === '1') return '男';
-  if (val === '2') return '女';
-  return val;
+  const match = trimmed.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (match) {
+    return `${match[1]}年${parseInt(match[2], 10)}月${parseInt(match[3], 10)}日`;
+  }
+  return trimmed || '未填报';
 }
 
 const getItemCornerRadius = (index: number, total: number): string => {
@@ -36,7 +28,7 @@ const getItemCornerRadius = (index: number, total: number): string => {
 
 export const ProfilePage: React.FC = () => {
   const { student, logout } = useAuth();
-  const [demographics, setDemographics] = useState<Record<string, any> | null>(null);
+  const [profile, setProfile] = useState<import('../api/intakeApi').StudentProfileDto | null>(null);
   const logoutDialogRef = useRef<MdDialog>(null);
   const setLogoutDialogRef = useCallback((node: MdDialog | null) => {
     (logoutDialogRef as React.MutableRefObject<MdDialog | null>).current = node;
@@ -48,14 +40,14 @@ export const ProfilePage: React.FC = () => {
   useEffect(() => {
     let isMounted = true;
     intakeApi
-      .getSubmission('demographics_survey')
+      .getMyProfile()
       .then((data) => {
-        if (isMounted && data?.answers) {
-          setDemographics(data.answers);
+        if (isMounted && data) {
+          setProfile(data);
         }
       })
-      .catch(() => {
-        // Demographics not yet submitted or unavailable
+      .catch((err) => {
+        console.warn('Failed to load profile:', err);
       });
 
     return () => {
@@ -82,49 +74,55 @@ export const ProfilePage: React.FC = () => {
       id: 'name',
       icon: 'badge',
       title: '姓名',
-      value: student.fullName,
+      value: profile?.fullName || student.fullName,
     },
     {
       id: 'studentNumber',
       icon: 'tag',
       title: '学号',
-      value: student.studentNumber,
+      value: profile?.studentNumber || student.studentNumber,
     },
     {
       id: 'gender',
       icon: 'person',
       title: '性别',
-      value: getGenderText(demographics?.demo_gender),
+      value: profile?.demographics?.gender || '未填报',
+    },
+    {
+      id: 'ethnicity',
+      icon: 'groups',
+      title: '民族',
+      value: profile?.demographics?.ethnicity || '未填报',
     },
     {
       id: 'phone',
       icon: 'call',
       title: '电话',
-      value: student.phone,
+      value: profile?.phone || student.phone,
     },
     {
       id: 'email',
       icon: 'mail',
       title: '邮箱',
-      value: demographics?.demo_email || '未填报',
+      value: profile?.demographics?.email || '未填报',
     },
     {
       id: 'birthday',
       icon: 'cake',
       title: '生日',
-      value: parseBirthdayFromIdCard(demographics?.demo_id_card),
+      value: formatBirthday(profile?.demographics?.birthday),
     },
     {
       id: 'major',
       icon: 'school',
       title: '院系专业',
-      value: demographics?.demo_major || '未填报',
+      value: profile?.demographics?.major || '未填报',
     },
     {
       id: 'address',
       icon: 'home',
       title: '住址',
-      value: demographics?.demo_home_address || '未填报',
+      value: profile?.demographics?.homeAddress || '未填报',
     },
   ];
 

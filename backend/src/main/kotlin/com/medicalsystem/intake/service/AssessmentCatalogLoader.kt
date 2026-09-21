@@ -108,12 +108,14 @@ class AssessmentCatalogLoader(
                                 val maxLabel = q.get("maxLabel")?.asText()
                                 val icon = q.get("icon")?.asText()
                                 val zeroOptionLabel = q.get("zeroOptionLabel")?.asText()
+                                val field = q.get("field")?.asText()?.trim()?.ifEmpty { null }
                                 val options = parseOptions(q, qId, code)
                                 val question = ScaleQuestion(
                                     id = qId,
                                     text = text,
                                     orderNum = globalOrder++,
                                     type = type,
+                                    field = field,
                                     placeholder = placeholder,
                                     min = min,
                                     max = max,
@@ -232,6 +234,7 @@ class AssessmentCatalogLoader(
                                 val placeholder = qNode.get("placeholder")?.asText()
                                 val icon = qNode.get("icon")?.asText()
                                 val zeroOptionLabel = qNode.get("zeroOptionLabel")?.asText()
+                                val field = qNode.get("field")?.asText()?.trim()?.ifEmpty { null }
                                 val options = parseOptions(qNode, qId, qCode)
 
                                 val question = ScaleQuestion(
@@ -239,6 +242,7 @@ class AssessmentCatalogLoader(
                                     text = text,
                                     orderNum = globalOrder++,
                                     type = type,
+                                    field = field,
                                     placeholder = placeholder,
                                     options = options,
                                     sectionCode = qCode,

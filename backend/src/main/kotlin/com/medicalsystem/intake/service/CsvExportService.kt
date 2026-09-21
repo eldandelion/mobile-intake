@@ -15,7 +15,8 @@ class CsvExportService(
     private val studentRepository: IntakeStudentRepository,
     private val submissionRepository: ScaleSubmissionRepository,
     private val scaleCatalogService: ScaleCatalogService,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val demographicsProjector: DemographicsProjector
 ) {
     // UTF-8 Byte Order Mark for Excel
     private val utf8Bom = byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte())
@@ -39,60 +40,34 @@ class CsvExportService(
         )
         writer.write(headers.joinToString(",") + "\n")
 
-        val ethnicityMap = mapOf(
-            1 to "汉族", 2 to "回族", 3 to "满族", 4 to "维吾尔族",
-            5 to "壮族", 6 to "蒙古族", 7 to "其他少数民族"
-        )
-
         for (s in students) {
             val demoSub = submissions[s.studentNumber]
-            val answers: Map<String, Any> = if (demoSub != null) {
-                try {
-                    objectMapper.readValue(demoSub.answersJson, object : TypeReference<Map<String, Any>>() {})
-                } catch (e: Exception) {
-                    emptyMap()
-                }
-            } else {
-                emptyMap()
-            }
+            val demographics = demographicsProjector.projectFromJson(demoSub?.answersJson)
 
-            val genderRaw = answers["G1"] ?: answers["demo_gender"] ?: answers["gender"]
-            val gender = when (genderRaw?.toString()) {
-                "1", "男" -> "男"
-                "2", "女" -> "女"
-                else -> ""
-            }
-
-            val ethRaw = answers["G4"] ?: answers["demo_ethnicity"] ?: answers["ethnicity"]
-            val ethnicity = when {
-                ethRaw is Number -> ethnicityMap[ethRaw.toInt()] ?: "汉族"
-                ethRaw != null && ethRaw.toString().toIntOrNull() != null -> ethnicityMap[ethRaw.toString().toInt()] ?: "汉族"
-                ethRaw != null -> ethRaw.toString()
-                else -> "汉族"
-            }
-
-            val major = answers["demo_class"] ?: answers["demo_major"] ?: answers["major"] ?: "待确认专业"
+            val major = demographics.major ?: "待确认专业"
             val enrollmentDate = "2026-09-01"
-            val idCardNumber = answers["demo_id_card"] ?: answers["idCardNumber"] ?: ""
-            val email = answers["demo_email"] ?: answers["email"] ?: "${s.studentNumber}@univ.edu.cn"
-            val homeAddress = answers["demo_home_address"] ?: answers["homeAddress"] ?: ""
-            val emergencyContact = answers["demo_emergency_contact"] ?: answers["emergencyContactName"] ?: ""
-            val emergencyPhone = answers["demo_emergency_phone"] ?: answers["emergencyContactPhone"] ?: ""
+            val idCardNumber = demographics.idCardNumber ?: ""
+            val gender = demographics.gender ?: ""
+            val ethnicity = demographics.ethnicity ?: "汉族"
+            val email = demographics.email ?: "${s.studentNumber}@univ.edu.cn"
+            val homeAddress = demographics.homeAddress ?: ""
+            val emergencyContact = demographics.emergencyContact ?: ""
+            val emergencyPhone = demographics.emergencyPhone ?: ""
             val teacherEmployeeNumber = ""
 
             val row = listOf(
                 escapeCsv(s.studentNumber),
                 escapeCsv(s.fullName),
-                escapeCsv(major.toString()),
+                escapeCsv(major),
                 escapeCsv(enrollmentDate),
-                escapeCsv(idCardNumber.toString()),
+                escapeCsv(idCardNumber),
                 escapeCsv(gender),
                 escapeCsv(ethnicity),
                 escapeCsv(s.phone),
-                escapeCsv(email.toString()),
-                escapeCsv(homeAddress.toString()),
-                escapeCsv(emergencyContact.toString()),
-                escapeCsv(emergencyPhone.toString()),
+                escapeCsv(email),
+                escapeCsv(homeAddress),
+                escapeCsv(emergencyContact),
+                escapeCsv(emergencyPhone),
                 escapeCsv(teacherEmployeeNumber)
             )
             writer.write(row.joinToString(",") + "\n")
