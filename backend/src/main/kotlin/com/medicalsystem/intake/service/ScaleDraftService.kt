@@ -20,13 +20,16 @@ class ScaleDraftService(
 
     @Transactional
     fun saveDraft(studentNumber: String, scaleCode: String, request: SaveDraftRequest) {
+        val studentNumberVo = com.medicalsystem.intake.model.StudentNumber(studentNumber)
+        val scaleCodeVo = com.medicalsystem.intake.model.ScaleCode(scaleCode)
+
         // Invariant: Do not accept drafts for already completed scales
-        if (submissionRepository.existsByStudentNumberAndScaleCode(studentNumber, scaleCode)) {
+        if (submissionRepository.existsByStudentNumberAndScaleCode(studentNumberVo.normalized(), scaleCodeVo.normalized())) {
             return
         }
 
         val answersJson = objectMapper.writeValueAsString(request.answers)
-        val existingOpt = draftRepository.findByStudentNumberAndScaleCode(studentNumber, scaleCode)
+        val existingOpt = draftRepository.findByStudentNumberAndScaleCode(studentNumberVo.normalized(), scaleCodeVo.normalized())
 
         if (existingOpt.isPresent) {
             val existing = existingOpt.get()
@@ -40,8 +43,8 @@ class ScaleDraftService(
         } else {
             draftRepository.save(
                 ScaleDraftEntity(
-                    studentNumber = studentNumber,
-                    scaleCode = scaleCode,
+                    studentNumber = studentNumberVo.normalized(),
+                    scaleCode = scaleCodeVo.normalized(),
                     answersJson = answersJson,
                     clientUpdatedAt = request.updatedAt,
                     updatedAt = LocalDateTime.now()
@@ -52,12 +55,15 @@ class ScaleDraftService(
 
     @Transactional(readOnly = true)
     fun getDraft(studentNumber: String, scaleCode: String): ScaleDraftDto? {
+        val studentNumberVo = com.medicalsystem.intake.model.StudentNumber(studentNumber)
+        val scaleCodeVo = com.medicalsystem.intake.model.ScaleCode(scaleCode)
+
         // If already completed, no draft should be returned
-        if (submissionRepository.existsByStudentNumberAndScaleCode(studentNumber, scaleCode)) {
+        if (submissionRepository.existsByStudentNumberAndScaleCode(studentNumberVo.normalized(), scaleCodeVo.normalized())) {
             return null
         }
 
-        val draftOpt = draftRepository.findByStudentNumberAndScaleCode(studentNumber, scaleCode)
+        val draftOpt = draftRepository.findByStudentNumberAndScaleCode(studentNumberVo.normalized(), scaleCodeVo.normalized())
         if (draftOpt.isEmpty) {
             return null
         }
@@ -78,6 +84,8 @@ class ScaleDraftService(
 
     @Transactional
     fun purgeDraft(studentNumber: String, scaleCode: String) {
-        draftRepository.deleteByStudentNumberAndScaleCode(studentNumber, scaleCode)
+        val studentNumberVo = com.medicalsystem.intake.model.StudentNumber(studentNumber)
+        val scaleCodeVo = com.medicalsystem.intake.model.ScaleCode(scaleCode)
+        draftRepository.deleteByStudentNumberAndScaleCode(studentNumberVo.normalized(), scaleCodeVo.normalized())
     }
 }

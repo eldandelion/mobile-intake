@@ -34,6 +34,16 @@ class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mapOf("error" to (e.message ?: "Validation Failed")))
     }
 
+    @ExceptionHandler(DomainValidationException::class, IllegalArgumentException::class)
+    fun handleDomainValidation(e: Exception): ResponseEntity<Map<String, Any>> {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            mapOf(
+                "error" to "DOMAIN_VALIDATION_FAILED",
+                "message" to (e.message ?: "Invalid domain value")
+            )
+        )
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleMethodArgumentNotValid(e: MethodArgumentNotValidException): ResponseEntity<Map<String, Any>> {
         val details = e.bindingResult.fieldErrors.associate { it.field to (it.defaultMessage ?: "Invalid value") }

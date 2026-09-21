@@ -38,19 +38,22 @@ class DemographicsProjector(
             ?.filter { it.field != null }
             ?.associateBy { it.field!! } ?: emptyMap()
 
-        // 1. Gender: dynamic catalog option label resolution
-        val gender = resolveChoice(questionsByField["gender"], answers, listOf("G1", "demo_gender", "gender"))
-
-        // 2. Ethnicity: dynamic catalog option label resolution
-        val ethnicity = resolveChoice(questionsByField["ethnicity"], answers, listOf("G4", "demo_ethnicity", "ethnicity")) ?: "汉族"
-
-        // 3. Major / Class
-        val major = resolveText(questionsByField["major"], answers, listOf("demo_class", "demo_major", "major"))
-
-        // 4. ID Card & Birthday
+        // 1. ID Card & Birthday
         val idCard = resolveText(questionsByField["idCardNumber"], answers, listOf("demo_id_card", "idCardNumber"))
         val age = resolveText(questionsByField["age"], answers, listOf("G2", "age"))
         val birthday = extractBirthday(idCard, age)
+
+        // 2. Gender: dynamic catalog option label resolution with ID card fallback
+        val gender = resolveChoice(questionsByField["gender"], answers, listOf("G1", "demo_gender", "gender"))
+            ?: if (idCard != null && com.medicalsystem.intake.model.IdCardNumber.isValid(idCard)) {
+                com.medicalsystem.intake.model.IdCardNumber(idCard).gender()
+            } else null
+
+        // 3. Ethnicity: dynamic catalog option label resolution
+        val ethnicity = resolveChoice(questionsByField["ethnicity"], answers, listOf("G4", "demo_ethnicity", "ethnicity")) ?: "汉族"
+
+        // 4. Major / Class
+        val major = resolveText(questionsByField["major"], answers, listOf("demo_class", "demo_major", "major"))
 
         // 5. Contact & Address
         val email = resolveText(questionsByField["email"], answers, listOf("demo_email", "email"))
@@ -98,6 +101,9 @@ class DemographicsProjector(
 
     private fun extractBirthday(idCard: String?, age: String?): String? {
         if (!idCard.isNullOrBlank()) {
+            if (com.medicalsystem.intake.model.IdCardNumber.isValid(idCard)) {
+                return com.medicalsystem.intake.model.IdCardNumber(idCard).birthDate().toString()
+            }
             val match = Regex("""\d{6}(\d{4})(\d{2})(\d{2})""").find(idCard.trim())
             if (match != null) {
                 val (y, m, d) = match.destructured

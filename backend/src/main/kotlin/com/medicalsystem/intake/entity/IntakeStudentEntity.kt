@@ -30,4 +30,30 @@ class IntakeStudentEntity(
 
     @Column(name = "created_at", nullable = false)
     val createdAt: LocalDateTime = LocalDateTime.now()
-)
+) {
+    val typedStudentNumber: com.medicalsystem.intake.model.StudentNumber
+        get() = com.medicalsystem.intake.model.StudentNumber(studentNumber)
+
+    val typedPhone: com.medicalsystem.intake.model.ChineseMobileNumber
+        get() = com.medicalsystem.intake.model.ChineseMobileNumber(phone)
+
+    val typedFullName: com.medicalsystem.intake.model.PersonName
+        get() = com.medicalsystem.intake.model.PersonName(fullName)
+
+    companion object {
+        fun create(
+            studentNumber: com.medicalsystem.intake.model.StudentNumber,
+            fullName: com.medicalsystem.intake.model.PersonName,
+            phone: com.medicalsystem.intake.model.ChineseMobileNumber,
+            passwordHash: String
+        ): IntakeStudentEntity {
+            require(passwordHash.isNotBlank()) { "Password hash cannot be blank" }
+            return IntakeStudentEntity(
+                studentNumber = studentNumber.normalized(),
+                fullName = fullName.normalized(),
+                phone = phone.normalized(),
+                passwordHash = passwordHash
+            )
+        }
+    }
+}

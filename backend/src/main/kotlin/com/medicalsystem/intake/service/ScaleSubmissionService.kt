@@ -21,60 +21,29 @@ class ScaleSubmissionService(
 
     @Transactional
     fun submitScale(studentNumber: String, scaleCode: String, request: SubmitScaleRequest): SubmitScaleResponse {
-        val detail = scaleCatalogService.getScaleDetail(scaleCode)
+        val studentNumberVo = com.medicalsystem.intake.model.StudentNumber(studentNumber)
+        val scaleCodeVo = com.medicalsystem.intake.model.ScaleCode(scaleCode)
 
-        if (submissionRepository.existsByStudentNumberAndScaleCode(studentNumber, scaleCode)) {
-            throw ConflictException("Scale '$scaleCode' has already been submitted and locked for student: $studentNumber")
+        val detail = scaleCatalogService.getScaleDetail(scaleCodeVo.normalized())
+
+        if (submissionRepository.existsByStudentNumberAndScaleCode(studentNumberVo.normalized(), scaleCodeVo.normalized())) {
+            throw ConflictException("Scale '${scaleCodeVo.normalized()}' has already been submitted and locked for student: ${studentNumberVo.normalized()}")
         }
 
-        // Validate completeness & option value invariants
-        for (q in detail.questions) {
-            val rawAnswer = request.answers[q.id]
-                ?: throw ValidationException("Missing answer for question: ${q.id}")
-            if (rawAnswer.toString().isBlank()) {
-                throw ValidationException("Answer cannot be blank for question: ${q.id}")
-            }
-            if (q.options.isNotEmpty()) {
-                val allowedValues = q.options.map { it.value.toString() }.toSet()
-                when (rawAnswer) {
-                    is Collection<*> -> {
-                        if (rawAnswer.isEmpty()) {
-                            throw ValidationException("At least one option must be selected for question: ${q.id}")
-                        }
-                        for (item in rawAnswer) {
-                            val itemVal = if (item is Map<*, *>) item["value"] else item
-                            if (!allowedValues.contains(itemVal?.toString())) {
-                                throw ValidationException("Invalid option value '$itemVal' for question: ${q.id}")
-                            }
-                        }
-                    }
-                    is Map<*, *> -> {
-                        val valPart = rawAnswer["value"]?.toString() ?: rawAnswer.toString()
-                        if (!allowedValues.contains(valPart)) {
-                            throw ValidationException("Invalid option value '$valPart' for question: ${q.id}")
-                        }
-                    }
-                    else -> {
-                        if (!allowedValues.contains(rawAnswer.toString())) {
-                            throw ValidationException("Invalid option value '$rawAnswer' for question: ${q.id}")
-                        }
-                    }
-                }
-            }
-        }
+        // Validate completeness, options, bounds, and key whitelisting via domain Value Object
+        val responseSet = com.medicalsystem.intake.model.ScaleResponseSet(scaleCodeVo, request.answers)
+        responseSet.validateAgainst(detail)
 
         val answersJson = objectMapper.writeValueAsString(request.answers)
-        val submission = ScaleSubmissionEntity(
-            studentNumber = studentNumber,
-            scaleCode = scaleCode,
-            answersJson = answersJson,
-            status = "COMPLETED",
-            completedAt = LocalDateTime.now()
+        val submission = ScaleSubmissionEntity.create(
+            studentNumber = studentNumberVo,
+            scaleCode = scaleCodeVo,
+            answersJson = answersJson
         )
         val saved = submissionRepository.save(submission)
 
         // Atomically purge draft upon successful final submission
-        scaleDraftService.purgeDraft(studentNumber, scaleCode)
+        scaleDraftService.purgeDraft(studentNumberVo.normalized(), scaleCodeVo.normalized())
 
         return SubmitScaleResponse(
             scaleCode = saved.scaleCode,

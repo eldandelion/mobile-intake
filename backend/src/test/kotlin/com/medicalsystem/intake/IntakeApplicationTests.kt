@@ -241,9 +241,11 @@ class IntakeApplicationTests {
         val demoAnswers = demoDetail.questions.associate { q ->
             val sampleVal: Any = if (q.id == "demo_class") {
                 "计算机学院 软件工程"
+            } else if (q.id == "demo_id_card") {
+                "110101199003072375"
             } else if (q.options.isNotEmpty()) {
                 q.options[0].value
-            } else if (q.type == "number") {
+            } else if (q.type == "number" || q.type == "slider") {
                 q.min?.toInt() ?: 18
             } else {
                 "张测试"
@@ -390,9 +392,13 @@ class IntakeApplicationTests {
         // 5. Complete and submit demographics_survey
         val demoDetail = catalogLoader.getScaleDetail("demographics_survey")!!
         val fullAnswers = demoDetail.questions.associate { q ->
-            val sampleVal: Any = if (q.options.isNotEmpty()) {
+            val sampleVal: Any = if (q.id == "demo_class") {
+                "计算机学院 软件工程"
+            } else if (q.id == "demo_id_card") {
+                "110101199003072375"
+            } else if (q.options.isNotEmpty()) {
                 q.options[0].value
-            } else if (q.type == "number") {
+            } else if (q.type == "number" || q.type == "slider") {
                 q.min?.toInt() ?: 18
             } else {
                 "测试内容"

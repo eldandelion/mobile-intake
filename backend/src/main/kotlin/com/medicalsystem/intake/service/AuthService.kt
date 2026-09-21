@@ -19,20 +19,24 @@ class AuthService(
 
     @Transactional
     fun register(request: RegisterRequest): AuthResponse {
-        val trimmedStudentNumber = request.studentNumber.trim()
-        val trimmedPhone = request.phone.trim()
+        val studentNumberVo = com.medicalsystem.intake.model.StudentNumber(request.studentNumber)
+        val phoneVo = com.medicalsystem.intake.model.ChineseMobileNumber(request.phone)
+        val nameVo = com.medicalsystem.intake.model.PersonName(request.fullName)
 
-        if (studentRepository.existsByStudentNumber(trimmedStudentNumber)) {
-            throw ConflictException("Student number already registered: $trimmedStudentNumber")
+        val normalizedStudentNumber = studentNumberVo.normalized()
+        val normalizedPhone = phoneVo.normalized()
+
+        if (studentRepository.existsByStudentNumber(normalizedStudentNumber)) {
+            throw ConflictException("Student number already registered: $normalizedStudentNumber")
         }
-        if (studentRepository.existsByPhone(trimmedPhone)) {
-            throw ConflictException("Phone number already registered: $trimmedPhone")
+        if (studentRepository.existsByPhone(normalizedPhone)) {
+            throw ConflictException("Phone number already registered: $normalizedPhone")
         }
 
-        val student = IntakeStudentEntity(
-            studentNumber = trimmedStudentNumber,
-            fullName = request.fullName.trim(),
-            phone = trimmedPhone,
+        val student = IntakeStudentEntity.create(
+            studentNumber = studentNumberVo,
+            fullName = nameVo,
+            phone = phoneVo,
             passwordHash = checkNotNull(passwordEncoder.encode(request.password)) { "Failed to encode password" }
         )
         val saved = studentRepository.save(student)

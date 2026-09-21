@@ -46,7 +46,11 @@ class CsvExportService(
 
             val major = demographics.major ?: "待确认专业"
             val enrollmentDate = "2026-09-01"
-            val idCardNumber = demographics.idCardNumber ?: ""
+            val idCardNumber = demographics.idCardNumber?.let { raw ->
+                if (com.medicalsystem.intake.model.IdCardNumber.isValid(raw)) {
+                    com.medicalsystem.intake.model.IdCardNumber(raw).normalized()
+                } else raw.trim()
+            } ?: ""
             val gender = demographics.gender ?: ""
             val ethnicity = demographics.ethnicity ?: "汉族"
             val email = demographics.email ?: "${s.studentNumber}@univ.edu.cn"

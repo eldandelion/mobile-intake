@@ -324,7 +324,8 @@ class AssessmentCatalogLoader(
         return list
     }
 
-    fun getScaleDetail(code: String): ScaleDetail? = scaleDetailsMap[code]
+    fun getScaleDetail(code: String): ScaleDetail? =
+        scaleDetailsMap[code] ?: scaleDetailsMap.entries.find { it.key.equals(code, ignoreCase = true) }?.value
 
     fun getScaleDetails(): List<ScaleDetail> = scaleDetailsMap.values.toList()
 
