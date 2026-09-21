@@ -3,12 +3,13 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { intakeApi, ScaleDetail, ScaleQuestion, ScaleOption } from '../api/intakeApi';
 import { PrimaryButton, OutlinedButton, TertiaryButton } from '../components/common/Buttons';
-import { QuestionGridSheet, isQuestionAnswered } from '../components/assessments/QuestionGridSheet';
+import { QuestionGridSheet } from '../components/assessments/QuestionGridSheet';
 import { QuestionnaireIntroScaffold } from '../components/assessments/QuestionnaireIntroScaffold';
 import { setCenteredDialogAnimation } from '../utils/dialogAnimation';
 import { useAssessmentDraft } from '../hooks/useAssessmentDraft';
 import { useSnackbar } from '../contexts/SnackbarContext';
 import { useOptionalAuth } from '../contexts/AuthContext';
+import { validateQuestionAnswer } from '../domain/validators';
 import type { MdDialog } from '@material/web/dialog/dialog';
 import type { MdMenu } from '@material/web/menu/menu';
 
@@ -246,11 +247,11 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
   useEffect(() => {
     if (scale && isInitialized && !isReady) {
       const hasAnswers = Object.keys(answers).some(
-        (k) => isQuestionAnswered(answers[k])
+        (k) => answers[k] !== undefined && answers[k] !== null && answers[k] !== ''
       );
       if (hasAnswers) {
         const firstUnanswered = scale.questions.findIndex(
-          (q) => !isQuestionAnswered(answers[q.id])
+          (q) => !validateQuestionAnswer(q, answers[q.id]).isValid
         );
         if (firstUnanswered > 0) {
           setCurrentIndex(firstUnanswered);
@@ -270,12 +271,16 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
   const currentAnswer = currentQuestion ? answers[currentQuestion.id] : undefined;
   const currentCategory = currentQuestion?.sectionTitle || scale?.subtitle;
 
-  // Calculate answered count
+  // Calculate answered & valid count
   const answeredCount = questions.filter((q) =>
-    isQuestionAnswered(answers[q.id])
+    validateQuestionAnswer(q, answers[q.id]).isValid
   ).length;
 
-  const isCurrentAnswered = currentQuestion ? isQuestionAnswered(currentAnswer) : false;
+  const currentValidation = currentQuestion
+    ? validateQuestionAnswer(currentQuestion, currentAnswer)
+    : { isValid: false };
+  const isCurrentValid = currentValidation.isValid;
+  const isCurrentAnswered = isCurrentValid;
 
   const handleSelectOption = (opt: ScaleOption) => {
     if (!currentQuestion) return;
@@ -421,6 +426,7 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
     if (autoAdvanceTimerRef.current) {
       clearTimeout(autoAdvanceTimerRef.current);
     }
+    if (!isCurrentValid) return;
     if (currentIndex < totalQuestions - 1) {
       setCurrentIndex((prev) => prev + 1);
     }
@@ -429,12 +435,14 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
   const handleSubmit = async () => {
     if (submitting) return;
 
-    // Check if any questions are unanswered
-    const missing = questions.filter((q) => !isQuestionAnswered(answers[q.id]));
-    if (missing.length > 0) {
-      const firstMissingIdx = questions.findIndex((q) => q.id === missing[0].id);
-      setUnansweredCount(missing.length);
-      setFirstUnansweredIndex(firstMissingIdx !== -1 ? firstMissingIdx : 0);
+    // Check if any questions are unanswered or invalid
+    const invalidQuestions = questions.filter(
+      (q) => !validateQuestionAnswer(q, answers[q.id]).isValid
+    );
+    if (invalidQuestions.length > 0) {
+      const firstInvalidIdx = questions.findIndex((q) => q.id === invalidQuestions[0].id);
+      setUnansweredCount(invalidQuestions.length);
+      setFirstUnansweredIndex(firstInvalidIdx !== -1 ? firstInvalidIdx : 0);
       incompleteDialogRef.current?.show();
       return;
     }
@@ -788,6 +796,8 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
                                 placeholder={opt.textInputPlaceholder || '请输入补充内容...'}
                                 value={typeof currentAnswer === 'object' && !Array.isArray(currentAnswer) ? currentAnswer.text || '' : ''}
                                 className="w-full bg-[var(--md-sys-color-surface)] rounded-xl"
+                                error={!isCurrentValid}
+                                error-text={currentValidation.error}
                                 onInput={(e: any) => handleOptionTextInput(opt, e.target.value)}
                                 onKeyDown={(e: any) => {
                                   if (e.key === 'Enter' && isCurrentAnswered) {
@@ -854,6 +864,8 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
                                 placeholder={opt.textInputPlaceholder || '请输入补充内容...'}
                                 value={getMultiOptionText(opt)}
                                 className="w-full bg-[var(--md-sys-color-surface)] rounded-xl"
+                                error={!getMultiOptionText(opt).trim() && !isCurrentValid}
+                                error-text={!getMultiOptionText(opt).trim() ? '请补充填写具体说明' : undefined}
                                 onInput={(e: any) => handleMultiOptionTextInput(opt, e.target.value)}
                               >
                                 <md-icon slot="leading-icon">edit</md-icon>
@@ -947,6 +959,8 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
                         step={currentQuestion.step ?? 1}
                         inputmode={currentQuestion.step && currentQuestion.step < 1 ? 'decimal' : 'numeric'}
                         className="w-full"
+                        error={Boolean(!isZeroSelected && currentAnswer !== undefined && currentAnswer !== '' && !isCurrentValid)}
+                        error-text={currentValidation.error}
                         supporting-text={
                           isZeroSelected
                             ? `已选择“${zeroOptionLabel}”，若需修改请在此直接输入开始饮酒年龄`
@@ -1035,6 +1049,8 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
                         value={currentAnswer || ''}
                         placeholder={currentQuestion.placeholder || '请输入...'}
                         className="w-full"
+                        error={Boolean(currentAnswer !== undefined && currentAnswer !== '' && !isCurrentValid)}
+                        error-text={currentValidation.error}
                         supporting-text="输入完成后点击下方“下一题”即可继续作答"
                         onInput={(e: any) => handleTextInput(e.target.value)}
                         onKeyDown={(e: any) => {

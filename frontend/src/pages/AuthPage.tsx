@@ -3,6 +3,11 @@ import { useAuth } from '../contexts/AuthContext';
 import { intakeApi } from '../api/intakeApi';
 import { PrimaryButton } from '../components/common/Buttons';
 import { Snackbar } from '../components/common/Snackbar';
+import {
+  validateStudentNumber,
+  validateChineseMobile,
+  validatePersonName,
+} from '../domain/validators';
 
 type AuthView = 'login' | 'register_step1' | 'register_step2' | 'register_step3';
 
@@ -105,9 +110,9 @@ export const AuthPage: React.FC = () => {
     setSnackbarOpen(false);
     const errors: Record<string, string> = {};
 
-    const cleanNum = loginStudentNumber.trim();
-    if (!cleanNum) {
-      errors.loginStudentNumber = '请输入您的学号';
+    const numValidation = validateStudentNumber(loginStudentNumber);
+    if (!numValidation.isValid) {
+      errors.loginStudentNumber = numValidation.error!;
     }
     if (!loginPassword) {
       errors.loginPassword = '请输入密码';
@@ -120,6 +125,7 @@ export const AuthPage: React.FC = () => {
 
     setLoading(true);
     try {
+      const cleanNum = numValidation.normalized || loginStudentNumber.trim();
       await login({
         identifier: cleanNum,
         studentNumber: cleanNum,
@@ -138,18 +144,19 @@ export const AuthPage: React.FC = () => {
     setSnackbarOpen(false);
     const errors: Record<string, string> = {};
 
-    const cleanName = regFullName.trim();
-    const cleanNum = regStudentNumber.trim();
-    const cleanPhone = regPhone.trim();
+    const nameValidation = validatePersonName(regFullName);
+    if (!nameValidation.isValid) {
+      errors.regFullName = nameValidation.error!;
+    }
 
-    if (!cleanName) {
-      errors.regFullName = '请输入您的真实姓名';
+    const numValidation = validateStudentNumber(regStudentNumber);
+    if (!numValidation.isValid) {
+      errors.regStudentNumber = numValidation.error!;
     }
-    if (!cleanNum) {
-      errors.regStudentNumber = '请输入您的学号';
-    }
-    if (!cleanPhone || cleanPhone.length < 11) {
-      errors.regPhone = '请输入正确的11位手机号码';
+
+    const phoneValidation = validateChineseMobile(regPhone);
+    if (!phoneValidation.isValid) {
+      errors.regPhone = phoneValidation.error!;
     }
 
     if (Object.keys(errors).length > 0) {
@@ -159,7 +166,7 @@ export const AuthPage: React.FC = () => {
 
     setLoading(true);
     try {
-      await intakeApi.sendCode(cleanPhone);
+      await intakeApi.sendCode(phoneValidation.normalized || regPhone.trim());
       startCountdown();
       setView('register_step2');
     } catch (err: any) {
@@ -219,6 +226,8 @@ export const AuthPage: React.FC = () => {
 
     if (!regPassword || regPassword.length < 6) {
       errors.regPassword = '密码至少需要 6 位字符';
+    } else if (regPassword.length > 64) {
+      errors.regPassword = '密码长度不能超过 64 个字符';
     }
     if (regPassword !== regConfirmPassword) {
       errors.regConfirmPassword = '两次输入的密码不一致';
@@ -232,9 +241,9 @@ export const AuthPage: React.FC = () => {
     setLoading(true);
     try {
       await register({
-        studentNumber: regStudentNumber.trim(),
-        fullName: regFullName.trim(),
-        phone: regPhone.trim(),
+        studentNumber: validateStudentNumber(regStudentNumber).normalized || regStudentNumber.trim(),
+        fullName: validatePersonName(regFullName).normalized || regFullName.trim(),
+        phone: validateChineseMobile(regPhone).normalized || regPhone.trim(),
         password: regPassword,
       });
     } catch (err: any) {

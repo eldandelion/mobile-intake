@@ -1,6 +1,7 @@
 import React, { useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { ScaleQuestion } from '../../api/intakeApi';
+import { validateQuestionAnswer } from '../../domain/validators';
 
 export interface QuestionGridSheetProps {
   isOpen: boolean;
@@ -12,7 +13,10 @@ export interface QuestionGridSheetProps {
   onClose: () => void;
 }
 
-export const isQuestionAnswered = (val: any): boolean => {
+export const isQuestionAnswered = (val: any, q?: ScaleQuestion): boolean => {
+  if (q) {
+    return validateQuestionAnswer(q, val).isValid;
+  }
   if (val === undefined || val === null || val === '') return false;
   if (Array.isArray(val)) return val.length > 0;
   if (typeof val === 'object') {
@@ -46,7 +50,7 @@ export const QuestionGridSheet: React.FC<QuestionGridSheetProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, handleKeyDown]);
 
-  const answeredCount = questions.filter((q) => isQuestionAnswered(answers[q.id])).length;
+  const answeredCount = questions.filter((q) => isQuestionAnswered(answers[q.id], q)).length;
 
   return (
     <AnimatePresence>
@@ -127,7 +131,7 @@ export const QuestionGridSheet: React.FC<QuestionGridSheetProps> = ({
               <div className="grid grid-cols-5 sm:grid-cols-6 gap-3">
                 {questions.map((q, idx) => {
                   const isCurrent = idx === currentIndex;
-                  const isAnswered = isQuestionAnswered(answers[q.id]);
+                  const isAnswered = isQuestionAnswered(answers[q.id], q);
 
                   let buttonStyles =
                     'bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-on-surface-variant)] hover:bg-[var(--md-sys-color-surface-container-highest)]';

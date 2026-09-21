@@ -864,5 +864,130 @@ describe('QuestionnairePlayerPage', () => {
       expect(zeroOptionBtn.getAttribute('aria-pressed')).toBe('true');
     });
   });
+
+  it('validates numeric bounds and displays error text when input is out of range', async () => {
+    const numericScale = {
+      code: 'demo_num',
+      title: '数值测试',
+      description: '测试数值边界',
+      estimatedMinutes: 1,
+      questions: [
+        {
+          id: 'G2',
+          text: '您的实际年龄',
+          orderNum: 1,
+          type: 'number',
+          min: 10,
+          max: 100,
+          unit: '岁',
+          options: [],
+        },
+      ],
+    };
+    vi.spyOn(intakeApi, 'getScaleDetail').mockResolvedValue(numericScale);
+
+    render(
+      <QuestionnairePlayerPage
+        scaleCode="demo_num"
+        studentNumber="2026001"
+        onClose={vi.fn()}
+      />
+    );
+
+    // Dismiss intro page if shown
+    await waitFor(() => {
+      expect(screen.getByText('开始作答')).toBeDefined();
+    });
+    fireEvent.click(screen.getByText('开始作答'));
+
+    await waitFor(() => {
+      expect(screen.getByText('您的实际年龄')).toBeDefined();
+    });
+
+    const textField = document.querySelector('md-outlined-text-field')!;
+    expect(textField).toBeDefined();
+
+    // Input out-of-range value (5 < 10)
+    (textField as any).value = '5';
+    fireEvent(textField, new Event('input', { bubbles: true, composed: true }));
+
+    await waitFor(() => {
+      expect(textField.getAttribute('error-text')).toBe('输入数值不能小于 10');
+    });
+
+    // Next button / submit button should be disabled
+    const submitBtn = screen.getByText('完成并提交');
+    expect(submitBtn.closest('md-filled-button')?.hasAttribute('disabled')).toBe(true);
+
+    // Input valid value (18)
+    (textField as any).value = '18';
+    fireEvent(textField, new Event('input', { bubbles: true, composed: true }));
+
+    await waitFor(() => {
+      expect(textField.getAttribute('error-text')).toBeNull();
+    });
+    expect(submitBtn.closest('md-filled-button')?.hasAttribute('disabled')).toBe(false);
+  });
+
+  it('validates demographic National ID checksum and displays error on invalid check code', async () => {
+    const idCardScale = {
+      code: 'demo_id',
+      title: '身份信息',
+      description: '测试身份证核验',
+      estimatedMinutes: 1,
+      questions: [
+        {
+          id: 'demo_id_card',
+          field: 'id_card',
+          text: '请输入18位二代身份证号码',
+          orderNum: 1,
+          type: 'text',
+          options: [],
+        },
+      ],
+    };
+    vi.spyOn(intakeApi, 'getScaleDetail').mockResolvedValue(idCardScale);
+
+    render(
+      <QuestionnairePlayerPage
+        scaleCode="demo_id"
+        studentNumber="2026001"
+        onClose={vi.fn()}
+      />
+    );
+
+    // Dismiss intro page if shown
+    await waitFor(() => {
+      expect(screen.getByText('开始作答')).toBeDefined();
+    });
+    fireEvent.click(screen.getByText('开始作答'));
+
+    await waitFor(() => {
+      expect(screen.getByText('请输入18位二代身份证号码')).toBeDefined();
+    });
+
+    const textField = document.querySelector('md-outlined-text-field')!;
+
+    // Input ID with invalid check code (79 instead of 75)
+    (textField as any).value = '110101199003072379';
+    fireEvent(textField, new Event('input', { bubbles: true, composed: true }));
+
+    await waitFor(() => {
+      expect(textField.getAttribute('error-text')).toContain('身份证校验码错误');
+    });
+
+    const submitBtn = screen.getByText('完成并提交');
+    expect(submitBtn.closest('md-filled-button')?.hasAttribute('disabled')).toBe(true);
+
+    // Input valid ID card (75)
+    (textField as any).value = '110101199003072375';
+    fireEvent(textField, new Event('input', { bubbles: true, composed: true }));
+
+    await waitFor(() => {
+      expect(textField.getAttribute('error-text')).toBeNull();
+    });
+    expect(submitBtn.closest('md-filled-button')?.hasAttribute('disabled')).toBe(false);
+  });
 });
+
 

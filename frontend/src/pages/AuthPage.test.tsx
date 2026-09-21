@@ -236,4 +236,52 @@ describe('AuthPage', () => {
     expect(closeBtn).toBeDefined();
     fireEvent.click(closeBtn);
   });
+
+  it('rejects formula injection prefix in login student number', async () => {
+    render(
+      <AuthProvider>
+        <AuthPage />
+      </AuthProvider>
+    );
+
+    const numField = document.querySelector('md-outlined-text-field[label="学号"]')!;
+    const pwdField = document.querySelector('md-outlined-text-field[label="登录密码"]')!;
+
+    simulateInput(numField, '=CMD()');
+    simulateInput(pwdField, 'password123');
+
+    fireEvent.click(screen.getByText('下一步'));
+
+    expect(
+      document.querySelector('md-outlined-text-field[error-text="学号不能包含公式或特殊计算符号"]')
+    ).not.toBeNull();
+  });
+
+  it('rejects invalid mobile carrier prefix and malformed student number in step 1', async () => {
+    render(
+      <AuthProvider>
+        <AuthPage />
+      </AuthProvider>
+    );
+
+    fireEvent.click(screen.getByText('创建账号'));
+
+    const nameField = document.querySelector('md-outlined-text-field[label="真实姓名"]')!;
+    const numField = document.querySelector('md-outlined-text-field[label="学号"]')!;
+    const phoneField = document.querySelector('md-outlined-text-field[label="手机号码"]')!;
+
+    simulateInput(nameField, '张三');
+    simulateInput(numField, '12'); // too short
+    simulateInput(phoneField, '10812345678'); // invalid carrier
+
+    fireEvent.click(screen.getByText('下一步'));
+
+    expect(
+      document.querySelector('md-outlined-text-field[error-text="学号须为 4 至 20 位字母或数字组合"]')
+    ).not.toBeNull();
+    expect(
+      document.querySelector('md-outlined-text-field[error-text="请输入正确的11位中国大陆手机号码"]')
+    ).not.toBeNull();
+  });
 });
+
