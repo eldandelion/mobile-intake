@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 export interface SnackbarProps {
   open: boolean;
   message: string;
+  variant?: 'default' | 'error';
   icon?: string;
   actionLabel?: string;
   onAction?: () => void;
@@ -15,6 +16,7 @@ export interface SnackbarProps {
 export const Snackbar: React.FC<SnackbarProps> = ({
   open,
   message,
+  variant = 'default',
   icon = 'error',
   actionLabel = '关闭',
   onAction,
@@ -27,6 +29,8 @@ export const Snackbar: React.FC<SnackbarProps> = ({
       return () => clearTimeout(timer);
     }
   }, [open, duration, onClose]);
+
+  const isError = variant === 'error';
 
   const snackbarContent = (
     <AnimatePresence>
@@ -43,18 +47,26 @@ export const Snackbar: React.FC<SnackbarProps> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.95 }}
             transition={{ duration: 0.2, ease: [0.05, 0.7, 0.1, 1.0] }}
-            className="pointer-events-auto w-full max-w-sm bg-[var(--md-sys-color-inverse-surface)] text-[var(--md-sys-color-inverse-on-surface)] rounded-xl shadow-lg px-4 py-3 flex items-center justify-between gap-3 text-sm"
+            className={`pointer-events-auto w-full max-w-sm rounded-xl shadow-lg px-4 py-3 flex items-center justify-between gap-3 text-sm ${
+              isError
+                ? 'bg-[var(--md-sys-color-error-container)] text-[var(--md-sys-color-on-error-container)]'
+                : 'bg-[var(--md-sys-color-inverse-surface)] text-[var(--md-sys-color-inverse-on-surface)]'
+            }`}
           >
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
               {icon && (
                 <md-icon
-                  className="text-lg text-[var(--md-sys-color-inverse-primary)] shrink-0"
+                  className={`text-lg shrink-0 ${
+                    isError
+                      ? 'text-[var(--md-sys-color-error)]'
+                      : 'text-[var(--md-sys-color-inverse-primary)]'
+                  }`}
                   style={{ '--md-icon-size': '1.125rem' } as React.CSSProperties}
                 >
                   {icon}
                 </md-icon>
               )}
-              <span className="leading-snug text-xs sm:text-sm font-normal truncate">
+              <span className="leading-snug text-xs sm:text-sm font-medium truncate">
                 {message}
               </span>
             </div>
@@ -62,7 +74,11 @@ export const Snackbar: React.FC<SnackbarProps> = ({
               <button
                 type="button"
                 onClick={onAction || onClose}
-                className="text-xs font-semibold text-[var(--md-sys-color-inverse-primary)] hover:opacity-80 transition cursor-pointer shrink-0 uppercase tracking-wider px-1 py-0.5"
+                className={`text-xs font-bold transition cursor-pointer shrink-0 uppercase tracking-wider px-2 py-1 rounded-lg ${
+                  isError
+                    ? 'text-[var(--md-sys-color-error)] hover:bg-[var(--md-sys-color-error)]/10'
+                    : 'text-[var(--md-sys-color-inverse-primary)] hover:opacity-80'
+                }`}
               >
                 {actionLabel}
               </button>

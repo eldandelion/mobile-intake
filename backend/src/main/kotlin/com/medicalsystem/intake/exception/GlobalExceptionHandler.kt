@@ -55,12 +55,20 @@ class GlobalExceptionHandler {
         )
     }
 
-    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException::class)
-    fun handleDataIntegrityViolation(e: org.springframework.dao.DataIntegrityViolationException): ResponseEntity<Map<String, Any>> {
+    @ExceptionHandler(
+        org.springframework.dao.DataIntegrityViolationException::class,
+        org.springframework.orm.jpa.JpaSystemException::class
+    )
+    fun handleDataIntegrityViolation(e: Exception): ResponseEntity<Map<String, Any>> {
+        val rootCause = when (e) {
+            is org.springframework.dao.DataIntegrityViolationException -> e.rootCause?.message
+            is org.springframework.orm.jpa.JpaSystemException -> e.rootCause?.message
+            else -> e.message
+        }
         return ResponseEntity.status(HttpStatus.CONFLICT).body(
             mapOf(
                 "error" to "RESOURCE_CONFLICT",
-                "message" to (e.rootCause?.message ?: "Database integrity constraint violated")
+                "message" to (rootCause ?: "Database integrity constraint violated")
             )
         )
     }

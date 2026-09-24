@@ -52,6 +52,19 @@ class IntakeApplicationTests {
         assertNotNull(webApplicationContext)
     }
 
+    private fun sendCodeAndGetDevCode(phone: String, purpose: String = "REGISTRATION", studentNumber: String? = null): String {
+        val sendRes = mockMvc.perform(
+            post("/api/auth/send-code")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(com.medicalsystem.intake.dto.SendCodeRequest(
+                    phone = phone,
+                    purpose = purpose,
+                    studentNumber = studentNumber
+                )))
+        ).andExpect(status().isOk).andReturn()
+        return objectMapper.readTree(sendRes.response.contentAsString).get("devCode").asText()
+    }
+
     @Test
     fun `test send and verify code endpoints`() {
         // Send code
@@ -88,11 +101,13 @@ class IntakeApplicationTests {
     fun `test phone login with sms verification code`() {
         val studentNumber = "8209220999"
         val phone = "13988887777"
+        val regCode = sendCodeAndGetDevCode(phone = phone, purpose = "REGISTRATION", studentNumber = studentNumber)
         val registerReq = com.medicalsystem.intake.dto.RegisterRequest(
             studentNumber = studentNumber,
             fullName = "王小明",
             phone = phone,
-            password = "password123"
+            password = "password123",
+            verificationCode = regCode
         )
         mockMvc.perform(
             post("/api/auth/register")
@@ -140,11 +155,13 @@ class IntakeApplicationTests {
     fun `test full student registration, scale completion, and admin CSV export lifecycle`() {
         val studentNumber = "2026099001"
         val phone = "13800112233"
+        val regCode = sendCodeAndGetDevCode(phone = phone, purpose = "REGISTRATION", studentNumber = studentNumber)
         val registerReq = RegisterRequest(
             studentNumber = studentNumber,
             fullName = "张三丰",
             phone = phone,
-            password = "securePassword123"
+            password = "securePassword123",
+            verificationCode = regCode
         )
 
         // 1. Register Student
@@ -385,11 +402,14 @@ class IntakeApplicationTests {
     @Test
     fun `test draft save, retrieve, status IN_PROGRESS, and purge on completion`() {
         val studentNumber = "2026088001"
+        val phone = "13800889900"
+        val regCode = sendCodeAndGetDevCode(phone = phone, purpose = "REGISTRATION", studentNumber = studentNumber)
         val registerReq = RegisterRequest(
             studentNumber = studentNumber,
             fullName = "李寻欢",
-            phone = "13800889900",
-            password = "securePassword123"
+            phone = phone,
+            password = "securePassword123",
+            verificationCode = regCode
         )
         val registerResult = mockMvc.perform(
             post("/api/auth/register")
@@ -492,11 +512,13 @@ class IntakeApplicationTests {
     fun `test international student registration with lowercase l normalizes and allows login`() {
         val rawStudentNumber = "l209220532"
         val phone = "13900112233"
+        val regCode = sendCodeAndGetDevCode(phone = phone, purpose = "REGISTRATION", studentNumber = rawStudentNumber)
         val registerReq = RegisterRequest(
             studentNumber = rawStudentNumber,
             fullName = "John Doe",
             phone = phone,
-            password = "securePassword123"
+            password = "securePassword123",
+            verificationCode = regCode
         )
 
         // Register with lowercase 'l'
@@ -529,7 +551,8 @@ class IntakeApplicationTests {
                         studentNumber = "9999999999",
                         fullName = "张三",
                         phone = "13800000001",
-                        password = "password123"
+                        password = "password123",
+                        verificationCode = "123456"
                     )
                 ))
         ).andExpect(status().isBadRequest)
@@ -543,9 +566,202 @@ class IntakeApplicationTests {
                         studentNumber = "0209220532",
                         fullName = "张三",
                         phone = "13800000002",
-                        password = "password123"
+                        password = "password123",
+                        verificationCode = "123456"
                     )
                 ))
         ).andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `test check availability endpoint returns availability status correctly`() {
+        val studentNumber = "8209220111"
+        val phone = "13911223344"
+
+        // Both available initially
+        mockMvc.perform(
+            get("/api/auth/check-availability")
+                .param("studentNumber", studentNumber)
+                .param("phone", phone)
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.studentNumberAvailable").value(true))
+            .andExpect(jsonPath("$.phoneAvailable").value(true))
+
+        // Register student
+        val regCode = sendCodeAndGetDevCode(phone = phone, purpose = "REGISTRATION", studentNumber = studentNumber)
+        mockMvc.perform(
+            post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(
+                    RegisterRequest(
+                        studentNumber = studentNumber,
+                        fullName = "赵云",
+                        phone = phone,
+                        password = "password123",
+                        verificationCode = regCode
+                    )
+                ))
+        ).andExpect(status().isOk)
+
+        // Both taken now
+        mockMvc.perform(
+            get("/api/auth/check-availability")
+                .param("studentNumber", studentNumber)
+                .param("phone", phone)
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.studentNumberAvailable").value(false))
+            .andExpect(jsonPath("$.phoneAvailable").value(false))
+            .andExpect(jsonPath("$.message").isNotEmpty)
+    }
+
+    @Test
+    fun `test send code rejects when student number already registered`() {
+        val studentNumber = "8209220222"
+        val phone1 = "13922334455"
+        val phone2 = "13922334466"
+
+        // Register student with phone1
+        val regCode = sendCodeAndGetDevCode(phone = phone1, purpose = "REGISTRATION", studentNumber = studentNumber)
+        mockMvc.perform(
+            post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(
+                    RegisterRequest(
+                        studentNumber = studentNumber,
+                        fullName = "关羽",
+                        phone = phone1,
+                        password = "password123",
+                        verificationCode = regCode
+                    )
+                ))
+        ).andExpect(status().isOk)
+
+        // Attempt send-code for registration with SAME student number but new phone2
+        mockMvc.perform(
+            post("/api/auth/send-code")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(
+                    com.medicalsystem.intake.dto.SendCodeRequest(
+                        phone = phone2,
+                        purpose = "REGISTRATION",
+                        studentNumber = studentNumber
+                    )
+                ))
+        )
+            .andExpect(status().isConflict)
+            .andExpect(jsonPath("$.error").value("该学号已被注册: $studentNumber"))
+    }
+
+    @Test
+    fun `test send code rejects when phone already registered`() {
+        val studentNumber1 = "8209220333"
+        val studentNumber2 = "8209220444"
+        val phone = "13933445566"
+
+        // Register student 1
+        val regCode = sendCodeAndGetDevCode(phone = phone, purpose = "REGISTRATION", studentNumber = studentNumber1)
+        mockMvc.perform(
+            post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(
+                    RegisterRequest(
+                        studentNumber = studentNumber1,
+                        fullName = "刘备",
+                        phone = phone,
+                        password = "password123",
+                        verificationCode = regCode
+                    )
+                ))
+        ).andExpect(status().isOk)
+
+        // Attempt send-code for registration with new student number 2 but SAME phone
+        mockMvc.perform(
+            post("/api/auth/send-code")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(
+                    com.medicalsystem.intake.dto.SendCodeRequest(
+                        phone = phone,
+                        purpose = "REGISTRATION",
+                        studentNumber = studentNumber2
+                    )
+                ))
+        )
+            .andExpect(status().isConflict)
+            .andExpect(jsonPath("$.error").value("该手机号码已被注册: $phone"))
+    }
+
+    @Test
+    fun `test register requires valid verification code and invalidates it upon use`() {
+        val studentNumber = "8209220555"
+        val phone = "13955667788"
+        val code = sendCodeAndGetDevCode(phone = phone, purpose = "REGISTRATION", studentNumber = studentNumber)
+
+        // Attempt register with WRONG code -> 400 Bad Request
+        mockMvc.perform(
+            post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(
+                    RegisterRequest(
+                        studentNumber = studentNumber,
+                        fullName = "曹操",
+                        phone = phone,
+                        password = "password123",
+                        verificationCode = "000000"
+                    )
+                ))
+        ).andExpect(status().isBadRequest)
+
+        // Register with VALID code -> 200 OK
+        mockMvc.perform(
+            post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(
+                    RegisterRequest(
+                        studentNumber = studentNumber,
+                        fullName = "曹操",
+                        phone = phone,
+                        password = "password123",
+                        verificationCode = code
+                    )
+                ))
+        ).andExpect(status().isOk)
+
+        // Attempt to replay SAME code for another account -> should fail because code was consumed
+        mockMvc.perform(
+            post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(
+                    RegisterRequest(
+                        studentNumber = "8209220666",
+                        fullName = "曹丕",
+                        phone = "13955667799",
+                        password = "password123",
+                        verificationCode = code
+                    )
+                ))
+        ).andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `test database unique constraint on phone prevents duplicate insertion`() {
+        val s1 = com.medicalsystem.intake.entity.IntakeStudentEntity.create(
+            studentNumber = com.medicalsystem.intake.model.StudentNumber("8209220777"),
+            fullName = com.medicalsystem.intake.model.PersonName("孙权"),
+            phone = com.medicalsystem.intake.model.ChineseMobileNumber("13966778899"),
+            passwordHash = "hash1"
+        )
+        studentRepository.saveAndFlush(s1)
+
+        val s2 = com.medicalsystem.intake.entity.IntakeStudentEntity.create(
+            studentNumber = com.medicalsystem.intake.model.StudentNumber("8209220888"),
+            fullName = com.medicalsystem.intake.model.PersonName("孙策"),
+            phone = com.medicalsystem.intake.model.ChineseMobileNumber("13966778899"), // duplicate phone
+            passwordHash = "hash2"
+        )
+        assertThrows(org.springframework.dao.DataAccessException::class.java) {
+            studentRepository.saveAndFlush(s2)
+        }
     }
 }

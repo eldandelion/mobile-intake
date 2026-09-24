@@ -27,12 +27,21 @@ class AuthService(
         val normalizedStudentNumber = studentNumberVo.normalized()
         val normalizedPhone = phoneVo.normalized()
 
+        // 1. Check account redundancy first
         if (studentRepository.existsByStudentNumber(normalizedStudentNumber)) {
             throw ConflictException("Student number already registered: $normalizedStudentNumber")
         }
         if (studentRepository.existsByPhone(normalizedPhone)) {
             throw ConflictException("Phone number already registered: $normalizedPhone")
         }
+
+        // 2. Verify and consume OTP verification code before entity persistence
+        otpService.verifyOtp(
+            phone = phoneVo,
+            code = request.verificationCode,
+            purpose = OtpPurpose.REGISTRATION,
+            consume = true
+        )
 
         val student = IntakeStudentEntity.create(
             studentNumber = studentNumberVo,
@@ -46,6 +55,36 @@ class AuthService(
         return AuthResponse(
             token = token,
             student = toDto(saved)
+        )
+    }
+
+    @Transactional(readOnly = true)
+    fun checkAvailability(studentNumber: String?, phone: String?): CheckAvailabilityResponse {
+        var studentNumberAvailable = true
+        var phoneAvailable = true
+        val messages = mutableListOf<String>()
+
+        if (!studentNumber.isNullOrBlank()) {
+            val studentNumberVo = com.medicalsystem.intake.model.StudentNumber(studentNumber)
+            if (studentRepository.existsByStudentNumber(studentNumberVo.normalized())) {
+                studentNumberAvailable = false
+                messages.add("该学号已被注册")
+            }
+        }
+
+        if (!phone.isNullOrBlank()) {
+            val phoneVo = com.medicalsystem.intake.model.ChineseMobileNumber(phone)
+            if (studentRepository.existsByPhone(phoneVo.normalized())) {
+                phoneAvailable = false
+                messages.add("该手机号码已被注册")
+            }
+        }
+
+        val message = if (messages.isNotEmpty()) messages.joinToString("; ") else null
+        return CheckAvailabilityResponse(
+            studentNumberAvailable = studentNumberAvailable,
+            phoneAvailable = phoneAvailable,
+            message = message
         )
     }
 
@@ -91,6 +130,13 @@ class AuthService(
                 throw com.medicalsystem.intake.exception.NotFoundException("该手机号码尚未登记，请先创建账号")
             }
         } else if (purpose == OtpPurpose.REGISTRATION) {
+            val rawStudentNum = request.studentNumber?.trim()
+            if (!rawStudentNum.isNullOrBlank()) {
+                val studentNumberVo = com.medicalsystem.intake.model.StudentNumber(rawStudentNum)
+                if (studentRepository.existsByStudentNumber(studentNumberVo.normalized())) {
+                    throw ConflictException("该学号已被注册: ${studentNumberVo.normalized()}")
+                }
+            }
             if (studentRepository.existsByPhone(phoneVo.normalized())) {
                 throw ConflictException("该手机号码已被注册: ${phoneVo.normalized()}")
             }

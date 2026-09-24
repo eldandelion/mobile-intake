@@ -114,7 +114,7 @@ describe('AuthPage', () => {
     fireEvent.click(screen.getByText('下一步'));
 
     await waitFor(() => {
-      expect(sendCodeSpy).toHaveBeenCalledWith('13800138000', 'REGISTRATION');
+      expect(sendCodeSpy).toHaveBeenCalledWith('13800138000', 'REGISTRATION', '2026002001');
     });
 
     // Step 2 Screen
@@ -226,10 +226,10 @@ describe('AuthPage', () => {
       expect(screen.getByText('学号或密码错误，请重新输入')).toBeDefined();
     });
 
-    // Verify there is NO inline error banner on the login screen
+    // Verify there is NO inline error banner inside the login form
     expect(screen.queryByText('Invalid credentials')).toBeNull();
-    const errorContainers = document.querySelectorAll('.bg-\\[var\\(--md-sys-color-error-container\\)\\]');
-    expect(errorContainers.length).toBe(0);
+    const formErrorContainers = document.querySelector('form')?.querySelectorAll('.bg-\\[var\\(--md-sys-color-error-container\\)\\]');
+    expect(formErrorContainers?.length ?? 0).toBe(0);
 
     // Verify snackbar dismiss button
     const closeBtn = screen.getByText('关闭');
@@ -389,5 +389,74 @@ describe('AuthPage', () => {
       expect(loginWithSmsSpy).toHaveBeenCalledWith('13812345678', '654321');
     });
   });
+
+  it('displays error snackbar with action and redirects to password login when student number is already registered', async () => {
+    vi.spyOn(intakeApi, 'sendCode').mockRejectedValue(new Error('该学号已被注册: 2026001001'));
+
+    render(
+      <AuthProvider>
+        <AuthPage />
+      </AuthProvider>
+    );
+
+    fireEvent.click(screen.getByText('创建账号'));
+
+    simulateInput(document.querySelector('md-outlined-text-field[label="真实姓名"]')!, '张三');
+    simulateInput(document.querySelector('md-outlined-text-field[label="学号"]')!, '2026001001');
+    simulateInput(document.querySelector('md-outlined-text-field[label="手机号码"]')!, '13800112233');
+
+    fireEvent.click(screen.getByText('下一步'));
+
+    await waitFor(() => {
+      const snackbar = screen.getByTestId('snackbar');
+      expect(snackbar).toBeDefined();
+      expect(snackbar.className).toContain('bg-[var(--md-sys-color-error-container)]');
+      expect(screen.getByText('前往登录')).toBeDefined();
+    });
+
+    // Click snackbar redirect action button
+    fireEvent.click(screen.getByText('前往登录'));
+
+    // Should switch to password login with student number prefilled
+    expect(screen.getByText('使用您的中南大学学号以继续心理普查')).toBeDefined();
+    expect(
+      document.querySelector('md-outlined-text-field[label="学号"]')?.getAttribute('value')
+    ).toBe('2026001001');
+  });
+
+  it('displays error snackbar with action and redirects to sms login when phone number is already registered', async () => {
+    vi.spyOn(intakeApi, 'sendCode').mockRejectedValue(new Error('该手机号码已被注册: 13800112233'));
+
+    render(
+      <AuthProvider>
+        <AuthPage />
+      </AuthProvider>
+    );
+
+    fireEvent.click(screen.getByText('创建账号'));
+
+    simulateInput(document.querySelector('md-outlined-text-field[label="真实姓名"]')!, '张三');
+    simulateInput(document.querySelector('md-outlined-text-field[label="学号"]')!, '2026001001');
+    simulateInput(document.querySelector('md-outlined-text-field[label="手机号码"]')!, '13800112233');
+
+    fireEvent.click(screen.getByText('下一步'));
+
+    await waitFor(() => {
+      const snackbar = screen.getByTestId('snackbar');
+      expect(snackbar).toBeDefined();
+      expect(snackbar.className).toContain('bg-[var(--md-sys-color-error-container)]');
+      expect(screen.getByText('前往登录')).toBeDefined();
+    });
+
+    // Click snackbar redirect action button
+    fireEvent.click(screen.getByText('前往登录'));
+
+    // Should switch to SMS login with phone number prefilled
+    expect(screen.getByText('输入已登记手机号码及短信验证码快捷登录')).toBeDefined();
+    expect(
+      document.querySelector('md-outlined-text-field[label="手机号码"]')?.getAttribute('value')
+    ).toBe('13800112233');
+  });
 });
+
 

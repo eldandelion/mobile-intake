@@ -31,10 +31,19 @@ export function translateAuthError(msg?: string): string {
   if (lower.includes('not found') || lower.includes('student not found') || lower.includes('尚未登记')) {
     return '该账号尚未登记，请先创建账号';
   }
-  if (lower.includes('phone') && (lower.includes('already') || lower.includes('registered') || lower.includes('duplicate')) || lower.includes('已被注册')) {
+  if (
+    lower.includes('手机号码已被注册') ||
+    lower.includes('手机号已被注册') ||
+    (lower.includes('phone') && (lower.includes('already') || lower.includes('registered') || lower.includes('duplicate')))
+  ) {
     return '该手机号码已被注册';
   }
-  if (lower.includes('already registered') || lower.includes('conflict')) {
+  if (
+    lower.includes('学号已被注册') ||
+    lower.includes('student number already registered') ||
+    lower.includes('already registered') ||
+    lower.includes('conflict')
+  ) {
     return '该学号已被注册';
   }
   if (lower.includes('频繁') || lower.includes('wait') || lower.includes('cooldown')) {
@@ -83,11 +92,35 @@ export const AuthPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarVariant, setSnackbarVariant] = useState<'default' | 'error'>('error');
+  const [snackbarActionLabel, setSnackbarActionLabel] = useState('关闭');
+  const [snackbarAction, setSnackbarAction] = useState<(() => void) | undefined>(undefined);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const showAuthError = (rawError?: string, defaultMsg = '操作失败，请重试') => {
     const translated = translateAuthError(rawError || defaultMsg);
     setSnackbarMessage(translated);
+    setSnackbarVariant('error');
+    if (translated.includes('学号已被注册') || translated.includes('学号已存在')) {
+      setSnackbarActionLabel('前往登录');
+      setSnackbarAction(() => () => {
+        setLoginStudentNumber(regStudentNumber);
+        setLoginMode('password');
+        setView('login');
+        setSnackbarOpen(false);
+      });
+    } else if (translated.includes('手机号码已被注册') || translated.includes('手机号已存在')) {
+      setSnackbarActionLabel('前往登录');
+      setSnackbarAction(() => () => {
+        setLoginPhone(regPhone);
+        setLoginMode('sms');
+        setView('login');
+        setSnackbarOpen(false);
+      });
+    } else {
+      setSnackbarActionLabel('关闭');
+      setSnackbarAction(undefined);
+    }
     setSnackbarOpen(true);
   };
 
@@ -250,7 +283,11 @@ export const AuthPage: React.FC = () => {
 
     setLoading(true);
     try {
-      await intakeApi.sendCode(phoneValidation.normalized || regPhone.trim(), 'REGISTRATION');
+      await intakeApi.sendCode(
+        phoneValidation.normalized || regPhone.trim(),
+        'REGISTRATION',
+        numValidation.normalized || regStudentNumber.trim()
+      );
       startCountdown();
       setView('register_step2');
     } catch (err: any) {
@@ -267,7 +304,7 @@ export const AuthPage: React.FC = () => {
     setLoading(true);
     setSnackbarOpen(false);
     try {
-      await intakeApi.sendCode(regPhone.trim(), 'REGISTRATION');
+      await intakeApi.sendCode(regPhone.trim(), 'REGISTRATION', regStudentNumber.trim());
       startCountdown();
     } catch (err: any) {
       console.error('Resend code error:', err);
@@ -329,6 +366,7 @@ export const AuthPage: React.FC = () => {
         fullName: validatePersonName(regFullName).normalized || regFullName.trim(),
         phone: validateChineseMobile(regPhone).normalized || regPhone.trim(),
         password: regPassword,
+        verificationCode: verificationCode.trim(),
       });
     } catch (err: any) {
       console.error('Register error:', err);
@@ -770,9 +808,12 @@ export const AuthPage: React.FC = () => {
       <Snackbar
         open={snackbarOpen}
         message={snackbarMessage}
+        variant={snackbarVariant}
         icon="error"
-        actionLabel="关闭"
+        actionLabel={snackbarActionLabel}
+        onAction={snackbarAction}
         onClose={() => setSnackbarOpen(false)}
+        duration={snackbarAction ? 7000 : 4000}
       />
     </div>
   );

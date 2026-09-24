@@ -3,6 +3,7 @@ import { Snackbar } from '../components/common/Snackbar';
 
 export interface SnackbarOptions {
   message: string;
+  variant?: 'default' | 'error';
   icon?: string;
   duration?: number;
   actionLabel?: string;
@@ -36,6 +37,7 @@ export const SnackbarProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       <Snackbar
         open={open}
         message={options.message}
+        variant={options.variant}
         icon={options.icon}
         actionLabel={options.actionLabel}
         onAction={() => {

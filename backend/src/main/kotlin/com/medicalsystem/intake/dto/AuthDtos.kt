@@ -22,7 +22,11 @@ data class RegisterRequest(
 
     @field:NotBlank(message = "Password is required")
     @field:Size(min = 6, max = 64, message = "Password must be at least 6 characters")
-    val password: String
+    val password: String,
+
+    @field:NotBlank(message = "Verification code is required")
+    @field:Pattern(regexp = "^\\d{6}$", message = "Verification code must be 6 digits")
+    val verificationCode: String
 )
 
 data class LoginRequest(
@@ -64,7 +68,15 @@ data class SendCodeRequest(
     @field:Pattern(regexp = "^1[3-9]\\d{9}$", message = "Invalid Chinese mobile phone number format")
     val phone: String,
 
-    val purpose: String? = "REGISTRATION"
+    val purpose: String? = "REGISTRATION",
+
+    val studentNumber: String? = null
+)
+
+data class CheckAvailabilityResponse(
+    val studentNumberAvailable: Boolean,
+    val phoneAvailable: Boolean,
+    val message: String? = null
 )
 
 data class SendCodeResponse(

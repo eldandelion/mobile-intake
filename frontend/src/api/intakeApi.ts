@@ -23,6 +23,13 @@ export interface RegisterRequest {
   fullName: string;
   phone: string;
   password?: string;
+  verificationCode?: string;
+}
+
+export interface CheckAvailabilityResponse {
+  studentNumberAvailable: boolean;
+  phoneAvailable: boolean;
+  message?: string;
 }
 
 export interface LoginRequest {
@@ -209,11 +216,19 @@ export const intakeApi = {
       body: JSON.stringify({ phone, code }),
     }),
 
-  sendCode: (phone: string, purpose: 'REGISTRATION' | 'LOGIN' = 'REGISTRATION') =>
+  sendCode: (phone: string, purpose: 'REGISTRATION' | 'LOGIN' = 'REGISTRATION', studentNumber?: string) =>
     request<{ phone: string; devCode?: string; expiresInSeconds: number }>('/api/auth/send-code', {
       method: 'POST',
-      body: JSON.stringify({ phone, purpose }),
+      body: JSON.stringify({ phone, purpose, studentNumber: studentNumber || undefined }),
     }),
+
+  checkAvailability: (studentNumber?: string, phone?: string) =>
+    request<CheckAvailabilityResponse>(
+      `/api/auth/check-availability?${new URLSearchParams({
+        ...(studentNumber ? { studentNumber } : {}),
+        ...(phone ? { phone } : {}),
+      }).toString()}`
+    ),
 
   verifyCode: (phone: string, code: string, purpose: 'REGISTRATION' | 'LOGIN' = 'REGISTRATION') =>
     request<{ valid: boolean }>('/api/auth/verify-code', {

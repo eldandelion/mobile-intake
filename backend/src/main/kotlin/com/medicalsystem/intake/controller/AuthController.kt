@@ -20,6 +20,15 @@ class AuthController(
         return ResponseEntity.ok(response)
     }
 
+    @GetMapping("/check-availability")
+    fun checkAvailability(
+        @RequestParam(required = false) studentNumber: String?,
+        @RequestParam(required = false) phone: String?
+    ): ResponseEntity<CheckAvailabilityResponse> {
+        val response = authService.checkAvailability(studentNumber, phone)
+        return ResponseEntity.ok(response)
+    }
+
     @PostMapping("/login")
     fun login(@Valid @RequestBody request: LoginRequest): ResponseEntity<AuthResponse> {
         val response = authService.login(request)

@@ -8,7 +8,7 @@ import java.time.LocalDateTime
     name = "intake_students",
     indexes = [
         Index(name = "idx_student_number", columnList = "student_number", unique = true),
-        Index(name = "idx_phone", columnList = "phone")
+        Index(name = "idx_phone", columnList = "phone", unique = true)
     ]
 )
 class IntakeStudentEntity(
@@ -22,7 +22,7 @@ class IntakeStudentEntity(
     @Column(name = "full_name", nullable = false, length = 64)
     var fullName: String,
 
-    @Column(name = "phone", nullable = false, length = 20)
+    @Column(name = "phone", nullable = false, unique = true, length = 20)
     var phone: String,
 
     @Column(name = "password_hash", nullable = false, length = 128)
