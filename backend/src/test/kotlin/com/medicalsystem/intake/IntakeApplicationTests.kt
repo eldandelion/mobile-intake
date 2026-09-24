@@ -55,19 +55,22 @@ class IntakeApplicationTests {
     @Test
     fun `test send and verify code endpoints`() {
         // Send code
-        mockMvc.perform(
+        val sendRes = mockMvc.perform(
             post("/api/auth/send-code")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(com.medicalsystem.intake.dto.SendCodeRequest("13811112222")))
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.devCode").value("123456"))
+            .andReturn()
+
+        val json = objectMapper.readTree(sendRes.response.contentAsString)
+        val devCode = json.get("devCode").asText()
 
         // Verify code with valid code
         mockMvc.perform(
             post("/api/auth/verify-code")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(com.medicalsystem.intake.dto.VerifyCodeRequest("13811112222", "123456")))
+                .content(objectMapper.writeValueAsString(com.medicalsystem.intake.dto.VerifyCodeRequest("13811112222", devCode)))
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.valid").value(true))
@@ -76,10 +79,61 @@ class IntakeApplicationTests {
         mockMvc.perform(
             post("/api/auth/verify-code")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(com.medicalsystem.intake.dto.VerifyCodeRequest("13811112222", "999999")))
+                .content(objectMapper.writeValueAsString(com.medicalsystem.intake.dto.VerifyCodeRequest("13811112222", "000000")))
+        )
+            .andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `test phone login with sms verification code`() {
+        val studentNumber = "8209220999"
+        val phone = "13988887777"
+        val registerReq = com.medicalsystem.intake.dto.RegisterRequest(
+            studentNumber = studentNumber,
+            fullName = "王小明",
+            phone = phone,
+            password = "password123"
+        )
+        mockMvc.perform(
+            post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(registerReq))
+        ).andExpect(status().isOk)
+
+        // Request login code
+        val sendRes = mockMvc.perform(
+            post("/api/auth/send-code")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(com.medicalsystem.intake.dto.SendCodeRequest(phone = phone, purpose = "LOGIN")))
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.valid").value(false))
+            .andReturn()
+
+        val json = objectMapper.readTree(sendRes.response.contentAsString)
+        val devCode = json.get("devCode").asText()
+
+        // Login with SMS code
+        val loginRes = mockMvc.perform(
+            post("/api/auth/login-sms")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(com.medicalsystem.intake.dto.LoginSmsRequest(phone = phone, code = devCode)))
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.token").isNotEmpty)
+            .andExpect(jsonPath("$.student.studentNumber").value(studentNumber))
+            .andReturn()
+
+        val loginJson = objectMapper.readTree(loginRes.response.contentAsString)
+        val token = loginJson.get("token").asText()
+
+        // Verify me endpoint with token
+        mockMvc.perform(
+            get("/api/auth/me")
+                .header("Authorization", "Bearer $token")
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.studentNumber").value(studentNumber))
+            .andExpect(jsonPath("$.phone").value(phone))
     }
 
     @Test

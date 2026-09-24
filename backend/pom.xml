@@ -19,6 +19,9 @@
 		<kotlin.version>2.3.21</kotlin.version>
 		<sqlite-jdbc.version>3.46.0.0</sqlite-jdbc.version>
 		<jjwt.version>0.12.5</jjwt.version>
+		<aliyun-dysmsapi.version>3.1.0</aliyun-dysmsapi.version>
+		<aliyun-dypnsapi.version>2.0.0</aliyun-dypnsapi.version>
+		<caffeine.version>3.1.8</caffeine.version>
 	</properties>
 
 	<dependencies>
@@ -83,6 +86,27 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- Alibaba Cloud SMS (Dysmsapi) -->
+		<dependency>
+			<groupId>com.aliyun</groupId>
+			<artifactId>dysmsapi20170525</artifactId>
+			<version>${aliyun-dysmsapi.version}</version>
+		</dependency>
+
+		<!-- Alibaba Cloud Number Verification Service (Dypnsapi - SMS Auth) -->
+		<dependency>
+			<groupId>com.aliyun</groupId>
+			<artifactId>dypnsapi20170525</artifactId>
+			<version>${aliyun-dypnsapi.version}</version>
+		</dependency>
+
+		<!-- Caffeine High-Performance Cache for OTP TTL & Eviction -->
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
+			<version>${caffeine.version}</version>
+		</dependency>
+
 		<!-- Testing -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -101,6 +125,20 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>aliyunmaven</id>
+			<name>aliyun maven</name>
+			<url>https://maven.aliyun.com/repository/public</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 
 	<build>
 		<sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { intakeApi } from '../api/intakeApi';
-import { PrimaryButton } from '../components/common/Buttons';
+import { PrimaryButton, OutlinedButton, SegmentedButton } from '../components/common/Buttons';
 import { Snackbar } from '../components/common/Snackbar';
 import {
   validateStudentNumber,
@@ -10,9 +10,15 @@ import {
 } from '../domain/validators';
 
 type AuthView = 'login' | 'register_step1' | 'register_step2' | 'register_step3';
+export type LoginMode = 'password' | 'sms';
+
+export const LOGIN_MODE_ITEMS = [
+  { label: '学号密码', value: 'password' },
+  { label: '手机验证码', value: 'sms' },
+];
 
 export function translateAuthError(msg?: string): string {
-  if (!msg) return '登录失败，请核对学号与密码';
+  if (!msg) return '登录失败，请核对输入信息';
   const lower = msg.toLowerCase().trim();
   if (
     lower.includes('invalid credential') ||
@@ -22,14 +28,20 @@ export function translateAuthError(msg?: string): string {
   ) {
     return '学号或密码错误，请重新输入';
   }
-  if (lower.includes('not found') || lower.includes('student not found')) {
-    return '该学号尚未登记，请先创建账号';
+  if (lower.includes('not found') || lower.includes('student not found') || lower.includes('尚未登记')) {
+    return '该账号尚未登记，请先创建账号';
   }
-  if (lower.includes('phone') && (lower.includes('already') || lower.includes('registered') || lower.includes('duplicate'))) {
+  if (lower.includes('phone') && (lower.includes('already') || lower.includes('registered') || lower.includes('duplicate')) || lower.includes('已被注册')) {
     return '该手机号码已被注册';
   }
   if (lower.includes('already registered') || lower.includes('conflict')) {
     return '该学号已被注册';
+  }
+  if (lower.includes('频繁') || lower.includes('wait') || lower.includes('cooldown')) {
+    return msg;
+  }
+  if (lower.includes('验证码') || lower.includes('code')) {
+    return msg;
   }
   if (lower.includes('network') || lower.includes('failed to fetch')) {
     return '网络连接异常，请稍后重试';
@@ -38,13 +50,20 @@ export function translateAuthError(msg?: string): string {
 }
 
 export const AuthPage: React.FC = () => {
-  const { login, register } = useAuth();
+  const { login, loginWithSms, register } = useAuth();
   const [view, setView] = useState<AuthView>('login');
+  const [loginMode, setLoginMode] = useState<LoginMode>('password');
 
-  // Login form state
+  // Password Login form state
   const [loginStudentNumber, setLoginStudentNumber] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
+
+  // SMS Login form state
+  const [loginPhone, setLoginPhone] = useState('');
+  const [loginSmsCode, setLoginSmsCode] = useState('');
+  const [loginCountdown, setLoginCountdown] = useState(0);
+  const loginCountdownTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Registration wizard state (preserved across back and forward steps)
   const [regFullName, setRegFullName] = useState('');
@@ -56,7 +75,7 @@ export const AuthPage: React.FC = () => {
   const [showRegPassword, setShowRegPassword] = useState(false);
   const [showRegConfirmPassword, setShowRegConfirmPassword] = useState(false);
 
-  // SMS countdown timer
+  // SMS countdown timer for registration
   const [countdown, setCountdown] = useState(0);
   const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -77,6 +96,9 @@ export const AuthPage: React.FC = () => {
       if (countdownTimerRef.current) {
         clearInterval(countdownTimerRef.current);
       }
+      if (loginCountdownTimerRef.current) {
+        clearInterval(loginCountdownTimerRef.current);
+      }
     };
   }, []);
 
@@ -94,6 +116,20 @@ export const AuthPage: React.FC = () => {
     }, 1000);
   };
 
+  const startLoginCountdown = () => {
+    setLoginCountdown(60);
+    if (loginCountdownTimerRef.current) clearInterval(loginCountdownTimerRef.current);
+    loginCountdownTimerRef.current = setInterval(() => {
+      setLoginCountdown((prev) => {
+        if (prev <= 1) {
+          if (loginCountdownTimerRef.current) clearInterval(loginCountdownTimerRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
   const clearFieldError = (field: string) => {
     if (fieldErrors[field]) {
       setFieldErrors((prev) => {
@@ -104,38 +140,86 @@ export const AuthPage: React.FC = () => {
     }
   };
 
-  // 1. Handle Login Submit
-  const handleLoginSubmit = async (e?: React.FormEvent) => {
-    e?.preventDefault();
+  // Send Login SMS verification code
+  const handleSendLoginCode = async () => {
+    if (loginCountdown > 0 || loading) return;
     setSnackbarOpen(false);
-    const errors: Record<string, string> = {};
-
-    const numValidation = validateStudentNumber(loginStudentNumber);
-    if (!numValidation.isValid) {
-      errors.loginStudentNumber = numValidation.error!;
-    }
-    if (!loginPassword) {
-      errors.loginPassword = '请输入密码';
-    }
-
-    if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors);
+    const phoneValidation = validateChineseMobile(loginPhone);
+    if (!phoneValidation.isValid) {
+      setFieldErrors((prev) => ({ ...prev, loginPhone: phoneValidation.error! }));
       return;
     }
 
     setLoading(true);
     try {
-      const cleanNum = numValidation.normalized || loginStudentNumber.trim();
-      await login({
-        identifier: cleanNum,
-        studentNumber: cleanNum,
-        password: loginPassword,
-      });
+      await intakeApi.sendCode(phoneValidation.normalized || loginPhone.trim(), 'LOGIN');
+      startLoginCountdown();
     } catch (err: any) {
-      console.error('Login error:', err);
-      showAuthError(err.message, '学号或密码错误，请重新输入');
+      console.error('Send login code error:', err);
+      showAuthError(err.message, '获取验证码失败，请重试');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 1. Handle Login Submit (Password or SMS)
+  const handleLoginSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    setSnackbarOpen(false);
+    const errors: Record<string, string> = {};
+
+    if (loginMode === 'password') {
+      const numValidation = validateStudentNumber(loginStudentNumber);
+      if (!numValidation.isValid) {
+        errors.loginStudentNumber = numValidation.error!;
+      }
+      if (!loginPassword) {
+        errors.loginPassword = '请输入密码';
+      }
+
+      if (Object.keys(errors).length > 0) {
+        setFieldErrors(errors);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const cleanNum = numValidation.normalized || loginStudentNumber.trim();
+        await login({
+          identifier: cleanNum,
+          studentNumber: cleanNum,
+          password: loginPassword,
+        });
+      } catch (err: any) {
+        console.error('Login error:', err);
+        showAuthError(err.message, '学号或密码错误，请重新输入');
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      const phoneValidation = validateChineseMobile(loginPhone);
+      if (!phoneValidation.isValid) {
+        errors.loginPhone = phoneValidation.error!;
+      }
+      const cleanCode = loginSmsCode.trim();
+      if (!cleanCode || cleanCode.length !== 6 || !/^\d{6}$/.test(cleanCode)) {
+        errors.loginSmsCode = '请输入 6 位数字验证码';
+      }
+
+      if (Object.keys(errors).length > 0) {
+        setFieldErrors(errors);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        await loginWithSms(phoneValidation.normalized || loginPhone.trim(), cleanCode);
+      } catch (err: any) {
+        console.error('SMS Login error:', err);
+        showAuthError(err.message, '验证码错误或已失效，请重新输入');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -166,7 +250,7 @@ export const AuthPage: React.FC = () => {
 
     setLoading(true);
     try {
-      await intakeApi.sendCode(phoneValidation.normalized || regPhone.trim());
+      await intakeApi.sendCode(phoneValidation.normalized || regPhone.trim(), 'REGISTRATION');
       startCountdown();
       setView('register_step2');
     } catch (err: any) {
@@ -183,7 +267,7 @@ export const AuthPage: React.FC = () => {
     setLoading(true);
     setSnackbarOpen(false);
     try {
-      await intakeApi.sendCode(regPhone.trim());
+      await intakeApi.sendCode(regPhone.trim(), 'REGISTRATION');
       startCountdown();
     } catch (err: any) {
       console.error('Resend code error:', err);
@@ -204,7 +288,7 @@ export const AuthPage: React.FC = () => {
 
     setLoading(true);
     try {
-      const res = await intakeApi.verifyCode(regPhone.trim(), cleanCode);
+      const res = await intakeApi.verifyCode(regPhone.trim(), cleanCode, 'REGISTRATION');
       if (!res.valid) {
         setFieldErrors({ verificationCode: '验证码不正确，请重新核对' });
         setLoading(false);
@@ -286,60 +370,123 @@ export const AuthPage: React.FC = () => {
               <h1 className="text-[32px] sm:text-[36px] font-normal leading-[40px] sm:leading-[44px] text-[var(--md-sys-color-on-surface)] tracking-tight">
                 登录
               </h1>
-              <p className="text-[15px] sm:text-[16px] leading-[24px] text-[var(--md-sys-color-on-surface-variant)] mt-3 mb-8 font-normal">
-                使用您的中南大学学号以继续心理普查
+              <p className="text-[15px] sm:text-[16px] leading-[24px] text-[var(--md-sys-color-on-surface-variant)] mt-3 mb-6 font-normal">
+                {loginMode === 'password'
+                  ? '使用您的中南大学学号以继续心理普查'
+                  : '输入已登记手机号码及短信验证码快捷登录'}
               </p>
 
+              {/* Segmented Button: Tab Switcher between Password and SMS Login */}
+              <div className="mb-6 flex">
+                <SegmentedButton
+                  items={LOGIN_MODE_ITEMS}
+                  selectedValue={loginMode}
+                  onChange={(val) => {
+                    setLoginMode(val as LoginMode);
+                    setFieldErrors({});
+                  }}
+                />
+              </div>
+
               <form onSubmit={handleLoginSubmit} className="space-y-6">
-                <div>
-                  <md-outlined-text-field
-                    label="学号"
-                    value={loginStudentNumber}
-                    required
-                    className="w-full"
-                    error={!!fieldErrors.loginStudentNumber}
-                    error-text={fieldErrors.loginStudentNumber}
-                    onInput={(e: any) => {
-                      setLoginStudentNumber(e.target.value);
-                      clearFieldError('loginStudentNumber');
-                    }}
-                  />
-                </div>
+                {loginMode === 'password' ? (
+                  <>
+                    <div>
+                      <md-outlined-text-field
+                        label="学号"
+                        value={loginStudentNumber}
+                        required
+                        className="w-full"
+                        error={!!fieldErrors.loginStudentNumber}
+                        error-text={fieldErrors.loginStudentNumber}
+                        onInput={(e: any) => {
+                          setLoginStudentNumber(e.target.value);
+                          clearFieldError('loginStudentNumber');
+                        }}
+                      />
+                    </div>
 
-                <div>
-                  <md-outlined-text-field
-                    label="登录密码"
-                    type={showLoginPassword ? 'text' : 'password'}
-                    value={loginPassword}
-                    required
-                    className="w-full"
-                    error={!!fieldErrors.loginPassword}
-                    error-text={fieldErrors.loginPassword}
-                    onInput={(e: any) => {
-                      setLoginPassword(e.target.value);
-                      clearFieldError('loginPassword');
-                    }}
-                  >
-                    <md-icon-button
-                      type="button"
-                      slot="trailing-icon"
-                      onClick={() => setShowLoginPassword(!showLoginPassword)}
-                      aria-label={showLoginPassword ? '隐藏密码' : '显示密码'}
-                    >
-                      <md-icon>{showLoginPassword ? 'visibility_off' : 'visibility'}</md-icon>
-                    </md-icon-button>
-                  </md-outlined-text-field>
-                </div>
+                    <div>
+                      <md-outlined-text-field
+                        label="登录密码"
+                        type={showLoginPassword ? 'text' : 'password'}
+                        value={loginPassword}
+                        required
+                        className="w-full"
+                        error={!!fieldErrors.loginPassword}
+                        error-text={fieldErrors.loginPassword}
+                        onInput={(e: any) => {
+                          setLoginPassword(e.target.value);
+                          clearFieldError('loginPassword');
+                        }}
+                      >
+                        <md-icon-button
+                          type="button"
+                          slot="trailing-icon"
+                          onClick={() => setShowLoginPassword(!showLoginPassword)}
+                          aria-label={showLoginPassword ? '隐藏密码' : '显示密码'}
+                        >
+                          <md-icon>{showLoginPassword ? 'visibility_off' : 'visibility'}</md-icon>
+                        </md-icon-button>
+                      </md-outlined-text-field>
+                    </div>
 
-                <div className="pt-1">
-                  <button
-                    type="button"
-                    onClick={() => alert('请联系校区辅导员或心理健康中心管理员协助找回学号与密码。')}
-                    className="text-[14px] font-medium text-[var(--md-sys-color-primary)] hover:underline"
-                  >
-                    忘记了学号或密码？
-                  </button>
-                </div>
+                    <div className="pt-1">
+                      <button
+                        type="button"
+                        onClick={() => alert('请联系校区辅导员或心理健康中心管理员协助找回学号与密码。')}
+                        className="text-[14px] font-medium text-[var(--md-sys-color-primary)] hover:underline"
+                      >
+                        忘记了学号或密码？
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <md-outlined-text-field
+                        type="tel"
+                        label="手机号码"
+                        value={loginPhone}
+                        required
+                        className="w-full"
+                        error={!!fieldErrors.loginPhone}
+                        error-text={fieldErrors.loginPhone}
+                        supporting-text="请输入已注册的 11 位手机号码"
+                        onInput={(e: any) => {
+                          setLoginPhone(e.target.value);
+                          clearFieldError('loginPhone');
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex gap-2.5 items-start">
+                        <md-outlined-text-field
+                          type="tel"
+                          inputmode="numeric"
+                          label="6 位验证码"
+                          value={loginSmsCode}
+                          maxLength={6}
+                          required
+                          className="flex-1"
+                          error={!!fieldErrors.loginSmsCode}
+                          error-text={fieldErrors.loginSmsCode}
+                          onInput={(e: any) => {
+                            setLoginSmsCode(e.target.value);
+                            clearFieldError('loginSmsCode');
+                          }}
+                        />
+                        <OutlinedButton
+                          label={loginCountdown > 0 ? `${loginCountdown}s` : '获取验证码'}
+                          disabled={loginCountdown > 0 || loading}
+                          onClick={handleSendLoginCode}
+                          className="h-14 min-h-[56px] px-4 text-sm font-medium rounded-xl shrink-0"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 {/* Action Row: Left: Create account, Right: Next */}
                 <div className="flex items-center justify-between mt-10 pt-4">
@@ -483,7 +630,7 @@ export const AuthPage: React.FC = () => {
                     className="w-full"
                     error={!!fieldErrors.verificationCode}
                     error-text={fieldErrors.verificationCode}
-                    supporting-text="开发测试默认验证码：123456"
+                    supporting-text="请输入短信中收到的 6 位验证码"
                     onInput={(e: any) => {
                       setVerificationCode(e.target.value);
                       clearFieldError('verificationCode');

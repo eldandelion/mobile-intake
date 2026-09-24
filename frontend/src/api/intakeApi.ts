@@ -203,16 +203,22 @@ export const intakeApi = {
     });
   },
 
-  sendCode: (phone: string) =>
-    request<{ phone: string; devCode: string; expiresInSeconds: number }>('/api/auth/send-code', {
-      method: 'POST',
-      body: JSON.stringify({ phone }),
-    }),
-
-  verifyCode: (phone: string, code: string) =>
-    request<{ valid: boolean }>('/api/auth/verify-code', {
+  loginWithSms: (phone: string, code: string) =>
+    request<AuthResponse>('/api/auth/login-sms', {
       method: 'POST',
       body: JSON.stringify({ phone, code }),
+    }),
+
+  sendCode: (phone: string, purpose: 'REGISTRATION' | 'LOGIN' = 'REGISTRATION') =>
+    request<{ phone: string; devCode?: string; expiresInSeconds: number }>('/api/auth/send-code', {
+      method: 'POST',
+      body: JSON.stringify({ phone, purpose }),
+    }),
+
+  verifyCode: (phone: string, code: string, purpose: 'REGISTRATION' | 'LOGIN' = 'REGISTRATION') =>
+    request<{ valid: boolean }>('/api/auth/verify-code', {
+      method: 'POST',
+      body: JSON.stringify({ phone, code, purpose }),
     }),
 
   getMe: () => request<StudentDto>('/api/auth/me'),

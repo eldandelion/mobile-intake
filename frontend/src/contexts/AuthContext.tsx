@@ -6,6 +6,7 @@ interface AuthContextType {
   token: string | null;
   loading: boolean;
   login: (req: LoginRequest) => Promise<void>;
+  loginWithSms: (phone: string, code: string) => Promise<void>;
   register: (req: RegisterRequest) => Promise<void>;
   logout: () => void;
   refreshStudent: () => Promise<void>;
@@ -55,6 +56,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
+  const loginWithSms = async (phone: string, code: string) => {
+    const res = await intakeApi.loginWithSms(phone, code);
+    tokenStorage.set(res.token);
+    setToken(res.token);
+    const s = res.student;
+    setStudent({
+      studentNumber: s?.studentNumber || res.studentNumber || '',
+      fullName: s?.fullName || res.fullName || '',
+      phone: s?.phone || res.phone || phone,
+      registeredAt: (s as any)?.createdAt || (s as any)?.registeredAt || new Date().toISOString(),
+    });
+  };
+
   const register = async (req: RegisterRequest) => {
     const res = await intakeApi.register(req);
     tokenStorage.set(res.token);
@@ -81,6 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         token,
         loading,
         login,
+        loginWithSms,
         register,
         logout,
         refreshStudent,

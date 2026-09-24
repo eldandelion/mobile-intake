@@ -62,23 +62,38 @@ data class AuthResponse(
 data class SendCodeRequest(
     @field:NotBlank(message = "Phone number is required")
     @field:Pattern(regexp = "^1[3-9]\\d{9}$", message = "Invalid Chinese mobile phone number format")
-    val phone: String
+    val phone: String,
+
+    val purpose: String? = "REGISTRATION"
 )
 
 data class SendCodeResponse(
     val phone: String,
-    val devCode: String = "123456",
+    val devCode: String? = null,
     val expiresInSeconds: Int = 300
 )
 
 data class VerifyCodeRequest(
     @field:NotBlank(message = "Phone number is required")
+    @field:Pattern(regexp = "^1[3-9]\\d{9}$", message = "Invalid Chinese mobile phone number format")
     val phone: String,
 
     @field:NotBlank(message = "Verification code is required")
-    val code: String
+    val code: String,
+
+    val purpose: String? = "REGISTRATION"
 )
 
 data class VerifyCodeResponse(
     val valid: Boolean
+)
+
+data class LoginSmsRequest(
+    @field:NotBlank(message = "Phone number is required")
+    @field:Pattern(regexp = "^1[3-9]\\d{9}$", message = "Invalid Chinese mobile phone number format")
+    val phone: String,
+
+    @field:NotBlank(message = "Verification code is required")
+    @field:Pattern(regexp = "^\\d{6}$", message = "Verification code must be 6 digits")
+    val code: String
 )

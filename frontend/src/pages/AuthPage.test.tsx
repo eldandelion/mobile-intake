@@ -114,7 +114,7 @@ describe('AuthPage', () => {
     fireEvent.click(screen.getByText('下一步'));
 
     await waitFor(() => {
-      expect(sendCodeSpy).toHaveBeenCalledWith('13800138000');
+      expect(sendCodeSpy).toHaveBeenCalledWith('13800138000', 'REGISTRATION');
     });
 
     // Step 2 Screen
@@ -164,7 +164,7 @@ describe('AuthPage', () => {
     fireEvent.click(screen.getByText('下一步'));
 
     await waitFor(() => {
-      expect(verifyCodeSpy).toHaveBeenCalledWith('13900139000', '123456');
+      expect(verifyCodeSpy).toHaveBeenCalledWith('13900139000', '123456', 'REGISTRATION');
     });
 
     // Step 3 Screen
@@ -336,6 +336,58 @@ describe('AuthPage', () => {
     expect(
       document.querySelector('md-outlined-text-field[error-text="学号不能为全重复数字"]')
     ).not.toBeNull();
+  });
+
+  it('switches to SMS login mode, validates phone, sends code with LOGIN purpose, and logs in', async () => {
+    const sendCodeSpy = vi.spyOn(intakeApi, 'sendCode').mockResolvedValue({
+      phone: '13812345678',
+      expiresInSeconds: 60,
+    });
+    const loginWithSmsSpy = vi.spyOn(intakeApi, 'loginWithSms').mockResolvedValue({
+      token: 'jwt-sms-token',
+      student: {
+        studentNumber: '8209220001',
+        fullName: '张三',
+        phone: '13812345678',
+        registeredAt: new Date().toISOString(),
+      },
+    });
+
+    render(
+      <AuthProvider>
+        <AuthPage />
+      </AuthProvider>
+    );
+
+    // Click on "手机验证码" segmented button
+    fireEvent.click(screen.getByText('手机验证码'));
+
+    // Verify SMS login fields are displayed
+    expect(screen.getByText('输入已登记手机号码及短信验证码快捷登录')).toBeDefined();
+    const phoneField = document.querySelector('md-outlined-text-field[label="手机号码"]')!;
+    const codeField = document.querySelector('md-outlined-text-field[label="6 位验证码"]')!;
+    expect(phoneField).not.toBeNull();
+    expect(codeField).not.toBeNull();
+
+    // Trigger send code with invalid phone
+    fireEvent.click(screen.getByText('获取验证码'));
+    expect(document.querySelector('md-outlined-text-field[error-text="请输入正确的11位手机号码"]')).not.toBeNull();
+
+    // Enter valid phone and send code
+    simulateInput(phoneField, '13812345678');
+    fireEvent.click(screen.getByText('获取验证码'));
+
+    await waitFor(() => {
+      expect(sendCodeSpy).toHaveBeenCalledWith('13812345678', 'LOGIN');
+    });
+
+    // Enter 6-digit code and submit
+    simulateInput(codeField, '654321');
+    fireEvent.click(screen.getByText('下一步'));
+
+    await waitFor(() => {
+      expect(loginWithSmsSpy).toHaveBeenCalledWith('13812345678', '654321');
+    });
   });
 });
 

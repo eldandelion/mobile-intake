@@ -26,6 +26,12 @@ class AuthController(
         return ResponseEntity.ok(response)
     }
 
+    @PostMapping("/login-sms")
+    fun loginSms(@Valid @RequestBody request: LoginSmsRequest): ResponseEntity<AuthResponse> {
+        val response = authService.loginWithSms(request)
+        return ResponseEntity.ok(response)
+    }
+
     @PostMapping("/send-code")
     fun sendCode(@Valid @RequestBody request: SendCodeRequest): ResponseEntity<SendCodeResponse> {
         val response = authService.sendVerificationCode(request)

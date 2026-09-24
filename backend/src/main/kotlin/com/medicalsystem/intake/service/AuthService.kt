@@ -14,7 +14,8 @@ import org.springframework.transaction.annotation.Transactional
 class AuthService(
     private val studentRepository: IntakeStudentRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val jwtService: JwtService
+    private val jwtService: JwtService,
+    private val otpService: OtpService
 ) {
 
     @Transactional
@@ -81,38 +82,49 @@ class AuthService(
         )
     }
 
-    private val verificationCodes = java.util.concurrent.ConcurrentHashMap<String, Pair<String, Long>>()
-
-    private fun cleanExpiredCodes() {
-        val now = System.currentTimeMillis()
-        verificationCodes.entries.removeIf { it.value.second <= now }
-    }
-
     fun sendVerificationCode(request: SendCodeRequest): SendCodeResponse {
-        val phone = request.phone.trim()
-        cleanExpiredCodes()
-        val code = "123456" // Default test code; in production can be random 6-digits
-        val expiryTime = System.currentTimeMillis() + 5 * 60 * 1000 // 5 minutes
-        verificationCodes[phone] = Pair(code, expiryTime)
-        return SendCodeResponse(phone = phone, devCode = code, expiresInSeconds = 300)
+        val phoneVo = com.medicalsystem.intake.model.ChineseMobileNumber(request.phone)
+        val purpose = OtpPurpose.fromString(request.purpose)
+
+        if (purpose == OtpPurpose.LOGIN) {
+            if (!studentRepository.existsByPhone(phoneVo.normalized())) {
+                throw com.medicalsystem.intake.exception.NotFoundException("该手机号码尚未登记，请先创建账号")
+            }
+        } else if (purpose == OtpPurpose.REGISTRATION) {
+            if (studentRepository.existsByPhone(phoneVo.normalized())) {
+                throw ConflictException("该手机号码已被注册: ${phoneVo.normalized()}")
+            }
+        }
+
+        val outcome = otpService.sendOtp(phoneVo, purpose)
+        return SendCodeResponse(
+            phone = phoneVo.normalized(),
+            devCode = outcome.devCode,
+            expiresInSeconds = outcome.expiresInSeconds
+        )
     }
 
     fun verifyCode(request: VerifyCodeRequest): VerifyCodeResponse {
-        val phone = request.phone.trim()
-        val code = request.code.trim()
-        cleanExpiredCodes()
+        val phoneVo = com.medicalsystem.intake.model.ChineseMobileNumber(request.phone)
+        val purpose = OtpPurpose.fromString(request.purpose)
+        val isValid = otpService.verifyOtp(phoneVo, request.code, purpose, consume = false)
+        return VerifyCodeResponse(valid = isValid)
+    }
 
-        val cached = verificationCodes[phone]
-        if (cached != null && cached.first == code && cached.second > System.currentTimeMillis()) {
-            verificationCodes.remove(phone)
-            return VerifyCodeResponse(valid = true)
+    @Transactional(readOnly = true)
+    fun loginWithSms(request: LoginSmsRequest): AuthResponse {
+        val phoneVo = com.medicalsystem.intake.model.ChineseMobileNumber(request.phone)
+        otpService.verifyOtp(phoneVo, request.code, OtpPurpose.LOGIN, consume = true)
+
+        val student = studentRepository.findByPhone(phoneVo.normalized()).orElseThrow {
+            com.medicalsystem.intake.exception.NotFoundException("该手机号码尚未登记，请先创建账号")
         }
 
-        if (code == "123456") {
-            return VerifyCodeResponse(valid = true)
-        }
-
-        return VerifyCodeResponse(valid = false)
+        val token = jwtService.generateToken(student.studentNumber)
+        return AuthResponse(
+            token = token,
+            student = toDto(student)
+        )
     }
 
     fun toDto(entity: IntakeStudentEntity): StudentDto {
