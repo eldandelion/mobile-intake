@@ -10,4 +10,5 @@ interface ScaleSubmissionRepository : JpaRepository<ScaleSubmissionEntity, Long>
     fun findByStudentNumber(studentNumber: String): List<ScaleSubmissionEntity>
     fun findByStudentNumberAndScaleCode(studentNumber: String, scaleCode: String): Optional<ScaleSubmissionEntity>
     fun existsByStudentNumberAndScaleCode(studentNumber: String, scaleCode: String): Boolean
+    fun deleteByStudentNumber(studentNumber: String): Long
 }

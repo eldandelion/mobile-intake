@@ -16,17 +16,18 @@ class AdminExportController(
     private val adminSecret: String
 ) {
 
-    private fun verifySecret(headerSecret: String?) {
-        if (headerSecret == null || headerSecret != adminSecret) {
-            throw ForbiddenException("Invalid administrative export credentials")
-        }
+    private fun verifyAccess(headerSecret: String?, admin: com.medicalsystem.intake.security.AdminPrincipal?) {
+        if (admin != null) return
+        if (headerSecret != null && headerSecret == adminSecret) return
+        throw ForbiddenException("Invalid administrative export credentials")
     }
 
     @GetMapping("/students.csv")
     fun exportStudents(
-        @RequestHeader(name = "X-Admin-Secret", required = false) secret: String?
+        @RequestHeader(name = "X-Admin-Secret", required = false) secret: String?,
+        @com.medicalsystem.intake.security.CurrentAdmin(required = false) admin: com.medicalsystem.intake.security.AdminPrincipal?
     ): ResponseEntity<ByteArray> {
-        verifySecret(secret)
+        verifyAccess(secret, admin)
         val csvData = csvExportService.exportStudentsCsv()
 
         return ResponseEntity.ok()
@@ -37,14 +38,29 @@ class AdminExportController(
 
     @GetMapping("/assessments.csv")
     fun exportAssessments(
-        @RequestHeader(name = "X-Admin-Secret", required = false) secret: String?
+        @RequestHeader(name = "X-Admin-Secret", required = false) secret: String?,
+        @com.medicalsystem.intake.security.CurrentAdmin(required = false) admin: com.medicalsystem.intake.security.AdminPrincipal?
     ): ResponseEntity<ByteArray> {
-        verifySecret(secret)
+        verifyAccess(secret, admin)
         val csvData = csvExportService.exportAssessmentsCsv()
 
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"assessments.csv\"")
             .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
             .body(csvData)
+    }
+
+    @GetMapping("/package.zip")
+    fun exportPackage(
+        @RequestHeader(name = "X-Admin-Secret", required = false) secret: String?,
+        @com.medicalsystem.intake.security.CurrentAdmin(required = false) admin: com.medicalsystem.intake.security.AdminPrincipal?
+    ): ResponseEntity<ByteArray> {
+        verifyAccess(secret, admin)
+        val zipData = csvExportService.exportIntakeZip()
+
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"intake-package.zip\"")
+            .contentType(MediaType.parseMediaType("application/zip"))
+            .body(zipData)
     }
 }

@@ -116,6 +116,26 @@ class CsvExportService(
         return out.toByteArray()
     }
 
+    @Transactional(readOnly = true)
+    fun exportIntakeZip(): ByteArray {
+        val studentsCsv = exportStudentsCsv()
+        val assessmentsCsv = exportAssessmentsCsv()
+
+        val out = ByteArrayOutputStream()
+        java.util.zip.ZipOutputStream(out).use { zip ->
+            val studentEntry = java.util.zip.ZipEntry("students.csv")
+            zip.putNextEntry(studentEntry)
+            zip.write(studentsCsv)
+            zip.closeEntry()
+
+            val assessmentEntry = java.util.zip.ZipEntry("assessments.csv")
+            zip.putNextEntry(assessmentEntry)
+            zip.write(assessmentsCsv)
+            zip.closeEntry()
+        }
+        return out.toByteArray()
+    }
+
     internal fun escapeCsv(value: String): String {
         val sanitized = if (value.isNotEmpty() && value[0] in charArrayOf('=', '+', '-', '@', '\t', '\r')) {
             "'$value"

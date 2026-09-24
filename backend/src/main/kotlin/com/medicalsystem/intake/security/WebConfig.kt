@@ -7,11 +7,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
 class WebConfig(
-    private val currentStudentArgumentResolver: CurrentStudentArgumentResolver
+    private val currentStudentArgumentResolver: CurrentStudentArgumentResolver,
+    private val currentAdminArgumentResolver: CurrentAdminArgumentResolver
 ) : WebMvcConfigurer {
 
     override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {
         resolvers.add(currentStudentArgumentResolver)
+        resolvers.add(currentAdminArgumentResolver)
     }
 
     override fun addCorsMappings(registry: CorsRegistry) {

@@ -10,5 +10,6 @@ interface ScaleDraftRepository : JpaRepository<ScaleDraftEntity, Long> {
     fun findByStudentNumber(studentNumber: String): List<ScaleDraftEntity>
     fun findByStudentNumberAndScaleCode(studentNumber: String, scaleCode: String): Optional<ScaleDraftEntity>
     fun deleteByStudentNumberAndScaleCode(studentNumber: String, scaleCode: String): Long
+    fun deleteByStudentNumber(studentNumber: String): Long
     fun existsByStudentNumberAndScaleCode(studentNumber: String, scaleCode: String): Boolean
 }

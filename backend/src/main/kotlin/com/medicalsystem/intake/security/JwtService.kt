@@ -44,9 +44,46 @@ class JwtService(
                 .build()
                 .parseSignedClaims(token)
                 .payload
+            val type = claims["type"] as? String
+            if (type == "ADMIN") {
+                return null // Do not treat admin tokens as student credentials
+            }
             claims.subject
         } catch (e: Exception) {
             null
         }
     }
+
+    fun generateAdminToken(username: String = "admin"): String {
+        val now = Date()
+        val expiry = Date(now.time + validityMs)
+        return Jwts.builder()
+            .subject(username)
+            .claim("role", "ROLE_INTAKE_ADMIN")
+            .claim("type", "ADMIN")
+            .issuedAt(now)
+            .expiration(expiry)
+            .signWith(key)
+            .compact()
+    }
+
+    fun validateAndExtractAdmin(token: String): String? {
+        return try {
+            val claims = Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .payload
+            val role = claims["role"] as? String
+            val type = claims["type"] as? String
+            if (role == "ROLE_INTAKE_ADMIN" || type == "ADMIN") {
+                claims.subject ?: "admin"
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
 }
+
