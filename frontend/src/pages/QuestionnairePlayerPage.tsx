@@ -137,29 +137,44 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
   const menuAnchorRef = useRef<HTMLElement | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
-  const handleToggleMenu = () => {
-    setIsMenuOpen((prev) => {
-      const next = !prev;
-      if (menuRef.current) {
-        if (menuAnchorRef.current) {
-          menuRef.current.anchorElement = menuAnchorRef.current;
-        }
-        if (next) {
-          if (typeof menuRef.current.show === 'function') {
-            menuRef.current.show();
-          } else {
-            menuRef.current.open = true;
-          }
-        } else {
-          if (typeof menuRef.current.close === 'function') {
-            menuRef.current.close();
-          } else {
-            menuRef.current.open = false;
-          }
-        }
+  useEffect(() => {
+    const menuEl = menuRef.current as any;
+    if (!menuEl) return;
+    const handleClose = () => setIsMenuOpen(false);
+    menuEl.addEventListener('closed', handleClose);
+    menuEl.addEventListener('closing', handleClose);
+    return () => {
+      menuEl.removeEventListener('closed', handleClose);
+      menuEl.removeEventListener('closing', handleClose);
+    };
+  }, []);
+
+  const handleToggleMenu = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    const menuEl = menuRef.current as any;
+    if (menuEl) {
+      if (menuAnchorRef.current) {
+        menuEl.anchorElement = menuAnchorRef.current;
       }
-      return next;
-    });
+      const isCurrentlyOpen = Boolean(menuEl.open);
+      if (isCurrentlyOpen) {
+        if (typeof menuEl.close === 'function') {
+          menuEl.close();
+        } else {
+          menuEl.open = false;
+        }
+        setIsMenuOpen(false);
+      } else {
+        if (typeof menuEl.show === 'function') {
+          menuEl.show();
+        } else {
+          menuEl.open = true;
+        }
+        setIsMenuOpen(true);
+      }
+    } else {
+      setIsMenuOpen((prev) => !prev);
+    }
   };
 
   const handleOpenAboutTest = () => {
@@ -709,6 +724,8 @@ export const QuestionnairePlayerPage: React.FC<QuestionnairePlayerPageProps> = (
                 open={isMenuOpen}
                 anchor-corner="end-end"
                 menu-corner="start-end"
+                onclosed={() => setIsMenuOpen(false)}
+                onclosing={() => setIsMenuOpen(false)}
                 onClosed={() => setIsMenuOpen(false)}
                 style={{
                   minWidth: '160px',

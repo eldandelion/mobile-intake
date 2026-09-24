@@ -165,6 +165,10 @@ declare global {
         'default-focus'?: string;
         onClosed?: (e: any) => void;
         onOpened?: (e: any) => void;
+        onclosed?: (e: any) => void;
+        onclosing?: (e: any) => void;
+        onopened?: (e: any) => void;
+        onopening?: (e: any) => void;
       }, HTMLElement>;
       'md-menu-item': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
         disabled?: boolean;

@@ -1,4 +1,8 @@
 // Vitest Test Setup
+import { MotionGlobalConfig } from 'motion/react';
+
+MotionGlobalConfig.skipAnimations = true;
+
 const storageMock = (() => {
   let store: Record<string, string> = {};
   return {

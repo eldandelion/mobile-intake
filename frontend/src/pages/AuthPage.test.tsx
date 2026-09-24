@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { AuthPage } from './AuthPage';
 import { AuthProvider } from '../contexts/AuthContext';
+import { ThemeProvider } from '../contexts/ThemeContext';
 import { intakeApi } from '../api/intakeApi';
 
 // Helper to simulate input on Material Web custom elements in jsdom
@@ -70,10 +71,12 @@ describe('AuthPage', () => {
 
     // Click "创建账号" to enter registration sequence
     fireEvent.click(screen.getByText('创建账号'));
+    await waitFor(() => {
+      expect(screen.getByText('输入您的基本信息以建立新生档案')).toBeDefined();
+    });
 
     // Step 1 Header
     expect(screen.getByText('创建账号')).toBeDefined();
-    expect(screen.getByText('输入您的基本信息以建立新生档案')).toBeDefined();
     expect(document.querySelector('md-outlined-text-field[label="真实姓名"]')).not.toBeNull();
     expect(document.querySelector('md-outlined-text-field[label="学号"]')).not.toBeNull();
     expect(document.querySelector('md-outlined-text-field[label="手机号码"]')).not.toBeNull();
@@ -101,6 +104,9 @@ describe('AuthPage', () => {
     );
 
     fireEvent.click(screen.getByText('创建账号'));
+    await waitFor(() => {
+      expect(screen.getByText('输入您的基本信息以建立新生档案')).toBeDefined();
+    });
 
     // Fill Step 1
     const nameField = document.querySelector('md-outlined-text-field[label="真实姓名"]')!;
@@ -118,7 +124,9 @@ describe('AuthPage', () => {
     });
 
     // Step 2 Screen
-    expect(screen.getByText('验证手机号码')).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getByText('验证手机号码')).toBeDefined();
+    });
     expect(screen.getByText('13800138000')).toBeDefined();
     expect(document.querySelector('md-outlined-text-field[label="6 位短信验证码"]')).not.toBeNull();
 
@@ -126,7 +134,9 @@ describe('AuthPage', () => {
     fireEvent.click(screen.getByText('修改号码'));
 
     // Should return to Step 1 with preserved values
-    expect(screen.getByText('输入您的基本信息以建立新生档案')).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getByText('输入您的基本信息以建立新生档案')).toBeDefined();
+    });
     expect(document.querySelector('md-outlined-text-field[label="真实姓名"]')?.getAttribute('value')).toBe('李四');
   });
 
@@ -147,6 +157,9 @@ describe('AuthPage', () => {
     );
 
     fireEvent.click(screen.getByText('创建账号'));
+    await waitFor(() => {
+      expect(screen.getByText('输入您的基本信息以建立新生档案')).toBeDefined();
+    });
 
     // Step 1
     simulateInput(document.querySelector('md-outlined-text-field[label="真实姓名"]')!, '王五');
@@ -168,7 +181,9 @@ describe('AuthPage', () => {
     });
 
     // Step 3 Screen
-    expect(screen.getByText('创建安全密码')).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getByText('创建安全密码')).toBeDefined();
+    });
 
     const pwdField = document.querySelector('md-outlined-text-field[label="登录密码"]')!;
     const confirmPwdField = document.querySelector('md-outlined-text-field[label="确认密码"]')!;
@@ -196,11 +211,15 @@ describe('AuthPage', () => {
 
     // From Login -> Step 1
     fireEvent.click(screen.getByText('创建账号'));
-    expect(screen.getByText('输入您的基本信息以建立新生档案')).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getByText('输入您的基本信息以建立新生档案')).toBeDefined();
+    });
 
     // From Step 1 -> "改为登录" back to Login
     fireEvent.click(screen.getByText('改为登录'));
-    expect(screen.getByText('使用您的中南大学学号以继续心理普查')).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getByText('使用您的中南大学学号以继续心理普查')).toBeDefined();
+    });
   });
 
   it('translates "Invalid credentials" and displays it in a bottom snackbar instead of inline line', async () => {
@@ -265,6 +284,9 @@ describe('AuthPage', () => {
     );
 
     fireEvent.click(screen.getByText('创建账号'));
+    await waitFor(() => {
+      expect(screen.getByText('输入您的基本信息以建立新生档案')).toBeDefined();
+    });
 
     const nameField = document.querySelector('md-outlined-text-field[label="真实姓名"]')!;
     const numField = document.querySelector('md-outlined-text-field[label="学号"]')!;
@@ -400,6 +422,9 @@ describe('AuthPage', () => {
     );
 
     fireEvent.click(screen.getByText('创建账号'));
+    await waitFor(() => {
+      expect(screen.getByText('输入您的基本信息以建立新生档案')).toBeDefined();
+    });
 
     simulateInput(document.querySelector('md-outlined-text-field[label="真实姓名"]')!, '张三');
     simulateInput(document.querySelector('md-outlined-text-field[label="学号"]')!, '2026001001');
@@ -418,7 +443,9 @@ describe('AuthPage', () => {
     fireEvent.click(screen.getByText('前往登录'));
 
     // Should switch to password login with student number prefilled
-    expect(screen.getByText('使用您的中南大学学号以继续心理普查')).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getByText('使用您的中南大学学号以继续心理普查')).toBeDefined();
+    });
     expect(
       document.querySelector('md-outlined-text-field[label="学号"]')?.getAttribute('value')
     ).toBe('2026001001');
@@ -434,6 +461,9 @@ describe('AuthPage', () => {
     );
 
     fireEvent.click(screen.getByText('创建账号'));
+    await waitFor(() => {
+      expect(screen.getByText('输入您的基本信息以建立新生档案')).toBeDefined();
+    });
 
     simulateInput(document.querySelector('md-outlined-text-field[label="真实姓名"]')!, '张三');
     simulateInput(document.querySelector('md-outlined-text-field[label="学号"]')!, '2026001001');
@@ -452,10 +482,168 @@ describe('AuthPage', () => {
     fireEvent.click(screen.getByText('前往登录'));
 
     // Should switch to SMS login with phone number prefilled
-    expect(screen.getByText('输入已登记手机号码及短信验证码快捷登录')).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getByText('输入已登记手机号码及短信验证码快捷登录')).toBeDefined();
+    });
     expect(
       document.querySelector('md-outlined-text-field[label="手机号码"]')?.getAttribute('value')
     ).toBe('13800112233');
+  });
+
+  it('renders indeterminate linear progress bar and locks inputs and buttons during network requests with static button copy', async () => {
+    let resolveLogin: (val: any) => void;
+    const loginPromise = new Promise((resolve) => {
+      resolveLogin = resolve;
+    });
+    vi.spyOn(intakeApi, 'login').mockReturnValue(loginPromise as any);
+
+    render(
+      <AuthProvider>
+        <AuthPage />
+      </AuthProvider>
+    );
+
+    const numField = document.querySelector('md-outlined-text-field[label="学号"]')!;
+    const pwdField = document.querySelector('md-outlined-text-field[label="登录密码"]')!;
+
+    simulateInput(numField, '8209220532');
+    simulateInput(pwdField, 'password123');
+
+    // Before submit: no progress bar, fields enabled
+    expect(document.querySelector('md-linear-progress')).toBeNull();
+    expect(numField.hasAttribute('disabled')).toBe(false);
+
+    // Submit
+    const nextBtn = screen.getByText('下一步');
+    fireEvent.click(nextBtn);
+
+    // During network request: linear progress is visible
+    await waitFor(() => {
+      expect(document.querySelector('md-linear-progress')).not.toBeNull();
+    });
+
+    // Inputs and buttons must be disabled
+    expect(numField.hasAttribute('disabled')).toBe(true);
+    expect(pwdField.hasAttribute('disabled')).toBe(true);
+    expect(nextBtn.closest('md-filled-button')?.hasAttribute('disabled')).toBe(true);
+
+    // Button label MUST remain static ("下一步", not "登录中..." or "加载中...")
+    expect(screen.getByText('下一步')).toBeDefined();
+
+    // Resolve network call
+    await act(async () => {
+      resolveLogin({
+        token: 'token-123',
+        student: { studentNumber: '8209220532', fullName: '测试', phone: '13800000000', registeredAt: '' },
+      });
+    });
+
+    // After completion, progress bar is removed
+    await waitFor(() => {
+      expect(document.querySelector('md-linear-progress')).toBeNull();
+    });
+  });
+
+  it('renders verification code button directly inside trailing-icon slot of text field with matching height', async () => {
+    render(
+      <AuthProvider>
+        <AuthPage />
+      </AuthProvider>
+    );
+
+    // Switch to SMS login
+    fireEvent.click(screen.getByText('手机验证码'));
+
+    const smsCodeField = document.querySelector('md-outlined-text-field[label="6 位验证码"]')!;
+    expect(smsCodeField).not.toBeNull();
+
+    // Verify trailing-icon slot button exists inside the text field
+    const trailingBtn = smsCodeField.querySelector('button[slot="trailing-icon"]') as HTMLButtonElement;
+    expect(trailingBtn).not.toBeNull();
+    expect(trailingBtn?.textContent).toContain('获取验证码');
+
+    // Verify the trailing button has matching height class (h-10 min-h-[40px])
+    expect(trailingBtn.className).toContain('h-10');
+    expect(trailingBtn.className).toContain('min-h-[40px]');
+
+    // Verify field does NOT blow up with 84px trailing icon size
+    expect(smsCodeField.getAttribute('style') || '').not.toContain('84px');
+
+    // Verify trailing padding matches input field start padding
+    expect(smsCodeField.getAttribute('style')).toContain('--md-outlined-text-field-with-trailing-icon-trailing-space: 6px');
+    expect(trailingBtn.className).toContain('px-2.5');
+  });
+
+  it('renders Google-style theme switcher with Material Design menu and toggles between light and dark modes', async () => {
+    render(
+      <ThemeProvider>
+        <AuthProvider>
+          <AuthPage />
+        </AuthProvider>
+      </ThemeProvider>
+    );
+
+    const themeButton = screen.getByLabelText('选择界面外观主题');
+    expect(themeButton).toBeDefined();
+    expect(themeButton.textContent).toContain('浅色模式');
+
+    const themeMenu = document.querySelector('md-menu#theme-menu');
+    expect(themeMenu).not.toBeNull();
+
+    // Verify menu items for light and dark modes exist
+    const menuItems = document.querySelectorAll('md-menu-item');
+    expect(menuItems.length).toBe(2);
+
+    // Click dark mode menu item
+    const darkMenuItem = Array.from(menuItems).find(item => item.textContent?.includes('深色模式'))!;
+    expect(darkMenuItem).toBeDefined();
+    fireEvent.click(darkMenuItem);
+
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+    expect(localStorage.getItem('app-theme')).toBe('dark');
+    expect(themeButton.textContent).toContain('深色模式');
+
+    // Click light mode menu item
+    const lightMenuItem = Array.from(menuItems).find(item => item.textContent?.includes('浅色模式'))!;
+    fireEvent.click(lightMenuItem);
+
+    expect(document.documentElement.classList.contains('light')).toBe(true);
+    expect(localStorage.getItem('app-theme')).toBe('light');
+    expect(themeButton.textContent).toContain('浅色模式');
+
+    // Verify university branding is rendered on the same line in the footer
+    const footerContainer = themeButton.closest('div.justify-between');
+    expect(footerContainer).not.toBeNull();
+    expect(footerContainer?.textContent).toContain('中南大学');
+    expect(footerContainer?.textContent).toContain('心理普查');
+  });
+
+  it('prevents double-click bug by reopening theme menu on a single click after outside dismissal', async () => {
+    render(
+      <ThemeProvider>
+        <AuthProvider>
+          <AuthPage />
+        </AuthProvider>
+      </ThemeProvider>
+    );
+
+    const themeButton = screen.getByLabelText('选择界面外观主题');
+    const themeMenu = document.querySelector('md-menu#theme-menu') as any;
+    expect(themeMenu).not.toBeNull();
+
+    // 1st click: opens menu
+    fireEvent.click(themeButton);
+    expect(themeButton.getAttribute('aria-expanded')).toBe('true');
+
+    // Simulate menu closing via outside click / native closed event
+    fireEvent(themeMenu, new Event('closed'));
+
+    // State should be immediately synchronized to closed
+    expect(themeButton.getAttribute('aria-expanded')).toBe('false');
+
+    // Single click after outside dismissal must immediately open the menu (no double-click needed)
+    fireEvent.click(themeButton);
+    expect(themeButton.getAttribute('aria-expanded')).toBe('true');
   });
 });
 
