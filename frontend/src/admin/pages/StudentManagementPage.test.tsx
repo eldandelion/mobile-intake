@@ -141,9 +141,18 @@ describe('StudentManagementPage', () => {
     const resetButtons = screen.getAllByTitle('重置密码');
     fireEvent.click(resetButtons[0]);
 
-    // Dialog should open
+    // Step 1: Input Dialog should open
     await waitFor(() => {
       expect(screen.getByText('重置学生密码')).toBeDefined();
+    });
+
+    // Click 下一步 to enter Step 2: Confirmation
+    const nextBtn = screen.getByRole('button', { name: /下一步/i });
+    fireEvent.click(nextBtn);
+
+    // Step 2: Confirmation dialog should open
+    await waitFor(() => {
+      expect(screen.getByText('确认重置密码？')).toBeDefined();
     });
 
     const confirmBtn = screen.getByRole('button', { name: /确认重置/i });

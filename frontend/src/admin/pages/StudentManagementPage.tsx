@@ -19,6 +19,9 @@ interface StudentManagementPageProps {
   isSidePanelOpen: boolean;
   setIsSidePanelOpen: (open: boolean) => void;
   setIsSidePanelLoading?: (loading: boolean) => void;
+  onResetPassword?: (studentNumber: string, studentName?: string) => void;
+  onDeleteStudent?: (studentNumber: string, name: string) => void;
+  refreshKey?: number;
 }
 
 export function StudentManagementPage({
@@ -28,6 +31,9 @@ export function StudentManagementPage({
   isSidePanelOpen,
   setIsSidePanelOpen,
   setIsSidePanelLoading,
+  onResetPassword,
+  onDeleteStudent,
+  refreshKey,
 }: StudentManagementPageProps) {
   const [students, setStudents] = useState<AdminStudentSummaryDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,10 +45,11 @@ export function StudentManagementPage({
   // Exporting state
   const [exporting, setExporting] = useState(false);
 
-  // Dialog states
-  const [resetTargetNumber, setResetTargetNumber] = useState<string | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<{ number: string; name: string } | null>(null);
+  // Local dialog states (used when callbacks are not provided, e.g. standalone test runs)
+  const [localResetTarget, setLocalResetTarget] = useState<{ number: string; name?: string } | null>(null);
+  const [localDeleteTarget, setLocalDeleteTarget] = useState<{ number: string; name: string } | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const fetchStudents = (query?: string) => {
     setLoading(true);
@@ -55,7 +62,7 @@ export function StudentManagementPage({
 
   useEffect(() => {
     fetchStudents(searchQuery);
-  }, [searchQuery]);
+  }, [searchQuery, refreshKey]);
 
   const filteredStudents = useMemo(() => {
     let result = students;
@@ -97,7 +104,8 @@ export function StudentManagementPage({
       setFeedbackMessage(res.message);
       setTimeout(() => setFeedbackMessage(null), 4000);
     } catch (err: any) {
-      alert(err.message || '重置密码失败');
+      setErrorMessage(err.message || '重置密码失败');
+      setTimeout(() => setErrorMessage(null), 4000);
     }
   };
 
@@ -112,7 +120,8 @@ export function StudentManagementPage({
       }
       fetchStudents(searchQuery);
     } catch (err: any) {
-      alert(err.message || '删除学生失败');
+      setErrorMessage(err.message || '删除学生失败');
+      setTimeout(() => setErrorMessage(null), 4000);
     }
   };
 
@@ -123,7 +132,8 @@ export function StudentManagementPage({
       setFeedbackMessage(`已成功导出 ${filename}`);
       setTimeout(() => setFeedbackMessage(null), 4000);
     } catch (err: any) {
-      alert(err.message || '导出失败');
+      setErrorMessage(err.message || '导出失败');
+      setTimeout(() => setErrorMessage(null), 4000);
     } finally {
       setExporting(false);
     }
@@ -161,31 +171,29 @@ export function StudentManagementPage({
     },
     {
       key: 'registeredAt',
-      label: '登记时间',
+      label: '报到注册时间',
       width: 'w-[20%]',
       render: (item) => (
         <span className="text-[13px] opacity-70">{item.registeredAt}</span>
       ),
     },
     {
-      key: 'scaleStatuses',
-      label: '普查填报进展',
+      key: 'allCompleted',
+      label: '测评填报状态',
       width: 'w-[20%]',
       render: (item) => {
-        const completed = item.scaleStatuses.filter((s) => s.status === 'COMPLETED').length;
-        const total = item.scaleStatuses.length;
-        const isAll = item.allCompleted;
-
+        const completedCount = item.scaleStatuses?.filter((s) => s.status === 'COMPLETED').length || 0;
+        const totalCount = item.scaleStatuses?.length || 2;
         return (
           <div className="flex items-center gap-2">
             <span
-              className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                isAll
+              className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                item.allCompleted
                   ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
                   : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
               }`}
             >
-              {isAll ? '已全完成' : `进行中 (${completed}/${total})`}
+              {item.allCompleted ? '已全完成' : `填报中 (${completedCount}/${totalCount})`}
             </span>
           </div>
         );
@@ -199,7 +207,13 @@ export function StudentManagementPage({
         <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
-            onClick={() => setResetTargetNumber(item.studentNumber)}
+            onClick={() => {
+              if (onResetPassword) {
+                onResetPassword(item.studentNumber, item.fullName);
+              } else {
+                setLocalResetTarget({ number: item.studentNumber, name: item.fullName });
+              }
+            }}
             title="重置密码"
             className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--md-sys-color-on-surface-variant)] hover:bg-[var(--md-sys-color-surface-container-high)] cursor-pointer"
           >
@@ -207,14 +221,18 @@ export function StudentManagementPage({
           </button>
           <button
             type="button"
-            onClick={() =>
-              setDeleteTarget({
-                number: item.studentNumber,
-                name: item.fullName,
-              })
-            }
+            onClick={() => {
+              if (onDeleteStudent) {
+                onDeleteStudent(item.studentNumber, item.fullName);
+              } else {
+                setLocalDeleteTarget({
+                  number: item.studentNumber,
+                  name: item.fullName,
+                });
+              }
+            }}
             title="删除测试账号"
-            className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--md-sys-color-error)] hover:bg-[var(--md-sys-color-error-container)]/30 cursor-pointer"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--md-sys-color-on-surface-variant)] hover:bg-[var(--md-sys-color-surface-container-high)] cursor-pointer"
           >
             <span className="material-symbols-outlined text-base">delete</span>
           </button>
@@ -231,13 +249,20 @@ export function StudentManagementPage({
       />
 
       {feedbackMessage && (
-        <div className="mx-6 mt-4 p-3.5 rounded-2xl bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200 text-xs flex items-center gap-2">
+        <div className="mx-6 mt-4 p-3.5 rounded-2xl bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200 text-xs flex items-center gap-2 animate-in fade-in duration-150">
           <span className="material-symbols-outlined text-base">check_circle</span>
           <span>{feedbackMessage}</span>
         </div>
       )}
 
-      {/* Filter & Actions Bar matching medical-system StudentsView */}
+      {errorMessage && (
+        <div className="mx-6 mt-4 p-3.5 rounded-2xl bg-rose-100 text-rose-900 dark:bg-rose-950 dark:text-rose-200 text-xs flex items-center gap-2 animate-in fade-in duration-150">
+          <span className="material-symbols-outlined text-base">error</span>
+          <span>{errorMessage}</span>
+        </div>
+      )}
+
+      {/* Action Toolbar */}
       <div className="shrink-0 z-20 bg-[var(--md-sys-color-surface)] pb-2 pt-4 px-6 flex items-center justify-between gap-4 mb-6">
         {/* Left: Filter Chips + ExpandableSearchBar matching medical-system */}
         <FilterChipSet
@@ -260,38 +285,41 @@ export function StudentManagementPage({
           />
         </FilterChipSet>
 
-        {/* Right: Material Design 3 SplitButton matching medical-system */}
-        <SplitButton
-          icon={exporting ? 'progress_activity' : 'download'}
-          label={exporting ? '正在导出...' : '导出数据'}
-          disabled={exporting}
-          onClick={() => handleExport('zip', 'intake-package.zip')}
-          options={[
-            {
-              label: '完整普查数据包 (.zip)',
-              icon: 'folder_zip',
-              onClick: () => handleExport('zip', 'intake-package.zip'),
-            },
-            {
-              label: '学生档案 (students.csv)',
-              icon: 'table_chart',
-              onClick: () => handleExport('students', 'students.csv'),
-            },
-            {
-              label: '原始作答记录 (assessments.csv)',
-              icon: 'fact_check',
-              onClick: () => handleExport('assessments', 'assessments.csv'),
-            },
-          ]}
-        />
+        {/* Right: Material Design 3 SplitButton */}
+        <div className="flex items-center gap-3">
+
+          <SplitButton
+            label="导出数据"
+            icon="download"
+            disabled={exporting}
+            onClick={() => handleExport('zip', 'intake-package.zip')}
+            options={[
+              {
+                label: '完整普查数据包 (.zip)',
+                icon: 'folder_zip',
+                onClick: () => handleExport('zip', 'intake-package.zip'),
+              },
+              {
+                label: '学生档案 (students.csv)',
+                icon: 'badge',
+                onClick: () => handleExport('students', 'students.csv'),
+              },
+              {
+                label: '原始作答记录 (assessments.csv)',
+                icon: 'fact_check',
+                onClick: () => handleExport('assessments', 'assessments.csv'),
+              },
+            ]}
+          />
+        </div>
       </div>
 
-      {/* Main Table Content using medical-system DataTable */}
+      {/* Main Table Area */}
       <div className="flex-1 min-h-0 relative overflow-hidden">
         {loading && students.length === 0 ? (
-          <div className="h-64 flex flex-col items-center justify-center text-[var(--md-sys-color-on-surface-variant)] gap-3">
+          <div className="h-64 flex flex-col items-center justify-center gap-2 text-[var(--md-sys-color-on-surface-variant)]">
             <md-circular-progress indeterminate></md-circular-progress>
-            <span className="text-xs">加载学生普查记录中...</span>
+            <span className="text-xs">加载学生档案中...</span>
           </div>
         ) : filteredStudents.length === 0 ? (
           <div className="h-64 flex flex-col items-center justify-center text-[var(--md-sys-color-on-surface-variant)] gap-2">
@@ -308,23 +336,24 @@ export function StudentManagementPage({
         )}
       </div>
 
-      {/* Reset Password Dialog */}
-      {resetTargetNumber && (
+      {/* Local Reset Password Dialog (Two-step Material Design confirmation) */}
+      {localResetTarget && (
         <ResetPasswordDialog
-          isOpen={!!resetTargetNumber}
-          studentNumber={resetTargetNumber}
-          onClose={() => setResetTargetNumber(null)}
+          isOpen={!!localResetTarget}
+          studentNumber={localResetTarget.number}
+          studentName={localResetTarget.name}
+          onClose={() => setLocalResetTarget(null)}
           onConfirm={handleConfirmResetPassword}
         />
       )}
 
-      {/* Delete Student Dialog */}
-      {deleteTarget && (
+      {/* Local Delete Student Dialog (Material Design confirmation) */}
+      {localDeleteTarget && (
         <DeleteStudentDialog
-          isOpen={!!deleteTarget}
-          studentNumber={deleteTarget.number}
-          studentName={deleteTarget.name}
-          onClose={() => setDeleteTarget(null)}
+          isOpen={!!localDeleteTarget}
+          studentNumber={localDeleteTarget.number}
+          studentName={localDeleteTarget.name}
+          onClose={() => setLocalDeleteTarget(null)}
           onConfirm={handleConfirmDeleteStudent}
         />
       )}

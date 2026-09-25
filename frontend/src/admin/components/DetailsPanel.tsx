@@ -1,20 +1,197 @@
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { AdminStudentDetailDto } from '../api/adminApi';
 import { FullScreenView } from './FullScreenView';
+import { OutlinedButton } from '../../components/common/Buttons';
+import { DestructiveButton } from '../../components/common/DestructiveButton';
+
+interface DetailsContextType {
+  isFullScreen: boolean;
+  titleOverride?: string | null;
+  setTitleOverride?: (title: string | null) => void;
+}
+
+export const DetailsContext = React.createContext<DetailsContextType>({
+  isFullScreen: false,
+});
+
+export const useDetails = () => React.useContext(DetailsContext);
 
 interface DetailsPanelProps {
   isOpen: boolean;
   onClose: () => void;
   student: AdminStudentDetailDto | null;
   loading?: boolean;
-  onResetPassword?: (studentNumber: string) => void;
+  onResetPassword?: (studentNumber: string, studentName?: string) => void;
   onDeleteStudent?: (studentNumber: string, name: string) => void;
   width?: number | string;
 }
 
 /**
+ * Hook to manage scroll collapsing state for detail view headers matching medical-system.
+ */
+export function useScrollCollapse(threshold = 20) {
+  const [isScrolled, setIsScrolled] = React.useState(false);
+
+  const handleScroll = React.useCallback((e: React.UIEvent<HTMLElement>) => {
+    setIsScrolled(e.currentTarget.scrollTop > threshold);
+  }, [threshold]);
+
+  return { isScrolled, handleScroll, setIsScrolled };
+}
+
+interface CollapsibleHeaderProps {
+  visible: boolean;
+  children: React.ReactNode;
+  className?: string;
+  onWheel?: React.WheelEventHandler<HTMLDivElement>;
+}
+
+/**
+ * Reusable motion wrapper to animate header collapse on scroll matching medical-system.
+ */
+export function CollapsibleHeader({
+  visible,
+  children,
+  className = '',
+  onWheel,
+}: CollapsibleHeaderProps) {
+  return (
+    <AnimatePresence initial={false}>
+      {visible && (
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: 'auto', opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.3, ease: 'easeInOut' }}
+          className={`overflow-hidden origin-top shrink-0 ${className}`}
+          onWheel={onWheel}
+          data-testid="collapsible-header"
+        >
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+interface ScrollableDetailsLayoutProps {
+  header?: React.ReactNode;
+  tabs?: React.ReactNode;
+  footer?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+  title?: string;
+}
+
+/**
+ * Reusable details view layout that handles standard scroll-to-collapse header interactions,
+ * sticky tab items with scroll-based shadows, fixed action footers, and minimum tab content heights.
+ * Header and content are unified in a single continuous scroll stream matching medical-system,
+ * so the header scrolls out of view first before content reaches the top, with zero visual overlap.
+ * Automatically synchronizes the scroll title with the outer details shell.
+ */
+export function ScrollableDetailsLayout({
+  header,
+  tabs,
+  footer,
+  children,
+  className = '',
+  title,
+}: ScrollableDetailsLayoutProps) {
+  const { isScrolled, handleScroll } = useScrollCollapse(20);
+  const { setTitleOverride } = React.useContext(DetailsContext);
+
+  React.useEffect(() => {
+    if (setTitleOverride) {
+      if (isScrolled && title) {
+        setTitleOverride(title);
+      } else {
+        setTitleOverride(null);
+      }
+    }
+  }, [isScrolled, title, setTitleOverride]);
+
+  return (
+    <div className={`flex flex-col h-full bg-[var(--md-sys-color-surface)] relative overflow-hidden ${className}`}>
+      <div
+        className="flex-1 overflow-y-auto custom-scrollbar overflow-x-hidden relative"
+        onScroll={handleScroll}
+        data-testid="details-scroll-container"
+      >
+        {/* Header Section: Leads the scroll stream so it moves out of view first before content passes the top */}
+        {header && (
+          <div className="p-6 pb-6 flex flex-col gap-5 shrink-0" data-testid="details-header-section">
+            {header}
+          </div>
+        )}
+
+        {/* Sticky Tabs / Bar if present */}
+        {tabs && (
+          <div
+            className={`sticky top-0 z-20 bg-[var(--md-sys-color-surface)] transition-shadow duration-200 ${
+              isScrolled ? 'shadow-sm' : ''
+            }`}
+          >
+            {tabs}
+          </div>
+        )}
+
+        {/* Main Content Area */}
+        <div className="flex-1 px-6 pb-8 min-h-[75vh]">
+          {children}
+        </div>
+      </div>
+
+      {/* Fixed Action Footer */}
+      {footer}
+    </div>
+  );
+}
+
+/**
+ * Fixed Action Footer matching medical-system
+ * Pinned at the bottom of the details view, and portals to fullscreen header in full-screen mode.
+ */
+export function ActionFooter({
+  children,
+  isFullScreen = false,
+}: {
+  children: React.ReactNode;
+  isFullScreen?: boolean;
+}) {
+  const [portalTarget, setPortalTarget] = React.useState<HTMLElement | null>(null);
+
+  React.useEffect(() => {
+    if (isFullScreen) {
+      setPortalTarget(document.getElementById('fullscreen-header-actions'));
+    }
+  }, [isFullScreen]);
+
+  if (isFullScreen && portalTarget) {
+    return createPortal(
+      <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-4 duration-300">
+        {children}
+      </div>,
+      portalTarget
+    );
+  }
+
+  if (isFullScreen) return null;
+
+  return (
+    <div className="action-footer-anchor p-4 bg-[var(--md-sys-color-surface-container-high)] shrink-0 overflow-hidden">
+      <div className="flex flex-row items-center justify-start gap-2 w-fit">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/**
  * Helper component for sections inside the DetailsPanel matching medical-system
+ * Borderless design without horizontal separation lines.
  */
 export function DetailsSection({
   title,
@@ -28,15 +205,17 @@ export function DetailsSection({
   className?: string;
 }) {
   return (
-    <div
-      className={`flex flex-col gap-4 border-t border-[var(--md-sys-color-outline-variant)] border-opacity-30 pt-0 mt-6 first:border-0 first:pt-0 first:mt-0 ${className}`}
-    >
+    <div className={`flex flex-col gap-3.5 ${className}`}>
       {title && (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           {icon && (
-            <span className="material-symbols-outlined text-[var(--md-sys-color-on-surface)]">{icon}</span>
+            <span className="material-symbols-outlined text-[20px] text-[var(--md-sys-color-on-surface)]">
+              {icon}
+            </span>
           )}
-          <h3 className="text-[18px] font-medium text-[var(--md-sys-color-on-surface)]">{title}</h3>
+          <h3 className="text-[16px] font-medium text-[var(--md-sys-color-on-surface)] tracking-tight">
+            {title}
+          </h3>
         </div>
       )}
       {children}
@@ -77,6 +256,13 @@ export function DetailMetricCard({
   );
 }
 
+const getItemCornerRadius = (index: number, total: number): string => {
+  if (total <= 1) return 'rounded-[20px]';
+  if (index === 0) return 'rounded-t-[20px] rounded-b-[4px]';
+  if (index === total - 1) return 'rounded-t-[4px] rounded-b-[20px]';
+  return 'rounded-[4px]';
+};
+
 export function DetailsPanel({
   isOpen,
   onClose,
@@ -87,10 +273,12 @@ export function DetailsPanel({
   width = 380,
 }: DetailsPanelProps) {
   const [isExpanded, setIsExpanded] = React.useState(false);
+  const [titleOverride, setTitleOverride] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (!isOpen) {
       setIsExpanded(false);
+      setTitleOverride(null);
     }
   }, [isOpen]);
 
@@ -108,28 +296,39 @@ export function DetailsPanel({
   const completedCount = student?.scaleStatuses?.filter((s) => s.status === 'COMPLETED').length || 0;
   const totalScales = student?.scaleStatuses?.length || 0;
 
-  const panelContent = (
-    <div className="flex flex-col gap-5 p-4 sm:p-6">
-      {/* Header Info Banner */}
-      <div className="flex items-center gap-4 p-4 rounded-2xl bg-[var(--md-sys-color-surface-container-low)]">
-        <div className="w-14 h-14 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] flex items-center justify-center font-bold text-xl shrink-0">
-          {student?.fullName?.[0] || '学'}
+  const studentHeader = (
+    <div className="flex items-center justify-between gap-4 flex-nowrap overflow-hidden">
+      <div className="flex items-center gap-4 min-w-0">
+        {/* Primary Anchor: First Letter Avatar */}
+        <div className="w-16 h-16 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] flex items-center justify-center text-3xl font-medium shrink-0 animate-in fade-in zoom-in duration-300">
+          {student?.fullName ? student.fullName.charAt(0) : '学'}
         </div>
-        <div className="flex flex-col min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold text-[var(--md-sys-color-on-surface)] truncate">
-              {student?.fullName || '学生姓名'}
-            </h2>
-            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)] shrink-0">
-              {completedCount === totalScales && totalScales > 0 ? '全部完成' : '测评进行中'}
+        <div className="flex flex-col gap-1 min-w-0">
+          <h1 className="text-[24px] font-medium leading-[32px] text-[var(--md-sys-color-on-surface)] tracking-tight truncate">
+            {student?.fullName || '学生姓名'}
+          </h1>
+          <div className="flex items-center gap-x-2 gap-y-1 text-[14px] text-[var(--md-sys-color-on-surface-variant)] flex-wrap">
+            <span className="font-mono text-[13px] tracking-tight text-[var(--md-sys-color-primary)] font-bold">
+              {student?.studentNumber || '未登记'}
             </span>
+            <span className="opacity-40 shrink-0">•</span>
+            <div
+              className={`px-2.5 py-0.5 rounded-full flex items-center gap-1 font-bold text-[11px] shrink-0 whitespace-nowrap ${
+                completedCount === totalScales && totalScales > 0
+                  ? 'bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)]'
+                  : 'bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-on-surface-variant)]'
+              }`}
+            >
+              {completedCount === totalScales && totalScales > 0 ? '全部完成' : '测评进行中'}
+            </div>
           </div>
-          <p className="text-xs font-mono text-[var(--md-sys-color-on-surface-variant)] mt-0.5 truncate">
-            学号: {student?.studentNumber} · 电话: {student?.phone}
-          </p>
         </div>
       </div>
+    </div>
+  );
 
+  const mainBodyContent = (
+    <div className="flex flex-col gap-6 pt-1">
       {/* Demographics Section */}
       <DetailsSection title="学生基本档案 (ACL)" icon="badge">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -148,68 +347,62 @@ export function DetailsPanel({
 
       {/* Psychological Scale Response Progress */}
       <DetailsSection title="问卷测评填报动态" icon="fact_check">
-        <div className="flex flex-col gap-2">
-          {student?.scaleStatuses?.map((scale) => {
+        <div className="flex flex-col gap-[2px]">
+          {student?.scaleStatuses?.map((scale, index) => {
             const isCompleted = scale.status === 'COMPLETED';
             const isInProgress = scale.status === 'IN_PROGRESS';
+            const total = student.scaleStatuses.length;
+            const cornerRadius = getItemCornerRadius(index, total);
 
             return (
               <div
                 key={scale.scaleCode}
-                className="p-3.5 rounded-2xl bg-[var(--md-sys-color-surface-container-low)] flex items-center justify-between gap-3"
+                className={`px-4 py-3.5 bg-[var(--md-sys-color-surface-container-low)] flex items-center justify-between gap-3 min-h-[52px] ${cornerRadius}`}
               >
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-xs font-bold text-[var(--md-sys-color-on-surface)] truncate">
-                    {scale.title}
-                  </span>
-                  <span className="text-[10px] font-mono text-[var(--md-sys-color-on-surface-variant)] mt-0.5">
-                    {scale.scaleCode}
-                  </span>
-                </div>
+                <span className="text-[14px] font-medium text-[var(--md-sys-color-on-surface)] truncate">
+                  {scale.title}
+                </span>
 
                 <div className="flex items-center gap-2 shrink-0">
-                  <span
-                    className={`px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1 ${
-                      isCompleted
-                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                        : isInProgress
-                        ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                        : 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300'
-                    }`}
-                  >
-                    <span className="material-symbols-outlined text-xs">
-                      {isCompleted ? 'check_circle' : isInProgress ? 'pending' : 'radio_button_unchecked'}
+                  {isCompleted ? (
+                    <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                      <span className="material-symbols-outlined text-xs">check_circle</span>
+                      <span>已完成提交</span>
                     </span>
-                    <span>{isCompleted ? '已完成提交' : isInProgress ? '正在作答' : '未开始'}</span>
-                  </span>
+                  ) : isInProgress ? (
+                    <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1 bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                      <span className="material-symbols-outlined text-xs">pending</span>
+                      <span>正在作答</span>
+                    </span>
+                  ) : (
+                    <span className="text-[12px] text-[var(--md-sys-color-on-surface-variant)] opacity-70 font-normal pr-1">
+                      未开始
+                    </span>
+                  )}
                 </div>
               </div>
             );
           })}
         </div>
       </DetailsSection>
-
-      {/* Account Governance Actions */}
-      <DetailsSection title="账号运维操作" icon="manage_accounts">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => student && onResetPassword?.(student.studentNumber)}
-            className="flex-1 h-10 px-4 rounded-full border border-[var(--md-sys-color-primary)] text-[var(--md-sys-color-primary)] text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-[var(--md-sys-color-primary)]/10 cursor-pointer transition-colors"
-          >
-            <span className="material-symbols-outlined text-base">lock_reset</span>
-            <span>应急重置密码</span>
-          </button>
-
-          <button
-            onClick={() => student && onDeleteStudent?.(student.studentNumber, student.fullName)}
-            className="h-10 px-4 rounded-full border border-[var(--md-sys-color-error)] text-[var(--md-sys-color-error)] text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-[var(--md-sys-color-error-container)]/30 cursor-pointer transition-colors"
-          >
-            <span className="material-symbols-outlined text-base">delete</span>
-            <span>清除测试账号</span>
-          </button>
-        </div>
-      </DetailsSection>
     </div>
+  );
+
+  const renderActionButtons = () => (
+    <>
+      <OutlinedButton
+        icon="lock_reset"
+        label="重置密码"
+        className="h-10 min-h-0 px-4 text-xs font-semibold"
+        onClick={() => student && onResetPassword?.(student.studentNumber, student.fullName)}
+      />
+      <DestructiveButton
+        icon="delete"
+        label="删除账号"
+        className="h-10 min-h-0 px-4 text-xs font-semibold"
+        onClick={() => student && onDeleteStudent?.(student.studentNumber, student.fullName)}
+      />
+    </>
   );
 
   return (
@@ -224,8 +417,8 @@ export function DetailsPanel({
             className="h-full bg-[var(--md-sys-color-surface)] rounded-3xl overflow-hidden flex flex-col shrink-0 border-none ring-0 relative select-none"
             style={{ width: typeof width === 'number' ? `${width}px` : width }}
           >
-            {/* Panel Header matching medical-system */}
-            <div className="flex items-center justify-between px-4 py-3 shrink-0 border-b border-[var(--md-sys-color-outline-variant)]/30">
+            {/* Panel Header matching medical-system: pinned at top with titleOverride */}
+            <div className="flex items-center justify-between px-4 py-3 shrink-0">
               <div className="flex items-center gap-3 overflow-hidden">
                 <span
                   className="material-symbols-outlined shrink-0 text-[var(--md-sys-color-primary)]"
@@ -234,7 +427,7 @@ export function DetailsPanel({
                   person
                 </span>
                 <span className="text-[16px] font-medium text-[var(--md-sys-color-on-surface)] truncate">
-                  {student?.fullName || '学生档案详情'}
+                  {titleOverride || '学生档案详情'}
                 </span>
               </div>
               <div className="flex items-center gap-0.5 shrink-0">
@@ -261,7 +454,21 @@ export function DetailsPanel({
                 <span className="text-xs">加载学生详细档案中...</span>
               </div>
             ) : (
-              <div className="flex-1 overflow-y-auto custom-scrollbar">{panelContent}</div>
+              <div className="flex-1 custom-scrollbar flex flex-col scroll-smooth overflow-hidden">
+                <DetailsContext.Provider value={{ isFullScreen: false, titleOverride, setTitleOverride }}>
+                  <ScrollableDetailsLayout
+                    title={student?.fullName}
+                    header={studentHeader}
+                    footer={
+                      <ActionFooter isFullScreen={false}>
+                        {renderActionButtons()}
+                      </ActionFooter>
+                    }
+                  >
+                    {mainBodyContent}
+                  </ScrollableDetailsLayout>
+                </DetailsContext.Provider>
+              </div>
             )}
           </motion.aside>
         )}
@@ -279,7 +486,19 @@ export function DetailsPanel({
           </div>
         }
       >
-        {panelContent}
+        <DetailsContext.Provider value={{ isFullScreen: true, titleOverride, setTitleOverride }}>
+          <ScrollableDetailsLayout
+            title={student?.fullName}
+            header={undefined}
+            footer={
+              <ActionFooter isFullScreen={true}>
+                {renderActionButtons()}
+              </ActionFooter>
+            }
+          >
+            {mainBodyContent}
+          </ScrollableDetailsLayout>
+        </DetailsContext.Provider>
       </FullScreenView>
     </>
   );

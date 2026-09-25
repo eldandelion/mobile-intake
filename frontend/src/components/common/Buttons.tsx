@@ -26,6 +26,7 @@ export function PrimaryButton({
   return (
     <md-filled-button
       id={id}
+      role="button"
       className={`shrink-0 select-none ${className}`}
       onClick={onClick}
       disabled={disabled}
@@ -37,7 +38,7 @@ export function PrimaryButton({
         ...style
       } as React.CSSProperties}
     >
-      {icon && <md-icon slot="icon">{icon}</md-icon>}
+      {icon && <md-icon slot="icon" style={{ color: 'inherit', '--md-icon-size': iconSize } as React.CSSProperties}>{icon}</md-icon>}
       {label}
     </md-filled-button>
   );
@@ -57,6 +58,7 @@ export function SecondaryButton({
   return (
     <md-filled-tonal-button
       id={id}
+      role="button"
       className={`shrink-0 select-none ${className}`}
       onClick={onClick}
       disabled={disabled}
@@ -66,7 +68,7 @@ export function SecondaryButton({
         ...style
       } as React.CSSProperties}
     >
-      {icon && <md-icon slot="icon">{icon}</md-icon>}
+      {icon && <md-icon slot="icon" style={{ color: 'inherit', '--md-icon-size': iconSize } as React.CSSProperties}>{icon}</md-icon>}
       {label}
     </md-filled-tonal-button>
   );
@@ -88,6 +90,7 @@ export function OutlinedButton({
   return (
     <md-outlined-button
       id={id}
+      role="button"
       className={`shrink-0 select-none ${className}`}
       onClick={onClick}
       disabled={disabled}
@@ -97,7 +100,7 @@ export function OutlinedButton({
         ...style
       } as React.CSSProperties}
     >
-      {icon && <md-icon slot="icon">{icon}</md-icon>}
+      {icon && <md-icon slot="icon" style={{ color: 'inherit', '--md-icon-size': iconSize } as React.CSSProperties}>{icon}</md-icon>}
       {label}
     </md-outlined-button>
   );
@@ -117,6 +120,7 @@ export function TertiaryButton({
   return (
     <md-text-button
       id={id}
+      role="button"
       className={`shrink-0 select-none ${className}`}
       onClick={onClick}
       disabled={disabled}
@@ -126,7 +130,7 @@ export function TertiaryButton({
         ...style
       } as React.CSSProperties}
     >
-      {icon && <md-icon slot="icon">{icon}</md-icon>}
+      {icon && <md-icon slot="icon" style={{ color: 'inherit', '--md-icon-size': iconSize } as React.CSSProperties}>{icon}</md-icon>}
       {label}
     </md-text-button>
   );

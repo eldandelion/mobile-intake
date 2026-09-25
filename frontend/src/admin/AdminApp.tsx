@@ -9,6 +9,8 @@ import { AdminNavItem } from './layout/AdminNavItem';
 import { AdminHeader } from './layout/AdminHeader';
 import { AdminMainContent } from './layout/AdminMainContent';
 import { DetailsPanel } from './components/DetailsPanel';
+import { ResetPasswordDialog } from './components/ResetPasswordDialog';
+import { DeleteStudentDialog } from './components/DeleteStudentDialog';
 import { AdminStudentDetailDto, adminApi } from './api/adminApi';
 
 export type AdminTab = 'dashboard' | 'users';
@@ -23,6 +25,14 @@ function AdminShell() {
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
   const [sidePanelLoading, setSidePanelLoading] = useState(false);
 
+  // Dialog states for reset password and delete student
+  const [resetTarget, setResetTarget] = useState<{ studentNumber: string; studentName?: string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ studentNumber: string; studentName: string } | null>(null);
+
+  // In-app snackbar notification state (replaces browser alerts)
+  const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
   const handleTabChange = (tab: AdminTab) => {
     setActiveTab(tab);
     if (tab !== 'users') {
@@ -30,24 +40,39 @@ function AdminShell() {
     }
   };
 
-  const handleResetPassword = async (studentNumber: string) => {
+  const handleOpenResetPassword = (studentNumber: string, studentName?: string) => {
+    setResetTarget({ studentNumber, studentName });
+  };
+
+  const handleOpenDeleteStudent = (studentNumber: string, studentName: string) => {
+    setDeleteTarget({ studentNumber, studentName });
+  };
+
+  const handleConfirmResetPassword = async (studentNumber: string, newPassword?: string) => {
     try {
-      const res = await adminApi.resetPassword(studentNumber);
-      alert(res.message);
+      const res = await adminApi.resetPassword(studentNumber, newPassword);
+      setFeedback({ message: res.message, type: 'success' });
+      setTimeout(() => setFeedback(null), 4000);
+      setRefreshTrigger((prev) => prev + 1);
     } catch (err: any) {
-      alert(err.message || '重置密码失败');
+      setFeedback({ message: err.message || '重置密码失败', type: 'error' });
+      setTimeout(() => setFeedback(null), 4000);
     }
   };
 
-  const handleDeleteStudent = async (studentNumber: string, name: string) => {
-    if (!window.confirm(`确定要删除学生 ${name} (${studentNumber}) 吗？`)) return;
+  const handleConfirmDeleteStudent = async (studentNumber: string) => {
     try {
       const res = await adminApi.deleteStudent(studentNumber);
-      alert(res.message);
-      setIsSidePanelOpen(false);
-      setSelectedStudent(null);
+      setFeedback({ message: res.message, type: 'success' });
+      setTimeout(() => setFeedback(null), 4000);
+      if (selectedStudent?.studentNumber === studentNumber) {
+        setIsSidePanelOpen(false);
+        setSelectedStudent(null);
+      }
+      setRefreshTrigger((prev) => prev + 1);
     } catch (err: any) {
-      alert(err.message || '删除学生失败');
+      setFeedback({ message: err.message || '删除学生失败', type: 'error' });
+      setTimeout(() => setFeedback(null), 4000);
     }
   };
 
@@ -92,7 +117,7 @@ function AdminShell() {
       </AdminSidebar>
 
       {/* Right Application Workspace matching medical-system Header + MainContent */}
-      <div className="flex-1 flex flex-col min-w-0 bg-transparent overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 bg-transparent overflow-hidden relative">
         <AdminHeader
           searchPlaceholder="全局搜索学生与作答记录"
           searchQuery={searchQuery}
@@ -107,8 +132,8 @@ function AdminShell() {
               onClose={() => setIsSidePanelOpen(false)}
               student={selectedStudent}
               loading={sidePanelLoading}
-              onResetPassword={handleResetPassword}
-              onDeleteStudent={handleDeleteStudent}
+              onResetPassword={handleOpenResetPassword}
+              onDeleteStudent={handleOpenDeleteStudent}
             />
           }
         >
@@ -126,10 +151,66 @@ function AdminShell() {
               isSidePanelOpen={isSidePanelOpen}
               setIsSidePanelOpen={setIsSidePanelOpen}
               setIsSidePanelLoading={setSidePanelLoading}
+              onResetPassword={handleOpenResetPassword}
+              onDeleteStudent={handleOpenDeleteStudent}
+              refreshKey={refreshTrigger}
             />
           )}
         </AdminMainContent>
+
+        {/* Global Floating Material Design Snackbar Notification */}
+        {feedback && (
+          <div
+            role="status"
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-xl transition-all animate-in fade-in slide-in-from-bottom-4 duration-200 select-none border border-[var(--md-sys-color-outline-variant)]"
+            style={{
+              backgroundColor:
+                feedback.type === 'error'
+                  ? 'var(--md-sys-color-error-container)'
+                  : 'var(--md-sys-color-surface-container-highest)',
+              color:
+                feedback.type === 'error'
+                  ? 'var(--md-sys-color-on-error-container)'
+                  : 'var(--md-sys-color-on-surface)',
+            }}
+          >
+            <span
+              className="material-symbols-outlined text-xl"
+              style={{
+                color:
+                  feedback.type === 'error'
+                    ? 'var(--md-sys-color-error)'
+                    : 'var(--md-sys-color-primary)',
+              }}
+            >
+              {feedback.type === 'error' ? 'error' : 'check_circle'}
+            </span>
+            <span className="text-xs font-semibold">{feedback.message}</span>
+          </div>
+        )}
       </div>
+
+      {/* Material Design Reset Password Dialog (Two-step confirmation) */}
+      {resetTarget && (
+        <ResetPasswordDialog
+          isOpen={!!resetTarget}
+          studentNumber={resetTarget.studentNumber}
+          studentName={resetTarget.studentName}
+          onClose={() => setResetTarget(null)}
+          onConfirm={handleConfirmResetPassword}
+        />
+      )}
+
+      {/* Material Design Delete Student Confirmation Dialog */}
+      {deleteTarget && (
+        <DeleteStudentDialog
+          isOpen={!!deleteTarget}
+          studentNumber={deleteTarget.studentNumber}
+          studentName={deleteTarget.studentName}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={handleConfirmDeleteStudent}
+        />
+      )}
     </div>
   );
 }

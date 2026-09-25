@@ -28,12 +28,17 @@ export function DashboardPage({
     fetchMetrics();
   }, []);
 
+  const [exportFeedback, setExportFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
   const handleQuickZipExport = async () => {
     setExporting(true);
     try {
       await adminApi.downloadExport('zip', 'intake-package.zip');
+      setExportFeedback({ message: '已成功导出 intake-package.zip', type: 'success' });
+      setTimeout(() => setExportFeedback(null), 4000);
     } catch (err: any) {
-      alert(err.message || '导出失败');
+      setExportFeedback({ message: err.message || '导出失败', type: 'error' });
+      setTimeout(() => setExportFeedback(null), 4000);
     } finally {
       setExporting(false);
     }
@@ -45,6 +50,19 @@ export function DashboardPage({
         title="系统总览"
         isLoading={loading}
       />
+
+      {exportFeedback && (
+        <div className={`mx-6 mt-4 p-3.5 rounded-2xl text-xs flex items-center gap-2 animate-in fade-in duration-150 ${
+          exportFeedback.type === 'error'
+            ? 'bg-rose-100 text-rose-900 dark:bg-rose-950 dark:text-rose-200'
+            : 'bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200'
+        }`}>
+          <span className="material-symbols-outlined text-base">
+            {exportFeedback.type === 'error' ? 'error' : 'check_circle'}
+          </span>
+          <span>{exportFeedback.message}</span>
+        </div>
+      )}
 
       <div className="w-full h-full p-6 bg-[var(--md-sys-color-surface)] overflow-y-auto custom-scrollbar">
         {error ? (

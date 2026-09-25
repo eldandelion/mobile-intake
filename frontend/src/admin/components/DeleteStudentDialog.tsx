@@ -1,6 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import type { MdDialog } from '@material/web/dialog/dialog';
+import { setCenteredDialogAnimation } from '../../utils/dialogAnimation';
+import { OutlinedButton } from '../../components/common/Buttons';
+import { DestructiveButton } from '../../components/common/DestructiveButton';
 
-interface DeleteStudentDialogProps {
+export interface DeleteStudentDialogProps {
   isOpen: boolean;
   studentNumber: string;
   studentName: string;
@@ -17,6 +22,29 @@ export function DeleteStudentDialog({
 }: DeleteStudentDialogProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const isDeletingRef = useRef(isDeleting);
+  isDeletingRef.current = isDeleting;
+
+  const dialogRef = useRef<MdDialog | null>(null);
+  const setDialogRef = useCallback(
+    (node: MdDialog | null) => {
+      dialogRef.current = node;
+      if (node) {
+        setCenteredDialogAnimation(node);
+        const handleCancelOrClosed = (e: Event) => {
+          if (isDeletingRef.current) {
+            e.preventDefault();
+            return;
+          }
+          onClose();
+        };
+        node.addEventListener('closed', handleCancelOrClosed);
+        node.addEventListener('cancel', handleCancelOrClosed);
+      }
+    },
+    [onClose]
+  );
+
   if (!isOpen) return null;
 
   const handleDelete = async () => {
@@ -29,46 +57,46 @@ export function DeleteStudentDialog({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs select-none">
-      <div className="w-full max-w-sm rounded-3xl bg-[var(--md-sys-color-surface)] border border-[var(--md-sys-color-outline-variant)]/40 p-6 shadow-xl flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-[var(--md-sys-color-error-container)] text-[var(--md-sys-color-on-error-container)] flex items-center justify-center shrink-0">
-            <span className="material-symbols-outlined text-xl">warning</span>
-          </div>
-          <div>
-            <h3 className="text-base font-bold text-[var(--md-sys-color-on-surface)]">
-              确认删除学生登记？
-            </h3>
-            <p className="text-xs text-[var(--md-sys-color-error)]">
-              此操作将级联删除该学生的所有作答记录
-            </p>
-          </div>
-        </div>
-
-        <p className="text-xs text-[var(--md-sys-color-on-surface-variant)] leading-relaxed">
-          即将彻底移除学生 <strong className="text-[var(--md-sys-color-on-surface)]">{studentName}</strong> (学号: {studentNumber}) 及其填报的所有草稿和已提交问卷。此操作不可逆。
-        </p>
-
-        <div className="flex items-center justify-end gap-2 pt-2">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isDeleting}
-            className="h-10 px-4 rounded-full text-xs font-semibold text-[var(--md-sys-color-on-surface-variant)] hover:bg-[var(--md-sys-color-surface-container-high)] cursor-pointer"
-          >
-            取消
-          </button>
-          <button
-            type="button"
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="h-10 px-5 rounded-full bg-[var(--md-sys-color-error)] text-[var(--md-sys-color-on-error)] text-xs font-semibold flex items-center gap-1.5 hover:brightness-105 cursor-pointer disabled:opacity-50"
-          >
-            {isDeleting ? '正在删除...' : '彻底删除'}
-          </button>
-        </div>
+  const dialogContent = (
+    <md-dialog
+      ref={setDialogRef}
+      open={true}
+      style={{
+        maxWidth: 'min(420px, calc(100vw - 32px))',
+        minWidth: '320px',
+        '--md-dialog-container-shape': '28px',
+      } as React.CSSProperties}
+    >
+      {/* Headline Slot - No icon */}
+      <div slot="headline" className="px-6 pt-6 pb-2 select-none">
+        <h3 className="text-lg font-bold text-[var(--md-sys-color-on-surface)]">
+          确认删除学生登记？
+        </h3>
       </div>
-    </div>
+
+      {/* Content Slot - Concise, clean text */}
+      <div slot="content" className="px-6 py-2 select-none text-sm leading-relaxed text-[var(--md-sys-color-on-surface-variant)]">
+        确认彻底删除学生 <span className="font-semibold text-[var(--md-sys-color-on-surface)]">{studentName}</span> (学号: <span className="font-mono">{studentNumber}</span>) 吗？该学生的所有作答记录将被清除，此操作不可撤销。
+      </div>
+
+      {/* Actions Slot */}
+      <div slot="actions" className="px-6 pb-6 pt-3 flex items-center justify-end gap-2.5 select-none">
+        <OutlinedButton
+          label="取消"
+          className="h-10 min-h-[40px] px-4 text-xs font-semibold"
+          disabled={isDeleting}
+          onClick={onClose}
+        />
+        <DestructiveButton
+          label={isDeleting ? '正在删除...' : '彻底删除'}
+          icon="delete"
+          className="h-10 min-h-[40px] px-5 text-xs font-semibold"
+          disabled={isDeleting}
+          onClick={handleDelete}
+        />
+      </div>
+    </md-dialog>
   );
+
+  return typeof document !== 'undefined' ? createPortal(dialogContent, document.body) : dialogContent;
 }
