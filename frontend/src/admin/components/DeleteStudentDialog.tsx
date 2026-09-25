@@ -2,8 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import type { MdDialog } from '@material/web/dialog/dialog';
 import { setCenteredDialogAnimation } from '../../utils/dialogAnimation';
-import { OutlinedButton } from '../../components/common/Buttons';
-import { DestructiveButton } from '../../components/common/DestructiveButton';
+import { OutlinedButton, PrimaryButton } from '../../components/common/Buttons';
 
 export interface DeleteStudentDialogProps {
   isOpen: boolean;
@@ -87,9 +86,8 @@ export function DeleteStudentDialog({
           disabled={isDeleting}
           onClick={onClose}
         />
-        <DestructiveButton
+        <PrimaryButton
           label={isDeleting ? '正在删除...' : '彻底删除'}
-          icon="delete"
           className="h-10 min-h-[40px] px-5 text-xs font-semibold"
           disabled={isDeleting}
           onClick={handleDelete}
