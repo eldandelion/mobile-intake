@@ -122,6 +122,12 @@ It operates as an independent subproject outside the main medical system to ensu
 - Run local development server (port 8085): `./mvnw spring-boot:run`
 - Package standalone JAR: `./mvnw clean package`
 
+### Docker & Deployment
+- Start containers locally: `docker compose up --build -d`
+- Stop containers: `docker compose down`
+- Check container logs: `docker compose logs -f`
+- Data persistence: SQLite database persists in Docker named volume `intake-data` mounted at `/app/data/intake.db`
+
 ---
 
 ## PRD and Context Reference

@@ -1,0 +1,14 @@
+.git
+.idea
+.vscode
+*.db
+*.db-wal
+*.db-shm
+*.db-journal
+*.log
+node_modules
+dist
+target
+.env
+.env.*
+.DS_Store

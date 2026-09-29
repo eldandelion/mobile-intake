@@ -1,0 +1,79 @@
+name: Deploy to Alibaba Server
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  verify:
+    name: Build & Test Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run Backend Tests
+        run: |
+          cd backend
+          chmod +x ./mvnw
+          ./mvnw test
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Run Frontend Lint & Tests
+        run: |
+          cd frontend
+          npm ci
+          npm run lint
+          npm test
+
+  deploy:
+    name: Deploy to Server
+    needs: verify
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Copy source files via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "."
+          target: "~/mobile-intake"
+          rm: true
+
+      - name: Build and Restart Docker Containers
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/mobile-intake
+            # Try Docker Compose V2 first, fallback to V1, and use sudo to avoid permission denied errors
+            if sudo docker compose version > /dev/null 2>&1; then
+              sudo docker compose up --build -d
+            else
+              sudo docker-compose up --build -d
+            fi
+            # Clean up old unused images to save disk space
+            sudo docker image prune -f

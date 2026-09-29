@@ -1,0 +1,11 @@
+target
+*.db
+*.db-wal
+*.db-shm
+*.db-journal
+.git
+.idea
+*.log
+.env
+.env.*
+.DS_Store

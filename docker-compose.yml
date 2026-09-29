@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mobile-intake-frontend
+    ports:
+      - "${FRONTEND_PORT:-3005}:80"
+    restart: unless-stopped
+    depends_on:
+      - backend
+    networks:
+      - intake-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mobile-intake-backend
+    ports:
+      - "${BACKEND_PORT:-8085}:8085"
+    restart: unless-stopped
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:sqlite:/app/data/intake.db
+      - INTAKE_SECURITY_JWT_SECRET=${INTAKE_SECURITY_JWT_SECRET:-medical-system-intake-secret-key-must-be-long-enough-32bytes}
+      - INTAKE_SECURITY_ADMIN_SECRET=${INTAKE_SECURITY_ADMIN_SECRET:-csu-medical-intake-admin-secret-2026}
+      - ALIYUN_SMS_ENABLED=${ALIYUN_SMS_ENABLED:-false}
+      - ALIBABA_SMS_PROVIDER=${ALIBABA_SMS_PROVIDER:-dysms}
+      - ALIBABA_SMS_ACCESS_KEY_ID=${ALIBABA_SMS_ACCESS_KEY_ID:-}
+      - ALIBABA_SMS_ACCESS_KEY_SECRET=${ALIBABA_SMS_ACCESS_KEY_SECRET:-}
+      - ALIBABA_SMS_ENDPOINT=${ALIBABA_SMS_ENDPOINT:-dysmsapi.aliyuncs.com}
+      - ALIBABA_SMS_SIGN_NAME=${ALIBABA_SMS_SIGN_NAME:-}
+      - ALIBABA_SMS_TEMPLATE_CODE=${ALIBABA_SMS_TEMPLATE_CODE:-}
+      - ALIBABA_SMS_SCHEME_CODE=${ALIBABA_SMS_SCHEME_CODE:-}
+    volumes:
+      - intake-data:/app/data
+    networks:
+      - intake-network
+
+networks:
+  intake-network:
+    driver: bridge
+
+volumes:
+  intake-data:
