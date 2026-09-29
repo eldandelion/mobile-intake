@@ -313,13 +313,16 @@ export function DetailsPanel({
             </span>
             <span className="opacity-40 shrink-0">•</span>
             <div
-              className={`px-2.5 py-0.5 rounded-full flex items-center gap-1 font-bold text-[11px] shrink-0 whitespace-nowrap ${
-                completedCount === totalScales && totalScales > 0
-                  ? 'bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)]'
-                  : 'bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-on-surface-variant)]'
-              }`}
+              className="px-2.5 py-0.5 rounded-full flex items-center gap-1.5 font-bold text-[11px] shrink-0 whitespace-nowrap border border-[var(--md-sys-color-outline-variant)] bg-transparent text-[var(--md-sys-color-on-surface)]"
             >
-              {completedCount === totalScales && totalScales > 0 ? '全部完成' : '测评进行中'}
+              <span
+                className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                  completedCount === totalScales && totalScales > 0
+                    ? 'bg-emerald-500 dark:bg-emerald-400'
+                    : 'bg-amber-500 dark:bg-amber-400'
+                }`}
+              />
+              <span>{completedCount === totalScales && totalScales > 0 ? '全部完成' : '测评进行中'}</span>
             </div>
           </div>
         </div>
@@ -365,13 +368,13 @@ export function DetailsPanel({
 
                 <div className="flex items-center gap-2 shrink-0">
                   {isCompleted ? (
-                    <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                      <span className="material-symbols-outlined text-xs">check_circle</span>
+                    <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 border border-[var(--md-sys-color-outline-variant)] bg-transparent text-[var(--md-sys-color-on-surface)]">
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-emerald-500 dark:bg-emerald-400" />
                       <span>已完成提交</span>
                     </span>
                   ) : isInProgress ? (
-                    <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1 bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
-                      <span className="material-symbols-outlined text-xs">pending</span>
+                    <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1.5 border border-[var(--md-sys-color-outline-variant)] bg-transparent text-[var(--md-sys-color-on-surface)]">
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-amber-500 dark:bg-amber-400" />
                       <span>正在作答</span>
                     </span>
                   ) : (

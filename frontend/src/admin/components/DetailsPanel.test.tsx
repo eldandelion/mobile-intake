@@ -88,6 +88,13 @@ describe('DetailsPanel Component', () => {
     );
 
     expect(screen.getByText('全部完成')).toBeDefined();
+    const badge = screen.getByText('全部完成').closest('div');
+    expect(badge?.className).toContain('bg-transparent');
+    expect(badge?.className).toContain('border');
+    expect(badge?.className).toContain('rounded-full');
+    expect(badge?.className).toContain('text-[var(--md-sys-color-on-surface)]');
+    const dot = badge?.querySelector('.w-1\\.5');
+    expect(dot?.className).toContain('bg-emerald-500');
   });
 
   it('renders student demographics cards and scale progress with clean unstarted state', () => {

@@ -186,14 +186,15 @@ export function StudentManagementPage({
         const totalCount = item.scaleStatuses?.length || 2;
         return (
           <div className="flex items-center gap-2">
-            <span
-              className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                item.allCompleted
-                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                  : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-              }`}
-            >
-              {item.allCompleted ? '已全完成' : `填报中 (${completedCount}/${totalCount})`}
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border border-[var(--md-sys-color-outline-variant)] bg-transparent text-[var(--md-sys-color-on-surface)]">
+              <span
+                className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                  item.allCompleted
+                    ? 'bg-emerald-500 dark:bg-emerald-400'
+                    : 'bg-amber-500 dark:bg-amber-400'
+                }`}
+              />
+              <span>{item.allCompleted ? '已全完成' : `填报中 (${completedCount}/${totalCount})`}</span>
             </span>
           </div>
         );

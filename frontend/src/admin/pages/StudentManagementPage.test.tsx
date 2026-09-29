@@ -88,6 +88,43 @@ describe('StudentManagementPage', () => {
     expect(screen.getByText('李四')).toBeDefined();
   });
 
+  it('renders transparent outlined status badges with status color dots and neutral text', async () => {
+    vi.spyOn(adminApi, 'getStudents').mockResolvedValue(mockStudents);
+
+    render(
+      <StudentManagementPage
+        selectedStudent={null}
+        onSelectStudent={mockOnSelectStudent}
+        isSidePanelOpen={false}
+        setIsSidePanelOpen={mockSetIsSidePanelOpen}
+        setIsSidePanelLoading={mockSetIsSidePanelLoading}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('已全完成')).toBeDefined();
+      expect(screen.getByText('填报中 (1/2)')).toBeDefined();
+    });
+
+    const completedText = screen.getByText('已全完成');
+    const completedContainer = completedText.closest('.rounded-full');
+    expect(completedContainer?.className).toContain('bg-transparent');
+    expect(completedContainer?.className).toContain('border');
+    expect(completedContainer?.className).toContain('text-[var(--md-sys-color-on-surface)]');
+
+    const completedDot = completedContainer?.querySelector('.w-1\\.5');
+    expect(completedDot?.className).toContain('bg-emerald-500');
+
+    const inProgressText = screen.getByText('填报中 (1/2)');
+    const inProgressContainer = inProgressText.closest('.rounded-full');
+    expect(inProgressContainer?.className).toContain('bg-transparent');
+    expect(inProgressContainer?.className).toContain('border');
+    expect(inProgressContainer?.className).toContain('text-[var(--md-sys-color-on-surface)]');
+
+    const inProgressDot = inProgressContainer?.querySelector('.w-1\\.5');
+    expect(inProgressDot?.className).toContain('bg-amber-500');
+  });
+
   it('selects a student on row click and opens side panel', async () => {
     vi.spyOn(adminApi, 'getStudents').mockResolvedValue(mockStudents);
     const detailSpy = vi.spyOn(adminApi, 'getStudentDetail').mockResolvedValue(mockDetail);
