@@ -137,12 +137,12 @@ class AdminIntegrationTest {
             .andExpect(jsonPath("$.totalStudents").value(0))
             .andExpect(jsonPath("$.fullyCompletedStudents").value(0))
 
-        // 2. Create student and save a submission for demographics_survey
+        // 2. Create student and save a submission for comprehensive_student_intake_survey
         createStudent("8209220532", "张三", "13800138000")
         submissionRepository.save(
             ScaleSubmissionEntity.create(
                 studentNumber = StudentNumber("8209220532"),
-                scaleCode = ScaleCode("demographics_survey"),
+                scaleCode = ScaleCode("comprehensive_student_intake_survey"),
                 answersJson = objectMapper.writeValueAsString(mapOf("demo_major" to "自动化"))
             )
         )
@@ -154,7 +154,8 @@ class AdminIntegrationTest {
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.totalStudents").value(1))
-            .andExpect(jsonPath("$.scaleStats[?(@.scaleCode=='demographics_survey')].completedCount").value(1))
+            .andExpect(jsonPath("$.fullyCompletedStudents").value(1))
+            .andExpect(jsonPath("$.scaleStats[?(@.scaleCode=='comprehensive_student_intake_survey')].completedCount").value(1))
     }
 
     @Test
@@ -163,17 +164,7 @@ class AdminIntegrationTest {
 
         createStudent("8209220532", "李四", "13900139000", "oldpassword")
 
-        // Save a draft for MENTAL_HEALTH_ASSESSMENT
-        draftRepository.save(
-            ScaleDraftEntity(
-                studentNumber = "8209220532",
-                scaleCode = "MENTAL_HEALTH_ASSESSMENT",
-                answersJson = objectMapper.writeValueAsString(mapOf("phq9_1" to 2)),
-                clientUpdatedAt = System.currentTimeMillis()
-            )
-        )
-
-        // Save a submission for demographics_survey
+        // Save a submission for comprehensive_student_intake_survey
         val demoAnswers = mapOf(
             "demo_gender" to 1,
             "demo_major" to "计算机科学",
@@ -182,7 +173,7 @@ class AdminIntegrationTest {
         submissionRepository.save(
             ScaleSubmissionEntity.create(
                 studentNumber = StudentNumber("8209220532"),
-                scaleCode = ScaleCode("demographics_survey"),
+                scaleCode = ScaleCode("comprehensive_student_intake_survey"),
                 answersJson = objectMapper.writeValueAsString(demoAnswers)
             )
         )
@@ -196,8 +187,8 @@ class AdminIntegrationTest {
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.length()").value(1))
             .andExpect(jsonPath("$[0].studentNumber").value("8209220532"))
-            .andExpect(jsonPath("$[0].scaleStatuses[?(@.scaleCode=='MENTAL_HEALTH_ASSESSMENT')].status").value("IN_PROGRESS"))
-            .andExpect(jsonPath("$[0].scaleStatuses[?(@.scaleCode=='demographics_survey')].status").value("COMPLETED"))
+            .andExpect(jsonPath("$[0].scaleStatuses[?(@.scaleCode=='comprehensive_student_intake_survey')].status").value("COMPLETED"))
+            .andExpect(jsonPath("$[0].allCompleted").value(true))
 
         // 2. Admin gets student detail
         mockMvc.perform(

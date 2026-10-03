@@ -15,12 +15,14 @@ class AssessmentCatalogLoader(
 ) {
     private val optionGroups = mutableMapOf<String, List<ScaleOption>>()
     private val scaleDetailsMap = LinkedHashMap<String, ScaleDetail>()
+    private val standaloneSurveysMap = LinkedHashMap<String, ScaleDetail>()
     private val questionToScaleMap = HashMap<String, String>()
 
     @PostConstruct
     fun init() {
         optionGroups.clear()
         scaleDetailsMap.clear()
+        standaloneSurveysMap.clear()
         questionToScaleMap.clear()
 
         loadOptionGroups()
@@ -145,7 +147,7 @@ class AssessmentCatalogLoader(
                     }
                 }
 
-                scaleDetailsMap[code] = ScaleDetail(
+                standaloneSurveysMap[code] = ScaleDetail(
                     code = code,
                     title = title,
                     subtitle = subtitle,
@@ -179,8 +181,8 @@ class AssessmentCatalogLoader(
                     val title = groupNode.get("title")?.asText() ?: batteryCode
                     val subtitle = groupNode.get("subtitle")?.asText()
                     val description = groupNode.get("description")?.asText() ?: ""
-                    val durationStr = groupNode.get("duration")?.asText() ?: "15 分钟"
-                    val estimatedMinutes = Regex("""\d+""").find(durationStr)?.value?.toIntOrNull() ?: 15
+                    val durationStr = groupNode.get("duration")?.asText() ?: "45 分钟"
+                    val estimatedMinutes = Regex("""\d+""").find(durationStr)?.value?.toIntOrNull() ?: 45
                     val instructions = groupNode.get("instructions")?.asText() ?: description
 
                     val introItemsList = mutableListOf<ScaleIntroItem>()
@@ -215,54 +217,121 @@ class AssessmentCatalogLoader(
                         qResource.inputStream.use { qInput ->
                             val qRoot: JsonNode = objectMapper.readTree(qInput)
                             val subscaleTitle = qRoot.get("title")?.asText() ?: qCode
-                            val questionsNode = qRoot.get("questions")
-                                ?: throw AssessmentCatalogInitializationException("No questions found in questionnaire '$qCode'")
 
-                            var sectionQuestionCount = 0
-                            for (qNode in questionsNode) {
-                                val qId = qNode.get("code")?.asText() ?: qNode.get("id")?.asText()
-                                    ?: throw AssessmentCatalogInitializationException("Question missing code/id in '$qCode'")
+                            if (qRoot.has("sections") && qRoot.get("sections").isArray) {
+                                for (secNode in qRoot.get("sections")) {
+                                    val secId = secNode.get("id")?.asText() ?: qCode
+                                    val secTitle = secNode.get("title")?.asText() ?: subscaleTitle
+                                    val qNodes = secNode.get("questions")
+                                    var secCount = 0
+                                    if (qNodes != null && qNodes.isArray) {
+                                        for (qNode in qNodes) {
+                                            val qId = qNode.get("id")?.asText() ?: qNode.get("code")?.asText()
+                                                ?: throw AssessmentCatalogInitializationException("Question missing id/code in '$qCode'")
 
-                                if (!seenQuestionIds.add(qId)) {
-                                    throw AssessmentCatalogInitializationException(
-                                        "Duplicate question ID '$qId' detected in battery '$batteryCode'"
+                                            if (!seenQuestionIds.add(qId)) {
+                                                throw AssessmentCatalogInitializationException(
+                                                    "Duplicate question ID '$qId' detected in battery '$batteryCode'"
+                                                )
+                                            }
+
+                                            val text = qNode.get("text")?.asText() ?: ""
+                                            val type = qNode.get("type")?.asText() ?: "single_choice"
+                                            val placeholder = qNode.get("placeholder")?.asText()
+                                            val min = if (qNode.has("min") && !qNode.get("min").isNull) qNode.get("min").asDouble() else null
+                                            val max = if (qNode.has("max") && !qNode.get("max").isNull) qNode.get("max").asDouble() else null
+                                            val step = if (qNode.has("step") && !qNode.get("step").isNull) qNode.get("step").asDouble() else null
+                                            val unit = qNode.get("unit")?.asText()
+                                            val minLabel = qNode.get("minLabel")?.asText()
+                                            val maxLabel = qNode.get("maxLabel")?.asText()
+                                            val icon = qNode.get("icon")?.asText()
+                                            val zeroOptionLabel = qNode.get("zeroOptionLabel")?.asText()
+                                            val field = qNode.get("field")?.asText()?.trim()?.ifEmpty { null }
+                                            val options = parseOptions(qNode, qId, qCode)
+
+                                            val question = ScaleQuestion(
+                                                id = qId,
+                                                text = text,
+                                                orderNum = globalOrder++,
+                                                type = type,
+                                                field = field,
+                                                placeholder = placeholder,
+                                                min = min,
+                                                max = max,
+                                                step = step,
+                                                unit = unit,
+                                                minLabel = minLabel,
+                                                maxLabel = maxLabel,
+                                                options = options,
+                                                sectionCode = secId,
+                                                sectionTitle = secTitle,
+                                                icon = icon,
+                                                zeroOptionLabel = zeroOptionLabel
+                                            )
+                                            batteryQuestions.add(question)
+                                            questionToScaleMap[qId] = qCode
+                                            secCount++
+                                        }
+                                    }
+                                    batterySections.add(
+                                        BatterySection(
+                                            code = secId,
+                                            title = secTitle,
+                                            questionCount = secCount,
+                                            orderNum = batterySections.size + 1
+                                        )
                                     )
                                 }
+                            } else {
+                                val questionsNode = qRoot.get("questions")
+                                    ?: throw AssessmentCatalogInitializationException("No questions found in questionnaire '$qCode'")
 
-                                val text = qNode.get("text")?.asText() ?: ""
-                                val type = qNode.get("type")?.asText() ?: "single_choice"
-                                val placeholder = qNode.get("placeholder")?.asText()
-                                val icon = qNode.get("icon")?.asText()
-                                val zeroOptionLabel = qNode.get("zeroOptionLabel")?.asText()
-                                val field = qNode.get("field")?.asText()?.trim()?.ifEmpty { null }
-                                val options = parseOptions(qNode, qId, qCode)
+                                var sectionQuestionCount = 0
+                                for (qNode in questionsNode) {
+                                    val qId = qNode.get("code")?.asText() ?: qNode.get("id")?.asText()
+                                        ?: throw AssessmentCatalogInitializationException("Question missing code/id in '$qCode'")
 
-                                val question = ScaleQuestion(
-                                    id = qId,
-                                    text = text,
-                                    orderNum = globalOrder++,
-                                    type = type,
-                                    field = field,
-                                    placeholder = placeholder,
-                                    options = options,
-                                    sectionCode = qCode,
-                                    sectionTitle = subscaleTitle,
-                                    icon = icon,
-                                    zeroOptionLabel = zeroOptionLabel
+                                    if (!seenQuestionIds.add(qId)) {
+                                        throw AssessmentCatalogInitializationException(
+                                            "Duplicate question ID '$qId' detected in battery '$batteryCode'"
+                                        )
+                                    }
+
+                                    val text = qNode.get("text")?.asText() ?: ""
+                                    val type = qNode.get("type")?.asText() ?: "single_choice"
+                                    val placeholder = qNode.get("placeholder")?.asText()
+                                    val icon = qNode.get("icon")?.asText()
+                                    val zeroOptionLabel = qNode.get("zeroOptionLabel")?.asText()
+                                    val field = qNode.get("field")?.asText()?.trim()?.ifEmpty { null }
+                                    val options = parseOptions(qNode, qId, qCode)
+
+                                    val question = ScaleQuestion(
+                                        id = qId,
+                                        text = text,
+                                        orderNum = globalOrder++,
+                                        type = type,
+                                        field = field,
+                                        placeholder = placeholder,
+                                        options = options,
+                                        sectionCode = qCode,
+                                        sectionTitle = subscaleTitle,
+                                        icon = icon,
+                                        zeroOptionLabel = zeroOptionLabel
+                                    )
+                                    batteryQuestions.add(question)
+                                    questionToScaleMap[qId] = qCode
+                                    sectionQuestionCount++
+                                }
+
+                                batterySections.add(
+                                    BatterySection(
+                                        code = qCode,
+                                        title = subscaleTitle,
+                                        questionCount = sectionQuestionCount,
+                                        orderNum = batterySections.size + 1
+                                    )
                                 )
-                                batteryQuestions.add(question)
-                                questionToScaleMap[qId] = qCode
-                                sectionQuestionCount++
                             }
-
-                            batterySections.add(
-                                BatterySection(
-                                    code = qCode,
-                                    title = subscaleTitle,
-                                    questionCount = sectionQuestionCount,
-                                    orderNum = batterySections.size + 1
-                                )
-                            )
                         }
                     }
 
@@ -325,7 +394,10 @@ class AssessmentCatalogLoader(
     }
 
     fun getScaleDetail(code: String): ScaleDetail? =
-        scaleDetailsMap[code] ?: scaleDetailsMap.entries.find { it.key.equals(code, ignoreCase = true) }?.value
+        scaleDetailsMap[code]
+            ?: scaleDetailsMap.entries.find { it.key.equals(code, ignoreCase = true) }?.value
+            ?: standaloneSurveysMap[code]
+            ?: standaloneSurveysMap.entries.find { it.key.equals(code, ignoreCase = true) }?.value
 
     fun getScaleDetails(): List<ScaleDetail> = scaleDetailsMap.values.toList()
 

@@ -1,7 +1,6 @@
 package com.medicalsystem.intake.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.medicalsystem.intake.exception.AssessmentCatalogInitializationException
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -20,114 +19,93 @@ class AssessmentCatalogLoaderTest {
     }
 
     @Test
-    fun `testLoadCatalog creates exactly 10 milestones with demographics and general health screener pinned first`() {
+    fun `testLoadCatalog creates exactly 1 unified milestone questionnaire containing all assessments`() {
         val details = catalogLoader.getScaleDetails()
-        assertEquals(10, details.size, "Should contain exactly 10 milestone scales (2 standalone surveys + 8 batteries)")
+        assertEquals(1, details.size, "Should contain exactly 1 unified intake questionnaire")
 
         val codes = catalogLoader.getScaleCodes()
-        assertEquals("demographics_survey", codes[0], "Card 0 must be demographics_survey")
-        assertEquals("general_health_screener", codes[1], "Card 1 must be general_health_screener")
+        assertEquals("comprehensive_student_intake_survey", codes[0], "Primary questionnaire must be comprehensive_student_intake_survey")
 
-        val expectedBatteries = listOf(
-            "demographics_survey",
-            "general_health_screener",
-            "MENTAL_HEALTH_ASSESSMENT",
-            "SLEEP_ASSESSMENT",
-            "DIGITAL_HABITS_DAILY_BEHAVIORS_ASSESSMENT",
-            "SOCIAL_ENVIRONMENT_SUPPORT_ASSESSMENT",
-            "SELF_REGULATION_PERSONALITY_ASSESSMENT",
-            "FAMILY_BACKGROUND_EARLY_EXPERIENCES_ASSESSMENT",
-            "CLINICAL_SCREENING_NEURODIVERGENCE_ASSESSMENT",
-            "PERSONALITY_COPING_OUTLOOK_ASSESSMENT"
-        )
-        assertEquals(expectedBatteries, codes)
+        val unified = details[0]
+        assertEquals("中南大学学生心身健康综合调查问卷", unified.title)
+        assertTrue(unified.questions.isNotEmpty(), "Unified questionnaire must contain questions")
     }
 
     @Test
-    fun `testAssembleBattery contiguous orderNum across section boundaries`() {
-        val mentalHealth = catalogLoader.getScaleDetail("MENTAL_HEALTH_ASSESSMENT")
-        assertNotNull(mentalHealth)
-        mentalHealth!!
+    fun `testAssembleUnifiedSurvey contiguous orderNum across all section boundaries`() {
+        val survey = catalogLoader.getScaleDetail("comprehensive_student_intake_survey")
+        assertNotNull(survey)
+        survey!!
 
-        assertEquals(124, mentalHealth.questions.size)
         // Verify contiguous 1..N order
-        for (i in mentalHealth.questions.indices) {
-            assertEquals(i + 1, mentalHealth.questions[i].orderNum, "Question index $i should have orderNum ${i + 1}")
+        for (i in survey.questions.indices) {
+            assertEquals(i + 1, survey.questions[i].orderNum, "Question index $i should have orderNum ${i + 1}")
         }
 
-        // PHQ-9 is 9 questions, GAD-7 starts at question index 9 (orderNum 10)
-        val firstGad7 = mentalHealth.questions[9]
-        assertEquals("gad7_1", firstGad7.id)
-        assertEquals(10, firstGad7.orderNum)
-        assertEquals("gad_7", firstGad7.sectionCode)
-        assertNotNull(firstGad7.sectionTitle)
-
-        // Sections
-        assertEquals(5, mentalHealth.sections.size)
-        assertEquals("phq_9", mentalHealth.sections[0].code)
-        assertEquals(9, mentalHealth.sections[0].questionCount)
-        assertEquals("gad_7", mentalHealth.sections[1].code)
-        assertEquals(7, mentalHealth.sections[1].questionCount)
-        assertEquals("apq_9_father", mentalHealth.sections[2].code)
-        assertEquals(9, mentalHealth.sections[2].questionCount)
-        assertEquals("apq_9_mother", mentalHealth.sections[3].code)
-        assertEquals(9, mentalHealth.sections[3].questionCount)
-        assertEquals("scl_90", mentalHealth.sections[4].code)
-        assertEquals(90, mentalHealth.sections[4].questionCount)
+        // Verify sections contain expected PDF protocol components
+        val sectionCodes = survey.sections.map { it.code }
+        assertTrue(sectionCodes.contains("demo_basic_info"), "Must contain demographic basic info section")
+        assertTrue(sectionCodes.contains("ghq_12_section"), "Must contain GHQ-12 section")
+        assertTrue(sectionCodes.contains("phq_9"), "Must contain PHQ-9 section")
+        assertTrue(sectionCodes.contains("gad_7"), "Must contain GAD-7 section")
+        assertTrue(sectionCodes.contains("sleep_disorder"), "Must contain sleep disorder section")
+        assertTrue(sectionCodes.contains("big_five"), "Must contain Big Five section")
+        assertFalse(sectionCodes.contains("scl_90"), "Must NOT contain purged SCL-90")
+        assertFalse(sectionCodes.contains("psqi"), "Must NOT contain purged PSQI")
     }
 
     @Test
-    fun `testAssembleBattery customOptions parsed properly`() {
-        val sleep = catalogLoader.getScaleDetail("SLEEP_ASSESSMENT")
-        assertNotNull(sleep)
-        sleep!!
+    fun `testTable3SleepCustomOptions parsed properly with 10 questions`() {
+        val survey = catalogLoader.getScaleDetail("comprehensive_student_intake_survey")
+        assertNotNull(survey)
+        survey!!
 
-        assertEquals(14, sleep.questions.size)
-        assertEquals(2, sleep.sections.size)
-        assertEquals("sleep_disorder", sleep.sections[0].code)
-        assertEquals("psqi", sleep.sections[1].code)
+        val sleepQuestions = survey.questions.filter { it.sectionCode == "sleep_disorder" }
+        assertEquals(10, sleepQuestions.size, "Sleep questionnaire must have all 10 items from Table 3 in the PDF")
 
-        // sleep_4 has customOptions
-        val sleep4 = sleep.questions.first { it.id == "sleep_4" }
+        val sleepHours = sleepQuestions.first { it.id == "sleep_hours" }
+        assertEquals("你晚上一般睡几个小时？", sleepHours.text)
+        assertEquals(5, sleepHours.options.size)
+
+        val sleep4 = sleepQuestions.first { it.id == "sleep_4" }
         assertEquals(5, sleep4.options.size)
         assertEquals(0, sleep4.options[0].value)
         assertEquals("很不满意", sleep4.options[0].label)
         assertEquals(4, sleep4.options[4].value)
         assertEquals("很满意", sleep4.options[4].label)
 
-        // psqi_4 has customOptions
-        val psqi4 = sleep.questions.first { it.id == "psqi_4" }
-        assertEquals(5, psqi4.options.size)
-        assertEquals(0, psqi4.options[0].value)
-        assertEquals("很满意", psqi4.options[0].label)
-        assertEquals(4, psqi4.options[4].value)
-        assertEquals("很不满意", psqi4.options[4].label)
+        val sleepNap = sleepQuestions.first { it.id == "sleep_nap" }
+        assertEquals("你一般午休多久？", sleepNap.text)
+        assertEquals(5, sleepNap.options.size)
+
+        val sleepMed = sleepQuestions.first { it.id == "sleep_medication" }
+        assertEquals("过去一个月，你服用助眠药物的情况", sleepMed.text)
+        assertEquals(4, sleepMed.options.size)
     }
 
     @Test
     fun `testReverseIndex maps question to canonical scale`() {
-        assertEquals("phq_9", catalogLoader.lookupScaleCodeForQuestion("phq9_1"))
-        assertEquals("gad_7", catalogLoader.lookupScaleCodeForQuestion("gad7_1"))
-        assertEquals("apq_9_father", catalogLoader.lookupScaleCodeForQuestion("apq9_f_1"))
-        assertEquals("scl_90", catalogLoader.lookupScaleCodeForQuestion("scl90_1"))
-        assertEquals("sleep_disorder", catalogLoader.lookupScaleCodeForQuestion("sleep_1"))
-        assertEquals("psqi", catalogLoader.lookupScaleCodeForQuestion("psqi_1"))
         assertEquals("demographics_survey", catalogLoader.lookupScaleCodeForQuestion("G1"))
         assertEquals("general_health_screener", catalogLoader.lookupScaleCodeForQuestion("ghq_1"))
-        assertEquals("general_health_screener", catalogLoader.lookupScaleCodeForQuestion("ghq_22"))
+        assertEquals("phq_9", catalogLoader.lookupScaleCodeForQuestion("phq9_1"))
+        assertEquals("gad_7", catalogLoader.lookupScaleCodeForQuestion("gad7_1"))
+        assertEquals("sleep_disorder", catalogLoader.lookupScaleCodeForQuestion("sleep_hours"))
+        assertEquals("sleep_disorder", catalogLoader.lookupScaleCodeForQuestion("sleep_1"))
+        assertEquals("sleep_disorder", catalogLoader.lookupScaleCodeForQuestion("sleep_nap"))
+        assertEquals("sleep_disorder", catalogLoader.lookupScaleCodeForQuestion("sleep_medication"))
+        assertEquals("apq_9_father", catalogLoader.lookupScaleCodeForQuestion("apq9_f_1"))
+        assertEquals("apq_9_mother", catalogLoader.lookupScaleCodeForQuestion("apq9_m_1"))
+        assertEquals("big_five", catalogLoader.lookupScaleCodeForQuestion("big_five_1"))
+
+        // Purged scales must not have mappings
+        assertNull(catalogLoader.lookupScaleCodeForQuestion("scl90_1"), "SCL-90 should be purged")
+        assertNull(catalogLoader.lookupScaleCodeForQuestion("psqi_1"), "PSQI should be purged")
         assertNull(catalogLoader.lookupScaleCodeForQuestion("non_existent_question"))
     }
 
     @Test
     fun `testDurationParsing extracts minutes from localized strings`() {
-        assertEquals(15, catalogLoader.getScaleDetail("MENTAL_HEALTH_ASSESSMENT")?.estimatedMinutes)
-        assertEquals(10, catalogLoader.getScaleDetail("SLEEP_ASSESSMENT")?.estimatedMinutes)
-        assertEquals(15, catalogLoader.getScaleDetail("DIGITAL_HABITS_DAILY_BEHAVIORS_ASSESSMENT")?.estimatedMinutes)
-        assertEquals(10, catalogLoader.getScaleDetail("SOCIAL_ENVIRONMENT_SUPPORT_ASSESSMENT")?.estimatedMinutes)
-        assertEquals(15, catalogLoader.getScaleDetail("SELF_REGULATION_PERSONALITY_ASSESSMENT")?.estimatedMinutes)
-        assertEquals(20, catalogLoader.getScaleDetail("FAMILY_BACKGROUND_EARLY_EXPERIENCES_ASSESSMENT")?.estimatedMinutes)
-        assertEquals(25, catalogLoader.getScaleDetail("CLINICAL_SCREENING_NEURODIVERGENCE_ASSESSMENT")?.estimatedMinutes)
-        assertEquals(20, catalogLoader.getScaleDetail("PERSONALITY_COPING_OUTLOOK_ASSESSMENT")?.estimatedMinutes)
+        assertEquals(45, catalogLoader.getScaleDetail("comprehensive_student_intake_survey")?.estimatedMinutes)
     }
 
     @Test
@@ -157,14 +135,6 @@ class AssessmentCatalogLoaderTest {
         val religion = demo.questions.first { it.id == "G7" }
         val otherOpt = religion.options.first { it.value == "other" }
         assertTrue(otherOpt.hasTextInput)
-
-        // Test G17a zeroOptionLabel and refined question text
-        val g17a = demo.questions.first { it.id == "G17a" }
-        assertEquals("number", g17a.type)
-        assertEquals("从未喝过酒", g17a.zeroOptionLabel)
-        assertEquals("liquor", g17a.icon)
-        assertEquals("G17a. 你从多少岁开始每星期喝酒的？", g17a.text)
-        assertFalse(g17a.text.contains("请填 0"))
     }
 
     @Test
@@ -188,9 +158,8 @@ class AssessmentCatalogLoaderTest {
 
     @Test
     fun `testBatteriesHaveEmptyIntroItemsFromBackend`() {
-        // Strict adherence to GEMINI.md: No backend UI presentation strings
-        val mentalHealth = catalogLoader.getScaleDetail("MENTAL_HEALTH_ASSESSMENT")
-        assertNotNull(mentalHealth)
-        assertTrue(mentalHealth!!.introItems.isEmpty(), "Backend must not generate hardcoded UI introItems for batteries")
+        val survey = catalogLoader.getScaleDetail("comprehensive_student_intake_survey")
+        assertNotNull(survey)
+        assertTrue(survey!!.introItems.isEmpty(), "Backend must not generate hardcoded UI introItems for batteries")
     }
 }

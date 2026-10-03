@@ -17,6 +17,7 @@ export const AssessmentCard: React.FC<AssessmentCardProps> = ({
   const isCompleted = scale.status === 'COMPLETED';
   const isInProgress = scale.status === 'IN_PROGRESS';
   const isDemographic = scale.code === 'demographics_survey';
+  const isUnified = scale.code === 'comprehensive_student_intake_survey';
 
   const { percentage, clampedAnswered, total } = calculateScaleProgress(
     scale.answeredCount,
@@ -37,12 +38,12 @@ export const AssessmentCard: React.FC<AssessmentCardProps> = ({
         <div className="flex items-center gap-2">
           <span
             className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
-              isDemographic
+              isUnified || isDemographic
                 ? 'bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)]'
                 : 'bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)]'
             }`}
           >
-            {isDemographic ? '必填档案' : '心理测评'}
+            {isUnified ? '综合心身普查' : isDemographic ? '必填档案' : '心理测评'}
           </span>
         </div>
 
@@ -100,10 +101,10 @@ export const AssessmentCard: React.FC<AssessmentCardProps> = ({
           <PrimaryButton
             label={
               isInProgress
-                ? isDemographic
+                ? isUnified || isDemographic
                   ? '继续填报'
                   : '继续测评'
-                : isDemographic
+                : isUnified || isDemographic
                   ? '开始填报'
                   : '开始测评'
             }

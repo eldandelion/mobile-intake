@@ -104,7 +104,7 @@ class AdminStudentService(
             )
         }
 
-        val demoSub = submissions["demographics_survey"]
+        val demoSub = submissions["comprehensive_student_intake_survey"] ?: submissions["demographics_survey"]
         val demographics = demographicsProjector.projectFromJson(demoSub?.answersJson, demoSub?.completedAt)
 
         val demoMap: Map<String, Any?> = if (demographics.isSubmitted) {

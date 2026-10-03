@@ -208,7 +208,7 @@ class IntakeApplicationTests {
             .andExpect(jsonPath("$.student.studentNumber").value(studentNumber))
             .andExpect(jsonPath("$.studentNumber").value(studentNumber))
 
-        // 4. Fetch Scale List
+        // 4. Fetch Scale List (Now contains exactly 1 unified intake survey)
         val listResult = mockMvc.perform(
             get("/api/scales")
                 .header("Authorization", "Bearer $token")
@@ -218,52 +218,28 @@ class IntakeApplicationTests {
             .andReturn()
 
         val scaleSummaries = objectMapper.readTree(listResult.response.contentAsString)
-        assertEquals(10, scaleSummaries.size())
-        val demoSummary = scaleSummaries.get(0)
-        assertEquals("demographics_survey", demoSummary.get("code").asText())
-        assertEquals("NOT_STARTED", demoSummary.get("status").asText())
+        assertEquals(1, scaleSummaries.size(), "Should have exactly 1 unified questionnaire available to student")
+        val surveySummary = scaleSummaries.get(0)
+        assertEquals("comprehensive_student_intake_survey", surveySummary.get("code").asText())
+        assertEquals("NOT_STARTED", surveySummary.get("status").asText())
+        assertTrue(surveySummary.get("questionCount").asInt() > 300)
 
-        val ghqSummary = scaleSummaries.get(1)
-        assertEquals("general_health_screener", ghqSummary.get("code").asText())
-        assertEquals("NOT_STARTED", ghqSummary.get("status").asText())
-        assertEquals(24, ghqSummary.get("questionCount").asInt())
-
-        val sleepSummary = scaleSummaries.first { it.get("code").asText() == "SLEEP_ASSESSMENT" }
-        assertEquals("NOT_STARTED", sleepSummary.get("status").asText())
-        assertEquals(14, sleepSummary.get("questionCount").asInt())
-
-        // 5. Fetch Scale Details for SLEEP_ASSESSMENT
+        // 5. Fetch Scale Details for comprehensive_student_intake_survey
         mockMvc.perform(
-            get("/api/scales/SLEEP_ASSESSMENT")
+            get("/api/scales/comprehensive_student_intake_survey")
                 .header("Authorization", "Bearer $token")
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.code").value("SLEEP_ASSESSMENT"))
+            .andExpect(jsonPath("$.code").value("comprehensive_student_intake_survey"))
             .andExpect(jsonPath("$.questions").isArray)
-            .andExpect(jsonPath("$.questions.length()").value(14))
-            .andExpect(jsonPath("$.sections.length()").value(2))
-            .andExpect(jsonPath("$.sections[0].code").value("sleep_disorder"))
-            .andExpect(jsonPath("$.sections[1].code").value("psqi"))
+            .andExpect(jsonPath("$.sections").isArray)
 
         // 5.5 Submit with out-of-bounds option value -> 400 Bad Request
         val invalidOptionAnswers = mapOf(
-            "sleep_1" to 999,
-            "sleep_2" to 0,
-            "sleep_3" to 0,
-            "sleep_4" to 2,
-            "sleep_5" to 0,
-            "sleep_6" to 1,
-            "sleep_7" to 0,
-            "psqi_1" to 0,
-            "psqi_2" to 1,
-            "psqi_3" to 0,
-            "psqi_4" to 2,
-            "psqi_5" to 0,
-            "psqi_6" to 1,
-            "psqi_7" to 0
+            "sleep_1" to 999
         )
         mockMvc.perform(
-            post("/api/scales/SLEEP_ASSESSMENT/submit")
+            post("/api/scales/comprehensive_student_intake_survey/submit")
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(SubmitScaleRequest(invalidOptionAnswers)))
@@ -273,43 +249,16 @@ class IntakeApplicationTests {
         // 5.6 Submit with missing question -> 400 Bad Request
         val missingAnswers = mapOf("sleep_1" to 1)
         mockMvc.perform(
-            post("/api/scales/SLEEP_ASSESSMENT/submit")
+            post("/api/scales/comprehensive_student_intake_survey/submit")
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(SubmitScaleRequest(missingAnswers)))
         )
             .andExpect(status().isBadRequest)
 
-        // 6. Submit SLEEP_ASSESSMENT Battery (Valid 14 questions across 2 sections)
-        val sleepAnswers = mapOf(
-            "sleep_1" to 0,
-            "sleep_2" to 1,
-            "sleep_3" to 0,
-            "sleep_4" to 2,
-            "sleep_5" to 0,
-            "sleep_6" to 1,
-            "sleep_7" to 0,
-            "psqi_1" to 0,
-            "psqi_2" to 1,
-            "psqi_3" to 0,
-            "psqi_4" to 2,
-            "psqi_5" to 0,
-            "psqi_6" to 1,
-            "psqi_7" to 0
-        )
-        mockMvc.perform(
-            post("/api/scales/SLEEP_ASSESSMENT/submit")
-                .header("Authorization", "Bearer $token")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(SubmitScaleRequest(sleepAnswers)))
-        )
-            .andExpect(status().isOk)
-            .andExpect(jsonPath("$.scaleCode").value("SLEEP_ASSESSMENT"))
-            .andExpect(jsonPath("$.status").value("COMPLETED"))
-
-        // 6.1 Submit demographics_survey
-        val demoDetail = catalogLoader.getScaleDetail("demographics_survey")!!
-        val demoAnswers = demoDetail.questions.associate { q ->
+        // 6. Submit comprehensive_student_intake_survey
+        val surveyDetail = catalogLoader.getScaleDetail("comprehensive_student_intake_survey")!!
+        val surveyAnswers = surveyDetail.questions.associate { q ->
             val sampleVal: Any = if (q.id == "demo_class") {
                 "计算机学院 软件工程"
             } else if (q.id == "demo_id_card" || q.id == "idCardNumber") {
@@ -326,30 +275,29 @@ class IntakeApplicationTests {
             q.id to sampleVal
         }
         mockMvc.perform(
-            post("/api/scales/demographics_survey/submit")
+            post("/api/scales/comprehensive_student_intake_survey/submit")
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(SubmitScaleRequest(demoAnswers)))
+                .content(objectMapper.writeValueAsString(SubmitScaleRequest(surveyAnswers)))
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.scaleCode").value("demographics_survey"))
+            .andExpect(jsonPath("$.scaleCode").value("comprehensive_student_intake_survey"))
             .andExpect(jsonPath("$.status").value("COMPLETED"))
 
-        // 7. Verify statuses are now COMPLETED
+        // 7. Verify status is now COMPLETED
         mockMvc.perform(
             get("/api/scales")
                 .header("Authorization", "Bearer $token")
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$[?(@.code == 'SLEEP_ASSESSMENT')].status").value("COMPLETED"))
-            .andExpect(jsonPath("$[?(@.code == 'demographics_survey')].status").value("COMPLETED"))
+            .andExpect(jsonPath("$[?(@.code == 'comprehensive_student_intake_survey')].status").value("COMPLETED"))
 
         // 8. Resubmitting should return 409 Conflict (Locked)
         mockMvc.perform(
-            post("/api/scales/SLEEP_ASSESSMENT/submit")
+            post("/api/scales/comprehensive_student_intake_survey/submit")
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(SubmitScaleRequest(sleepAnswers)))
+                .content(objectMapper.writeValueAsString(SubmitScaleRequest(surveyAnswers)))
         )
             .andExpect(status().isConflict)
 
@@ -390,13 +338,11 @@ class IntakeApplicationTests {
         val assessCsvString = String(assessCsvResult.response.contentAsByteArray, Charsets.UTF_8)
         assertTrue(assessCsvString.contains("student_number,scale_code,question_id,selected_value,completed_at"))
         assertTrue(assessCsvString.contains(studentNumber))
-        // Verify ACL resolves question to canonical scale codes sleep_disorder and psqi
-        assertTrue(assessCsvString.contains("sleep_disorder,sleep_1,0"))
-        assertTrue(assessCsvString.contains("psqi,psqi_1,0"))
-        // And demographics_survey questions
-        assertTrue(assessCsvString.contains("demographics_survey,G1,1"))
-        // Must NOT output the composite battery code SLEEP_ASSESSMENT in scale_code column
-        assertFalse(assessCsvString.contains("SLEEP_ASSESSMENT"))
+        // Verify ACL resolves question to canonical scale codes sleep_disorder and demographics_survey
+        assertTrue(assessCsvString.contains("sleep_disorder,sleep_1"))
+        assertTrue(assessCsvString.contains("demographics_survey,G1"))
+        // Must NOT output the composite battery code comprehensive_student_intake_survey in scale_code column
+        assertFalse(assessCsvString.contains("comprehensive_student_intake_survey"))
     }
 
     @Test
@@ -438,7 +384,7 @@ class IntakeApplicationTests {
             updatedAt = 1000L
         )
         mockMvc.perform(
-            put("/api/scales/demographics_survey/draft")
+            put("/api/scales/comprehensive_student_intake_survey/draft")
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(draftReq))
@@ -447,27 +393,27 @@ class IntakeApplicationTests {
 
         // 3. Retrieve draft
         mockMvc.perform(
-            get("/api/scales/demographics_survey/draft")
+            get("/api/scales/comprehensive_student_intake_survey/draft")
                 .header("Authorization", "Bearer $token")
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.scaleCode").value("demographics_survey"))
+            .andExpect(jsonPath("$.scaleCode").value("comprehensive_student_intake_survey"))
             .andExpect(jsonPath("$.updatedAt").value(1000L))
             .andExpect(jsonPath("$.answers.G1").value(1))
             .andExpect(jsonPath("$.answers.G4").value(1))
 
-        // 4. Check scale list: demographics_survey should now have status "IN_PROGRESS" with progress counts
+        // 4. Check scale list: comprehensive_student_intake_survey should now have status "IN_PROGRESS" with progress counts
         mockMvc.perform(
             get("/api/scales")
                 .header("Authorization", "Bearer $token")
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$[?(@.code == 'demographics_survey')].status").value("IN_PROGRESS"))
-            .andExpect(jsonPath("$[?(@.code == 'demographics_survey')].answeredCount").value(2))
+            .andExpect(jsonPath("$[?(@.code == 'comprehensive_student_intake_survey')].status").value("IN_PROGRESS"))
+            .andExpect(jsonPath("$[?(@.code == 'comprehensive_student_intake_survey')].answeredCount").value(2))
 
-        // 5. Complete and submit demographics_survey
-        val demoDetail = catalogLoader.getScaleDetail("demographics_survey")!!
-        val fullAnswers = demoDetail.questions.associate { q ->
+        // 5. Complete and submit comprehensive_student_intake_survey
+        val surveyDetail = catalogLoader.getScaleDetail("comprehensive_student_intake_survey")!!
+        val fullAnswers = surveyDetail.questions.associate { q ->
             val sampleVal: Any = if (q.id == "demo_class") {
                 "计算机学院 软件工程"
             } else if (q.id == "demo_id_card") {
@@ -484,7 +430,7 @@ class IntakeApplicationTests {
             q.id to sampleVal
         }
         mockMvc.perform(
-            post("/api/scales/demographics_survey/submit")
+            post("/api/scales/comprehensive_student_intake_survey/submit")
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(SubmitScaleRequest(fullAnswers)))
@@ -494,7 +440,7 @@ class IntakeApplicationTests {
 
         // 6. Draft must now be purged (204 No Content) and status COMPLETED with 100% completion
         mockMvc.perform(
-            get("/api/scales/demographics_survey/draft")
+            get("/api/scales/comprehensive_student_intake_survey/draft")
                 .header("Authorization", "Bearer $token")
         )
             .andExpect(status().isNoContent)
@@ -504,8 +450,8 @@ class IntakeApplicationTests {
                 .header("Authorization", "Bearer $token")
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$[?(@.code == 'demographics_survey')].status").value("COMPLETED"))
-            .andExpect(jsonPath("$[?(@.code == 'demographics_survey')].completionPercentage").value(100))
+            .andExpect(jsonPath("$[?(@.code == 'comprehensive_student_intake_survey')].status").value("COMPLETED"))
+            .andExpect(jsonPath("$[?(@.code == 'comprehensive_student_intake_survey')].completionPercentage").value(100))
     }
 
     @Test

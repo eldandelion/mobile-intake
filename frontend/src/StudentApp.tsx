@@ -27,6 +27,7 @@ function AppContent() {
     setFilter,
     isScrolled,
     setIsScrolled,
+    scales,
   } = useAssessments();
   const { isDark, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState(0);
@@ -44,7 +45,7 @@ function AppContent() {
     }
   };
 
-  const showHeaderFilter = activeTab === 0 && isScrolled;
+  const showHeaderFilter = activeTab === 0 && isScrolled && totalCount > 1;
 
   if (loading) {
     return (
@@ -61,14 +62,22 @@ function AppContent() {
     return <AuthPage />;
   }
 
+  const singleScale = totalCount === 1 ? scales[0] : null;
+  const progressValue = singleScale
+    ? singleScale.status === 'COMPLETED'
+      ? singleScale.questionCount
+      : singleScale.answeredCount || 0
+    : completedCount;
+  const progressMax = singleScale ? singleScale.questionCount || 1 : totalCount || 1;
+
   return (
     <div className="w-full h-[100dvh] min-h-[100dvh] bg-[var(--md-sys-color-surface)] flex flex-col items-center overflow-hidden">
       {/* MD3 Top Navigation Bar - spans full width on wider screens */}
       <header className="sticky top-0 inset-x-0 w-full bg-[var(--md-sys-color-surface)] z-20 shrink-0">
         {/* Progress bar placed at the top of the top bar with no separation line */}
         <md-linear-progress
-          value={completedCount}
-          max={totalCount || 1}
+          value={progressValue}
+          max={progressMax}
           style={{
             width: '100%',
             '--md-linear-progress-track-height': '3px',
@@ -112,7 +121,11 @@ function AppContent() {
                       ? '正在获取测评任务...'
                       : isAllCompleted
                         ? '全部测评任务已完成'
-                        : `还有 ${remainingCount} 项任务待完成`}
+                        : singleScale && singleScale.status === 'IN_PROGRESS'
+                          ? `已完成 ${singleScale.answeredCount || 0} / ${singleScale.questionCount} 题 (${singleScale.completionPercentage || 0}%)`
+                          : singleScale
+                            ? '心身健康普查问卷待填报'
+                            : `还有 ${remainingCount} 项任务待完成`}
                   </h1>
                 </motion.div>
               )}

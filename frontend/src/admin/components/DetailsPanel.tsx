@@ -319,10 +319,18 @@ export function DetailsPanel({
                 className={`w-1.5 h-1.5 rounded-full shrink-0 ${
                   completedCount === totalScales && totalScales > 0
                     ? 'bg-emerald-500 dark:bg-emerald-400'
-                    : 'bg-amber-500 dark:bg-amber-400'
+                    : student?.scaleStatuses?.some((s) => s.status === 'IN_PROGRESS')
+                    ? 'bg-amber-500 dark:bg-amber-400'
+                    : 'bg-zinc-400 dark:bg-zinc-500'
                 }`}
               />
-              <span>{completedCount === totalScales && totalScales > 0 ? '全部完成' : '测评进行中'}</span>
+              <span>
+                {completedCount === totalScales && totalScales > 0
+                  ? '全部完成'
+                  : student?.scaleStatuses?.some((s) => s.status === 'IN_PROGRESS')
+                  ? '测评进行中'
+                  : '未开始'}
+              </span>
             </div>
           </div>
         </div>

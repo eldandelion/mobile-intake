@@ -25,7 +25,7 @@ class CsvExportService(
     fun exportStudentsCsv(): ByteArray {
         val students = studentRepository.findAll()
         val submissions = submissionRepository.findAll()
-            .filter { it.scaleCode == "demographics_survey" }
+            .filter { it.scaleCode == "comprehensive_student_intake_survey" || it.scaleCode == "demographics_survey" }
             .associateBy { it.studentNumber }
 
         val out = ByteArrayOutputStream()
