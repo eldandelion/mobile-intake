@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { intakeApi, tokenStorage, StudentDto, LoginRequest, RegisterRequest } from '../api/intakeApi';
 
-interface AuthContextType {
+export interface AuthContextType {
   student: StudentDto | null;
   token: string | null;
   loading: boolean;
@@ -12,7 +12,7 @@ interface AuthContextType {
   refreshStudent: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [student, setStudent] = useState<StudentDto | null>(null);

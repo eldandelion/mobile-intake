@@ -15,7 +15,7 @@ import { AssessmentsPage } from './pages/AssessmentsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import './utils/navigationTabStyles';
 
-function AppContent() {
+export function AppContent() {
   const { student, loading } = useAuth();
   const {
     totalCount,
